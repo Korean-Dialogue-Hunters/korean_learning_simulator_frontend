@@ -34,6 +34,17 @@
   --color-tab-active: #EF9F27;
   --color-tab-inactive: #6B7280;
 
+  /* ── 맞춤 학습 설정(setup) 전용 따뜻한 컬러 ── */
+  --color-setup-bg: #F5F0E8;
+  --color-setup-card: #FFFFFF;
+  --color-setup-card-border: #E8E0D4;
+  --color-setup-text: #3D3529;
+  --color-setup-text-sub: #8C8070;
+  --color-setup-accent: #D4A843;
+  --color-setup-accent-light: rgba(212, 168, 67, 0.12);
+  --color-setup-accent-hover: #C49A3A;
+  --color-setup-dot-inactive: #D4CFC6;
+
   /* 폰트 */
   --font-sans: "Pretendard", system-ui, sans-serif;
 }
@@ -54,16 +65,21 @@
 
 /* ──────────────────────────────────────────
    라이트모드 — dark 클래스가 없을 때 적용
+   따뜻한 베이지/크림 계열로 통일
    ────────────────────────────────────────── */
 :root:not(.dark) {
-  --color-background: #FFFFFF;
-  --color-foreground: #1A1A1A;
-  --color-btn-primary: #cbf5c8;
-  --color-btn-primary-text: #1A1A1A;
-  --color-card-bg: #F5F5F5;
-  --color-card-border: #E5E5E5;
-  --color-surface: #EFEFEF;
-  --color-surface-border: #D8D8D8;
+  --color-background: #F5F0E8;
+  --color-foreground: #3D3529;
+  --color-btn-primary: #D4A843;
+  --color-btn-primary-text: #FFFFFF;
+  --color-card-bg: #FFFFFF;
+  --color-card-border: #E8E0D4;
+  --color-surface: #EDE8DF;
+  --color-surface-border: #D9D1C4;
+  --color-gold: #D4A843;
+  --color-orange: #D4A843;
+  --color-tab-active: #D4A843;
+  --color-tab-inactive: #8C8070;
 }
 
 /* ──────────────────────────────────────────

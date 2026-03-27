@@ -1,55 +1,50 @@
 "use client";
 
 /* ──────────────────────────────────────────
-   NationalitySelect 컴포넌트
+   NationalitySelect 컴포넌트 (따뜻한 무드 리디자인)
    - 자주 쓰는 국가를 드롭다운 최상단에 고정
    - 타이핑으로 국가 검색 및 자동완성
    - IP 기반 자동 국가 선택 (ipapi.co 호출)
    ────────────────────────────────────────── */
 
 import { useState, useEffect, useRef } from "react";
-import { POPULAR_COUNTRIES } from "@/types/onboarding";
+import { Search, ChevronDown, Check } from "lucide-react";
+import { POPULAR_COUNTRIES } from "@/types/setup";
 import { ALL_COUNTRIES, Country } from "@/types/countries";
 
 interface NationalitySelectProps {
-  value: string;                        // 현재 선택된 국가 코드
-  onChange: (code: string) => void;     // 선택 변경 콜백
+  value: string;
+  onChange: (code: string) => void;
 }
 
 export default function NationalitySelect({
   value,
   onChange,
 }: NationalitySelectProps) {
-  const [query, setQuery] = useState("");          // 검색 입력값
-  const [isOpen, setIsOpen] = useState(false);     // 드롭다운 열림 여부
-  const [isDetecting, setIsDetecting] = useState(false); // IP 감지 로딩
-  const wrapperRef = useRef<HTMLDivElement>(null); // 외부 클릭 감지용
+  const [query, setQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // 현재 선택된 국가의 이름 가져오기
+  /* 선택된 국가명 */
   const selectedCountry = ALL_COUNTRIES.find((c) => c.code === value);
   const displayValue = selectedCountry ? selectedCountry.name : "";
 
-  /* ── IP 기반 자동 국가 감지 (마운트 시 1회 실행) ── */
+  /* ── IP 기반 자동 국가 감지 ── */
   useEffect(() => {
-    // 이미 선택된 값이 있으면 감지 생략
     if (value) return;
-
     const detectCountry = async () => {
       setIsDetecting(true);
       try {
-        // ipapi.co: 무료 IP 기반 국가 감지 API
         const res = await fetch("https://ipapi.co/json/");
         const data = await res.json();
-        if (data.country_code) {
-          onChange(data.country_code);
-        }
+        if (data.country_code) onChange(data.country_code);
       } catch {
-        // 감지 실패 시 조용히 무시 (사용자가 직접 선택)
+        /* 감지 실패 시 무시 */
       } finally {
         setIsDetecting(false);
       }
     };
-
     detectCountry();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -64,24 +59,21 @@ export default function NationalitySelect({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* ── 검색어 기준 국가 필터링 ── */
+  /* ── 검색어 기준 필터링 ── */
   const filtered: Country[] = query.trim()
     ? ALL_COUNTRIES.filter((c) =>
         c.name.toLowerCase().includes(query.toLowerCase())
       )
     : [];
 
-  // 검색어 없을 때: 자주 쓰는 국가 목록 표시
   const showPopular = query.trim() === "";
 
-  /* ── 국가 선택 처리 ── */
   const handleSelect = (code: string) => {
     onChange(code);
     setQuery("");
     setIsOpen(false);
   };
 
-  /* ── 입력 시 드롭다운 열기 ── */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
     setIsOpen(true);
@@ -91,30 +83,54 @@ export default function NationalitySelect({
     <div ref={wrapperRef} className="relative w-full">
       {/* 선택 입력창 */}
       <div
-        className="flex items-center w-full rounded-xl bg-surface border border-surface-border px-4 py-3 cursor-text"
+        className="flex items-center w-full rounded-2xl px-4 py-3.5 cursor-text transition-all"
+        style={{
+          backgroundColor: "var(--color-setup-card)",
+          border: `1.5px solid ${isOpen ? "var(--color-setup-accent)" : "var(--color-setup-card-border)"}`,
+          boxShadow: isOpen ? "0 0 0 3px var(--color-setup-accent-light)" : "0 1px 3px rgba(0,0,0,0.04)",
+        }}
         onClick={() => setIsOpen(true)}
       >
+        <Search
+          size={18}
+          strokeWidth={1.8}
+          className="mr-3 shrink-0"
+          style={{ color: "var(--color-setup-text-sub)" }}
+        />
         <input
           type="text"
           placeholder={isDetecting ? "국가 감지 중..." : "국가를 검색하세요"}
           value={isOpen ? query : displayValue}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
-          className="flex-1 bg-transparent text-foreground placeholder-tab-inactive text-sm outline-none"
+          className="flex-1 bg-transparent text-sm outline-none placeholder:opacity-60"
+          style={{ color: "var(--color-setup-text)" }}
         />
-        {/* 화살표 아이콘 */}
-        <span className={`text-tab-inactive transition-transform ${isOpen ? "rotate-180" : ""}`}>
-          ▾
-        </span>
+        <ChevronDown
+          size={18}
+          strokeWidth={1.8}
+          className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+          style={{ color: "var(--color-setup-text-sub)" }}
+        />
       </div>
 
       {/* 드롭다운 목록 */}
       {isOpen && (
-        <ul className="absolute top-full left-0 right-0 mt-1 max-h-52 overflow-y-auto rounded-xl bg-card-bg border border-card-border z-10 shadow-xl">
+        <ul
+          className="absolute top-full left-0 right-0 mt-2 max-h-56 overflow-y-auto rounded-2xl z-10"
+          style={{
+            backgroundColor: "var(--color-setup-card)",
+            border: "1.5px solid var(--color-setup-card-border)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+          }}
+        >
           {showPopular ? (
             <>
               {/* 자주 쓰는 국가 섹션 */}
-              <li className="px-4 py-1.5 text-[10px] text-tab-inactive uppercase tracking-wider">
+              <li
+                className="px-4 py-2 text-[11px] uppercase tracking-wider font-medium"
+                style={{ color: "var(--color-setup-text-sub)" }}
+              >
                 자주 쓰는 국가
               </li>
               {POPULAR_COUNTRIES.map((c) => (
@@ -127,9 +143,14 @@ export default function NationalitySelect({
                 />
               ))}
               {/* 구분선 */}
-              <li className="border-t border-surface-border my-1" />
-              {/* 전체 국가 */}
-              <li className="px-4 py-1.5 text-[10px] text-tab-inactive uppercase tracking-wider">
+              <li
+                className="my-1 mx-4"
+                style={{ borderTop: "1px solid var(--color-setup-card-border)" }}
+              />
+              <li
+                className="px-4 py-2 text-[11px] uppercase tracking-wider font-medium"
+                style={{ color: "var(--color-setup-text-sub)" }}
+              >
                 전체 국가
               </li>
               {ALL_COUNTRIES.map((c) => (
@@ -143,7 +164,6 @@ export default function NationalitySelect({
               ))}
             </>
           ) : filtered.length > 0 ? (
-            /* 검색 결과 */
             filtered.map((c) => (
               <CountryItem
                 key={c.code}
@@ -154,7 +174,10 @@ export default function NationalitySelect({
               />
             ))
           ) : (
-            <li className="px-4 py-3 text-sm text-tab-inactive text-center">
+            <li
+              className="px-4 py-3 text-sm text-center"
+              style={{ color: "var(--color-setup-text-sub)" }}
+            >
               검색 결과 없음
             </li>
           )}
@@ -164,7 +187,7 @@ export default function NationalitySelect({
   );
 }
 
-/* ── 드롭다운 항목 단위 컴포넌트 ── */
+/* ── 드롭다운 항목 ── */
 function CountryItem({
   code,
   name,
@@ -181,13 +204,20 @@ function CountryItem({
       <button
         type="button"
         onClick={() => onSelect(code)}
-        className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-          isSelected
-            ? "bg-orange/20 text-orange"
-            : "text-foreground hover:bg-surface-border"
-        }`}
+        className="w-full text-left px-4 py-2.5 text-sm flex items-center justify-between transition-colors"
+        style={{
+          color: isSelected ? "var(--color-setup-accent)" : "var(--color-setup-text)",
+          backgroundColor: isSelected ? "var(--color-setup-accent-light)" : "transparent",
+        }}
+        onMouseEnter={(e) => {
+          if (!isSelected) e.currentTarget.style.backgroundColor = "var(--color-setup-accent-light)";
+        }}
+        onMouseLeave={(e) => {
+          if (!isSelected) e.currentTarget.style.backgroundColor = "transparent";
+        }}
       >
-        {name}
+        <span>{name}</span>
+        {isSelected && <Check size={16} strokeWidth={2} />}
       </button>
     </li>
   );

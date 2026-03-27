@@ -1,5 +1,5 @@
 /* ──────────────────────────────────────────
-   온보딩 관련 타입 및 상수 정의
+   맞춤 학습 설정 관련 타입 및 상수 정의
    ────────────────────────────────────────── */
 
 // 한국어 수준 선택지
@@ -23,20 +23,19 @@ export const LOCATION_OPTIONS = [
 
 export type LocationId = (typeof LOCATION_OPTIONS)[number]["id"];
 
-// 온보딩에서 수집하는 사용자 프로필 데이터
-export interface OnboardingProfile {
+// 맞춤 학습 설정에서 수집하는 사용자 프로필 데이터
+export interface SetupProfile {
   nationality: string;       // 국적 (ISO 국가코드, 예: "KR", "US")
   level: KoreanLevel;        // 한국어 수준
   kulturalInterest: KultureInterest; // 관심 한국 문화
   preferredLocation: LocationId;    // 가보고 싶은 장소
 }
 
-// 온보딩 단계 번호 (1~4)
-export type OnboardingStep = 1 | 2 | 3 | 4;
+// 맞춤 학습 설정 단계 번호 (1~4)
+export type SetupStep = 1 | 2 | 3 | 4;
 
 // 자주 쓰는 국가 목록 (드롭다운 최상단 고정)
 // TODO: 향후 IP 기반 국가 감지 구현
-// IP geolocation API로 사용자 국가를 감지하여 해당 국가를 목록 상단에 자동 추천
 export const POPULAR_COUNTRIES = [
   { code: "KR", name: "South Korea" },
   { code: "US", name: "United States" },

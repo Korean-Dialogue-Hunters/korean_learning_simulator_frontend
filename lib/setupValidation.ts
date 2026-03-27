@@ -1,10 +1,10 @@
 /* ──────────────────────────────────────────
-   온보딩 유효성 검사 함수 (TODO 18 — TDD)
+   맞춤 학습 설정 유효성 검사 함수 (TDD)
    - 테스트가 먼저 작성되었고, 테스트를 통과하도록 구현
    - 반환값: 에러가 있는 필드명 배열 (없으면 빈 배열)
    ────────────────────────────────────────── */
 
-import { OnboardingProfile, LOCATION_OPTIONS } from "@/types/onboarding";
+import { SetupProfile, LOCATION_OPTIONS } from "@/types/setup";
 
 // 유효한 수준 목록
 const VALID_LEVELS = ["초급", "중급", "고급"] as const;
@@ -23,11 +23,11 @@ const VALID_INTERESTS = [
 const VALID_LOCATION_IDS = LOCATION_OPTIONS.map((l) => l.id);
 
 /**
- * OnboardingProfile의 유효성을 검사합니다.
+ * SetupProfile의 유효성을 검사합니다.
  * @returns 에러가 있는 필드명 배열. 유효하면 빈 배열 반환.
  */
-export function validateOnboardingProfile(
-  profile: OnboardingProfile
+export function validateSetupProfile(
+  profile: SetupProfile
 ): string[] {
   const errors: string[] = [];
 

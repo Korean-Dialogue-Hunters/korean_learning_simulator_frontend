@@ -13,8 +13,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LOCATION_OPTIONS, LocationId } from "@/types/onboarding";
-// import { getSavedProfile } from "@/hooks/useOnboarding"; // API 연동 시 활성화
+import { LOCATION_OPTIONS, LocationId } from "@/types/setup";
+// import { getSavedProfile } from "@/hooks/useSetup"; // API 연동 시 활성화
 
 // 장소별 배경 설명 텍스트
 const LOCATION_DESC: Record<string, string> = {

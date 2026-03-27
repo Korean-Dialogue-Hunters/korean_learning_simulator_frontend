@@ -6,7 +6,7 @@
    - TierCard: 현재 티어 + XP 진행 바
    - WeeklyStats: 대화 수 / 평균 점수 / 스트릭
    - CTA 버튼: 대화 시작 → /location 이동
-   - TutorialOverlay: 온보딩 NO 선택 후 최초 1회 실행
+   - TutorialOverlay: 맞춤 학습 설정 NO 선택 후 최초 1회 실행
 
    ⚡ BE API 연동 전 mock data 사용 중
    🔗 연동 필요: GET /user/profile, GET /user/weekly-stats
@@ -21,7 +21,7 @@ import WeeklyStats from "@/components/WeeklyStats";
 import TutorialOverlay from "@/components/tutorial/TutorialOverlay";
 import { UserProfile, WeeklyStats as WeeklyStatsType } from "@/types/user";
 import { useTutorial, isTutorialDone } from "@/hooks/useTutorial";
-import { isOnboardingDone } from "@/hooks/useOnboarding";
+import { isSetupDone } from "@/hooks/useSetup";
 
 /* ── Mock Data (BE API 완성 후 실제 데이터로 교체) ── */
 const MOCK_USER: UserProfile = {
@@ -43,13 +43,13 @@ export default function HomePage() {
   const { isActive, currentStep, totalSteps, step, startTutorial, nextStep, skipTutorial } =
     useTutorial();
 
-  /* ── 최초 방문: 온보딩 미완료면 /onboarding으로 이동 ── */
+  /* ── 최초 방문: 맞춤 학습 설정 미완료면 /setup으로 이동 ── */
   useEffect(() => {
-    if (!isOnboardingDone()) {
-      router.replace("/onboarding");
+    if (!isSetupDone()) {
+      router.replace("/setup");
       return;
     }
-    // 온보딩 완료 + 튜토리얼 미완료 → 튜토리얼 자동 시작
+    // 설정 완료 + 튜토리얼 미완료 → 튜토리얼 자동 시작
     if (!isTutorialDone()) {
       // 컴포넌트가 완전히 마운트된 후 시작 (DOM 위치 측정을 위해 약간 지연)
       const timer = setTimeout(() => startTutorial(), 300);
@@ -87,31 +87,31 @@ export default function HomePage() {
         </div>
 
         {/* 대화 시작 CTA 버튼 (tutorial-cta id 부여) */}
-        <div className="mx-4 mt-2" id="tutorial-cta">
+        <div className="mx-5 mt-2" id="tutorial-cta">
           <Link href="/location">
             <button
               className="
                 w-full py-4 rounded-2xl
-                bg-orange text-background font-bold text-base
-                active:scale-95 transition-transform duration-100
-                shadow-lg shadow-orange/20
+                bg-btn-primary text-btn-primary-text font-bold text-[15px]
+                active:scale-[0.97] transition-transform duration-100
               "
+              style={{ boxShadow: "0 4px 12px rgba(212,168,67,0.2)" }}
             >
-              오늘의 대화 시작하기 →
+              오늘의 대화 시작하기
             </button>
           </Link>
         </div>
 
         {/* RetryCard 영역 (TODO 57에서 구현, 튜토리얼용 id만 미리 배치) */}
-        <div id="tutorial-retry-card" className="mx-4">
+        <div id="tutorial-retry-card" className="mx-5">
           {/* 추후 RetryCard 컴포넌트로 교체 */}
-          <div className="rounded-xl bg-surface border border-surface-border p-4 opacity-0 h-0 overflow-hidden" />
+          <div className="rounded-2xl bg-card-bg border border-card-border p-4 opacity-0 h-0 overflow-hidden" />
         </div>
 
         {/* ReviewBanner 영역 (TODO 59에서 구현, 튜토리얼용 id만 미리 배치) */}
-        <div id="tutorial-review-banner" className="mx-4">
+        <div id="tutorial-review-banner" className="mx-5">
           {/* 추후 ReviewBanner 컴포넌트로 교체 */}
-          <div className="rounded-xl bg-surface border border-surface-border p-4 opacity-0 h-0 overflow-hidden" />
+          <div className="rounded-2xl bg-card-bg border border-card-border p-4 opacity-0 h-0 overflow-hidden" />
         </div>
       </div>
 
