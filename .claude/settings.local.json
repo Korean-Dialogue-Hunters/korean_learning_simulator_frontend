@@ -1,0 +1,53 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(git:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(cd:*)",
+      "Bash(yes:*)",
+      "Bash(printf:*)",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash(taskkill //F //IM node.exe)",
+      "Skill(update-config)",
+      "Bash(jq -e '.hooks.SessionStart[] | .hooks[] | select\\(.type == \"\"command\"\"\\) | .command' .claude/settings.local.json)",
+      "Read(//c/Users/sesac1/.claude/**)",
+      "Bash(rm -f \"C:/Users/sesac1/korean_learning_simulator/.claude/scripts/session-start.sh\")",
+      "Bash(rmdir \"C:/Users/sesac1/korean_learning_simulator/.claude/scripts\")",
+      "Bash(mkdir -p /c/Users/sesac1/korean_learning_simulator/platform/lib)",
+      "Bash(mkdir -p /c/Users/sesac1/korean_learning_simulator/platform/__tests__)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(mkdir -p C:/Users/sesac1/korean_learning_simulator_frontend/app/setup)",
+      "Bash(mkdir -p C:/Users/sesac1/korean_learning_simulator_frontend/components/setup)",
+      "Bash(rm -rf C:/Users/sesac1/korean_learning_simulator_frontend/app/onboarding)",
+      "Bash(rm -rf C:/Users/sesac1/korean_learning_simulator_frontend/components/onboarding)",
+      "Bash(netstat -ano)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(taskkill:*)"
+    ],
+    "defaultMode": "auto"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git fetch origin 2>/dev/null; DIFF=$(git log dev..origin/dev --oneline 2>/dev/null); if [ -n \"$DIFF\" ]; then COUNT=$(echo \"$DIFF\" | wc -l | tr -d \" \"); echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"SessionStart\\\",\\\"additionalContext\\\":\\\"⚠️ dev에 새로운 변경사항이 ${COUNT}개 있습니다. pull 받을까요? 승인 시: git stash → git pull origin dev → 현재 브랜치에 merge → git stash pop 순서로 진행합니다.\\\"}}\"; else echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"SessionStart\\\",\\\"additionalContext\\\":\\\"✅ dev 브랜치가 최신 상태입니다. 작업을 시작할게요.\\\"}}\"; fi",
+            "timeout": 30,
+            "statusMessage": "dev 브랜치 업데이트 확인 중..."
+          }
+        ]
+      }
+    ]
+  }
+}
