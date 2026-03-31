@@ -15,6 +15,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ChevronRight, RotateCcw } from "lucide-react";
 import HomeHeader from "@/components/HomeHeader";
 import TierCard from "@/components/TierCard";
 import WeeklyStats from "@/components/WeeklyStats";
@@ -86,7 +87,59 @@ export default function HomePage() {
           <WeeklyStats stats={MOCK_WEEKLY_STATS} />
         </div>
 
-        {/* 대화 시작 CTA 버튼 (tutorial-cta id 부여) */}
+        {/* 재도전 카드 — 지난 대화 중 최저점 시나리오 재도전 */}
+        <div id="tutorial-retry-card" className="mx-5">
+          <div className="rounded-2xl bg-card-bg border border-card-border p-4">
+            {/* 제목 */}
+            <p className="text-[13px] text-tab-inactive mb-2">
+              지난 대화를 다시 도전해봐요!
+            </p>
+
+            {/* 미션 + 점수 + 재도전 버튼 */}
+            <div className="flex items-center gap-3">
+              {/* 좌측: 미션·점수 */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground truncate">
+                  한강 자전거길에서 길 찾기
+                </p>
+                <p className="text-[12px] text-tab-inactive mt-1">
+                  지난주 최저점: <span className="font-bold" style={{ color: "var(--color-accent)" }}>4.2</span> / 10
+                </p>
+              </div>
+
+              {/* 우측: 재도전 버튼 */}
+              <button
+                type="button"
+                onClick={() => router.push("/location")}
+                className="flex items-center gap-1 px-4 py-2 rounded-xl text-[13px] font-bold transition-all active:scale-95 shrink-0"
+                style={{
+                  backgroundColor: "var(--color-accent)",
+                  color: "var(--color-btn-primary-text)",
+                }}
+              >
+                <RotateCcw size={14} strokeWidth={2.5} />
+                재도전
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 주간 복습 배너 — 초성 퀴즈 + 플래시 카드 개수 표시, /review로 유도 */}
+        <div id="tutorial-review-banner" className="mx-5">
+          <Link href="/review">
+            <div className="rounded-2xl bg-card-bg border border-card-border p-4 flex items-center justify-between hover:opacity-80 transition-opacity">
+              <div>
+                <p className="text-sm font-bold text-foreground">주간 복습 준비됐어요!</p>
+                <p className="text-[12px] text-tab-inactive mt-1">
+                  초성퀴즈 <span className="font-bold" style={{ color: "var(--color-accent)" }}>3</span>개, 플래시카드 <span className="font-bold" style={{ color: "var(--color-accent)" }}>5</span>개
+                </p>
+              </div>
+              <ChevronRight size={20} className="text-tab-inactive shrink-0" />
+            </div>
+          </Link>
+        </div>
+
+        {/* 대화 시작 CTA 버튼 (tutorial-cta id 부여) — 맨 하단 배치 */}
         <div className="mx-5 mt-2" id="tutorial-cta">
           <Link href="/location">
             <button
@@ -95,23 +148,10 @@ export default function HomePage() {
                 bg-btn-primary text-btn-primary-text font-bold text-[15px]
                 active:scale-[0.97] transition-transform duration-100
               "
-              style={{ boxShadow: "0 4px 12px rgba(212,168,67,0.2)" }}
             >
-              오늘의 대화 시작하기
+              대화 시작하기
             </button>
           </Link>
-        </div>
-
-        {/* RetryCard 영역 (TODO 57에서 구현, 튜토리얼용 id만 미리 배치) */}
-        <div id="tutorial-retry-card" className="mx-5">
-          {/* 추후 RetryCard 컴포넌트로 교체 */}
-          <div className="rounded-2xl bg-card-bg border border-card-border p-4 opacity-0 h-0 overflow-hidden" />
-        </div>
-
-        {/* ReviewBanner 영역 (TODO 59에서 구현, 튜토리얼용 id만 미리 배치) */}
-        <div id="tutorial-review-banner" className="mx-5">
-          {/* 추후 ReviewBanner 컴포넌트로 교체 */}
-          <div className="rounded-2xl bg-card-bg border border-card-border p-4 opacity-0 h-0 overflow-hidden" />
         </div>
       </div>
 

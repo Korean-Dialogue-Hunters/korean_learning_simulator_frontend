@@ -107,7 +107,7 @@ export default function ChatPage() {
       </div>
 
       {/* ── 채팅 메시지 영역 ── */}
-      <div className="flex-1 overflow-hidden px-4 py-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4">
         {/* 미션 안내 */}
         {messages.length === 0 && !isAiTyping && (
           <div className="text-center py-8">
