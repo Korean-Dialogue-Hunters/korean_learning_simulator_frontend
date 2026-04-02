@@ -20,16 +20,16 @@ import RadarChart from "@/components/result/RadarChart";
 
 /* ── Mock 피드백 데이터 ── */
 const MOCK_FEEDBACK: FeedbackData = {
-  sessionId: "mock-session-1",
-  totalScore: 7.2,
+  session_id: "mock-session-1",
+  total_score_10: 7.2,
   scores: {
     vocabulary: 6.5,
     situation: 8.0,
     grammar: 6.8,
   },
-  feedbackSummary:
+  feedback:
     "전반적으로 자연스러운 대화를 이끌어가셨어요! 인사와 장소 묻기를 잘 수행했습니다. 다만, 조사 사용('에서'와 '에')과 높임말 어미('-세요')의 정확한 사용을 좀 더 연습하시면 더 좋겠습니다.",
-  wrongWords: [
+  wrong_words: [
     {
       original: "한강에서 가요",
       corrected: "한강에 가요",
@@ -47,14 +47,14 @@ const MOCK_FEEDBACK: FeedbackData = {
     },
   ],
   messages: [
-    { sender: "user", text: "안녕하세요! 한강에서 가요?", hasError: true, errorHighlights: ["한강에서 가요"] },
-    { sender: "ai", text: "안녕하세요! 네, 한강에 가고 있어요. 날씨가 좋네요!", hasError: false },
-    { sender: "user", text: "자전거 어디 있어?", hasError: true, errorHighlights: ["어디 있어?"] },
-    { sender: "ai", text: "저기 편의점 옆에 자전거 대여소가 있어요!", hasError: false },
-    { sender: "user", text: "아 감사합니다! 같이 타볼까요?", hasError: false },
-    { sender: "ai", text: "좋아요! 같이 타요. 어디로 갈까요?", hasError: false },
-    { sender: "user", text: "여의도 쪽으로 가서 맛있는 거 먹자", hasError: true, errorHighlights: ["맛있는 거 먹자"] },
-    { sender: "ai", text: "좋은 생각이에요! 여의도에 유명한 치킨집이 있어요.", hasError: false },
+    { speaker: "user", utterance: "안녕하세요! 한강에서 가요?", has_error: true, error_highlights: ["한강에서 가요"] },
+    { speaker: "ai", utterance: "안녕하세요! 네, 한강에 가고 있어요. 날씨가 좋네요!", has_error: false },
+    { speaker: "user", utterance: "자전거 어디 있어?", has_error: true, error_highlights: ["어디 있어?"] },
+    { speaker: "ai", utterance: "저기 편의점 옆에 자전거 대여소가 있어요!", has_error: false },
+    { speaker: "user", utterance: "아 감사합니다! 같이 타볼까요?", has_error: false },
+    { speaker: "ai", utterance: "좋아요! 같이 타요. 어디로 갈까요?", has_error: false },
+    { speaker: "user", utterance: "여의도 쪽으로 가서 맛있는 거 먹자", has_error: true, error_highlights: ["맛있는 거 먹자"] },
+    { speaker: "ai", utterance: "좋은 생각이에요! 여의도에 유명한 치킨집이 있어요.", has_error: false },
   ],
 };
 
@@ -105,7 +105,7 @@ function HighlightedText({ text, highlights }: { text: string; highlights?: stri
 
 /* ── 대화 로그 말풍선 ── */
 function FeedbackBubble({ msg }: { msg: FeedbackMessage }) {
-  const isUser = msg.sender === "user";
+  const isUser = msg.speaker === "user";
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3`}>
@@ -114,26 +114,26 @@ function FeedbackBubble({ msg }: { msg: FeedbackMessage }) {
         style={{
           borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
           backgroundColor: isUser
-            ? msg.hasError
+            ? msg.has_error
               ? "rgba(220, 60, 60, 0.08)"
               : "var(--color-accent)"
             : "var(--color-card-bg)",
           color: isUser
-            ? msg.hasError
+            ? msg.has_error
               ? "var(--color-foreground)"
               : "var(--color-btn-primary-text)"
             : "var(--color-foreground)",
           border: isUser
-            ? msg.hasError
+            ? msg.has_error
               ? "1.5px solid rgba(220, 60, 60, 0.3)"
               : "none"
             : "1px solid var(--color-card-border)",
         }}
       >
-        {isUser && msg.hasError ? (
-          <HighlightedText text={msg.text} highlights={msg.errorHighlights} />
+        {isUser && msg.has_error ? (
+          <HighlightedText text={msg.utterance} highlights={msg.error_highlights} />
         ) : (
-          msg.text
+          msg.utterance
         )}
       </div>
     </div>
@@ -212,7 +212,7 @@ export default function FeedbackPage() {
       {/* ── 헤더 ── */}
       <h1 className="text-xl font-bold text-foreground mb-1">상세 피드백</h1>
       <p className="text-sm text-tab-inactive mb-6">
-        총점 <span className="font-bold text-accent">{feedback.totalScore}</span> / 10
+        총점 <span className="font-bold text-accent">{feedback.total_score_10}</span> / 10
       </p>
 
       {/* ── 피드백 요약 (#48) ── */}
@@ -226,7 +226,7 @@ export default function FeedbackPage() {
         <div className="flex items-start gap-2">
           <MessageCircle size={16} strokeWidth={2} className="shrink-0 mt-0.5" style={{ color: "var(--color-accent)" }} />
           <p className="text-sm leading-relaxed" style={{ color: "var(--color-foreground)" }}>
-            {feedback.feedbackSummary}
+            {feedback.feedback}
           </p>
         </div>
       </div>
@@ -248,11 +248,11 @@ export default function FeedbackPage() {
         <div className="flex items-center gap-2 mb-3">
           <AlertCircle size={16} strokeWidth={2} style={{ color: "#DC3C3C" }} />
           <h2 className="text-sm font-bold text-foreground">
-            교정이 필요한 표현 ({feedback.wrongWords.length})
+            교정이 필요한 표현 ({feedback.wrong_words.length})
           </h2>
         </div>
         <div className="space-y-3">
-          {feedback.wrongWords.map((word, i) => (
+          {feedback.wrong_words.map((word, i) => (
             <WrongWordCard key={i} word={word} index={i} />
           ))}
         </div>

@@ -28,12 +28,11 @@ export default function SetupPage() {
   const router = useRouter();
   const {
     step,
-    nationality, setNationality,
-    username, setUsername,
-    userCode,
-    level, setLevel,
-    kulturalInterest, setKulturalInterest,
-    preferredLocation, setPreferredLocation,
+    country, setCountry,
+    userNickname, setUserNickname,
+    koreanLevel, setKoreanLevel,
+    culturalInterest, setCulturalInterest,
+    location, setLocation,
     showModal,
     canProceed,
     goNext,
@@ -94,7 +93,7 @@ export default function SetupPage() {
 
   /* ── 선택한 장소명 ── */
   const selectedLocationLabel =
-    LOCATION_OPTIONS.find((l) => l.id === preferredLocation)?.label ?? "이 장소";
+    LOCATION_OPTIONS.find((l) => l.id === location)?.label ?? "이 장소";
 
   const currentConfig = STEP_CONFIG[step];
 
@@ -191,19 +190,19 @@ export default function SetupPage() {
       {/* ── 단계별 컴포넌트 렌더링 ── */}
       <div className="flex-1">
         {step === 1 && (
-          <NationalitySelect value={nationality} onChange={setNationality} />
+          <NationalitySelect value={country} onChange={setCountry} />
         )}
         {step === 2 && (
-          <NicknameInput value={username} onChange={setUsername} userCode={userCode} />
+          <NicknameInput value={userNickname} onChange={setUserNickname} />
         )}
         {step === 3 && (
-          <LevelSelect value={level} onChange={setLevel} />
+          <LevelSelect value={koreanLevel} onChange={setKoreanLevel} />
         )}
         {step === 4 && (
-          <CultureSelect value={kulturalInterest} onChange={setKulturalInterest} />
+          <CultureSelect value={culturalInterest} onChange={setCulturalInterest} />
         )}
         {step === 5 && (
-          <LocationSelect value={preferredLocation} onChange={setPreferredLocation} />
+          <LocationSelect value={location} onChange={setLocation} />
         )}
       </div>
 

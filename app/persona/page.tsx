@@ -21,16 +21,16 @@ const MOCK_PERSONAS: [Persona, Persona] = [
     name: "김민준",
     age: 23,
     gender: "남성",
-    occupation: "대학생",
-    purpose: "한강 자전거길을 달리다 길을 잃어 도움을 요청하는 대학생",
+    role: "대학생",
+    mission: "한강 자전거길을 달리다 길을 잃어 도움을 요청하는 대학생",
   },
   {
     id: "B",
     name: "이서연",
     age: 28,
     gender: "여성",
-    occupation: "직장인",
-    purpose: "점심 도시락을 먹으러 나왔다가 맛집 추천을 부탁하는 직장인",
+    role: "직장인",
+    mission: "점심 도시락을 먹으러 나왔다가 맛집 추천을 부탁하는 직장인",
   },
 ];
 
@@ -52,7 +52,7 @@ export default function PersonaPage() {
     sessionStorage.setItem("counterpart", JSON.stringify({
       name: counterpart.name,
       age: counterpart.age,
-      occupation: counterpart.occupation,
+      role: counterpart.role,
     }));
     router.push("/chat");
   };
@@ -143,9 +143,9 @@ function PersonaCard({
             ${isSelected ? "bg-accent/20 text-accent" : "bg-surface-border text-foreground"}
           `}
         >
-          {persona.avatarUrl ? (
+          {persona.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={persona.avatarUrl} alt={persona.name} className="w-full h-full object-cover rounded-full" />
+            <img src={persona.avatar_url} alt={persona.name} className="w-full h-full object-cover rounded-full" />
           ) : (
             initial
           )}
@@ -165,12 +165,12 @@ function PersonaCard({
 
           {/* 나이 / 성별 / 직업 */}
           <p className="text-xs text-tab-inactive mb-2">
-            {persona.age}세 · {persona.gender} · {persona.occupation}
+            {persona.age}세 · {persona.gender} · {persona.role}
           </p>
 
           {/* 미션 설명 */}
           <p className="text-xs text-foreground/80 leading-relaxed">
-            🎯 {persona.purpose}
+            🎯 {persona.mission}
           </p>
         </div>
       </div>

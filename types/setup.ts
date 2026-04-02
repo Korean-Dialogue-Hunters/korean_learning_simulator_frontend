@@ -1,12 +1,13 @@
 /* ──────────────────────────────────────────
    맞춤 학습 설정 관련 타입 및 상수 정의
+   - BE API 필드명 기준으로 통일
    ────────────────────────────────────────── */
 
 // 한국어 수준 선택지
 export type KoreanLevel = "초급" | "중급" | "고급";
 
 // 관심 문화 선택지
-export type KultureInterest =
+export type CulturalInterest =
   | "K-Content"
   | "K-Pop"
   | "K-Beauty"
@@ -25,19 +26,18 @@ export type LocationId = (typeof LOCATION_OPTIONS)[number]["id"];
 
 // 맞춤 학습 설정에서 수집하는 사용자 프로필 데이터
 export interface SetupProfile {
-  nationality: string;       // 국적 (ISO 국가코드, 예: "KR", "US")
-  username: string;          // 닉네임
-  userCode: string;          // 6자리 숫자 코드 (닉네임 중복 구분용)
-  level: KoreanLevel;        // 한국어 수준
-  kulturalInterest: KultureInterest; // 관심 한국 문화
-  preferredLocation: LocationId;    // 가보고 싶은 장소
+  user_id: string;                    // UUID (자동 생성, 유저에게 노출하지 않음)
+  country: string;                    // 국적 (ISO 국가코드, 예: "KR", "US")
+  user_nickname: string;              // 닉네임
+  korean_level: KoreanLevel;          // 한국어 수준
+  cultural_interest: CulturalInterest; // 관심 한국 문화
+  location: LocationId;               // 가보고 싶은 장소
 }
 
 // 맞춤 학습 설정 단계 번호 (1~5)
 export type SetupStep = 1 | 2 | 3 | 4 | 5;
 
 // 자주 쓰는 국가 목록 (드롭다운 최상단 고정)
-// TODO: 향후 IP 기반 국가 감지 구현
 export const POPULAR_COUNTRIES = [
   { code: "KR", name: "South Korea" },
   { code: "US", name: "United States" },

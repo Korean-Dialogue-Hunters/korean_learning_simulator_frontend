@@ -43,8 +43,8 @@ export function useChat(persona: Persona) {
       /* 사용자 메시지 추가 */
       const userMsg: ChatMessage = {
         id: generateId(),
-        sender: "user",
-        text,
+        speaker: "user",
+        utterance: text,
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, userMsg]);
@@ -68,8 +68,8 @@ export function useChat(persona: Persona) {
   const onStreamComplete = useCallback(() => {
     const aiMsg: ChatMessage = {
       id: generateId(),
-      sender: "ai",
-      text: streamingText,
+      speaker: "ai",
+      utterance: streamingText,
       timestamp: Date.now(),
     };
     setMessages((prev) => [...prev, aiMsg]);

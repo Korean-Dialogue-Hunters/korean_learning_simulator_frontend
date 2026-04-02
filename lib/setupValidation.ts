@@ -33,33 +33,28 @@ export function validateSetupProfile(
   const errors: string[] = [];
 
   // nationality: 비어있거나 2자 미만이면 에러
-  if (!profile.nationality || profile.nationality.trim().length < 2) {
-    errors.push("nationality");
+  if (!profile.country || profile.country.trim().length < 2) {
+    errors.push("country");
   }
 
-  // username: 닉네임 유효성 검사
-  if (!profile.username || !validateNickname(profile.username).valid) {
-    errors.push("username");
-  }
-
-  // userCode: 6자리 숫자여야 함
-  if (!profile.userCode || !/^\d{6}$/.test(profile.userCode)) {
-    errors.push("userCode");
+  // user_nickname: 닉네임 유효성 검사
+  if (!profile.user_nickname || !validateNickname(profile.user_nickname).valid) {
+    errors.push("user_nickname");
   }
 
   // level: 허용된 값(초급/중급/고급) 중 하나여야 함
-  if (!(VALID_LEVELS as readonly string[]).includes(profile.level)) {
-    errors.push("level");
+  if (!(VALID_LEVELS as readonly string[]).includes(profile.korean_level)) {
+    errors.push("korean_level");
   }
 
-  // kulturalInterest: 허용된 값 중 하나여야 함
-  if (!(VALID_INTERESTS as readonly string[]).includes(profile.kulturalInterest)) {
-    errors.push("kulturalInterest");
+  // cultural_interest: 허용된 값 중 하나여야 함
+  if (!(VALID_INTERESTS as readonly string[]).includes(profile.cultural_interest)) {
+    errors.push("cultural_interest");
   }
 
-  // preferredLocation: LOCATION_OPTIONS에 존재하는 ID여야 함
-  if (!(VALID_LOCATION_IDS as readonly string[]).includes(profile.preferredLocation)) {
-    errors.push("preferredLocation");
+  // location: LOCATION_OPTIONS에 존재하는 ID여야 함
+  if (!(VALID_LOCATION_IDS as readonly string[]).includes(profile.location)) {
+    errors.push("location");
   }
 
   return errors;

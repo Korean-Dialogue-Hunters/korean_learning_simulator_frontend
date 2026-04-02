@@ -77,11 +77,6 @@ export function generateRandomNickname(): string {
   return NOUNS[randomInt(NOUNS.length)];
 }
 
-/** 6자리 숫자 코드 생성 (000000~999999) */
-export function generateUserCode(): string {
-  return String(randomInt(1000000)).padStart(6, "0");
-}
-
 /** 닉네임 유효성 검사 */
 export function validateNickname(nickname: string): { valid: boolean; error?: string } {
   const trimmed = nickname.trim();

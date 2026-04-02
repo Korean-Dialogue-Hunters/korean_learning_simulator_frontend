@@ -10,10 +10,13 @@ import { Send } from "lucide-react";
 import { WARM_THEME } from "@/lib/designSystem";
 import { getByteLength } from "@/lib/nicknameGenerator";
 
-const MAX_INPUT_BYTES = 2000;
+const MAX_INPUT_BYTES = 1000;
 const MAX_LINES = 6;
 const LINE_HEIGHT = 20; // leading-relaxed 기준 약 20px
 const MAX_HEIGHT = LINE_HEIGHT * MAX_LINES; // 6줄 = 120px
+
+/** 한글 포함 여부 체크 (자음/모음/완성형 모두) */
+const containsKorean = (text: string) => /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(text);
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -21,6 +24,8 @@ interface ChatInputProps {
   /** true면 입력은 가능하지만 전송만 막힘 */
   sendDisabled?: boolean;
   placeholder?: string;
+  /** 한글 미포함 메시지 전송 시도 시 호출 */
+  onKoreanError?: () => void;
 }
 
 export default function ChatInput({
@@ -28,6 +33,7 @@ export default function ChatInput({
   disabled = false,
   sendDisabled = false,
   placeholder = "메시지를 입력하세요...",
+  onKoreanError,
 }: ChatInputProps) {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -53,6 +59,12 @@ export default function ChatInput({
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed || disabled || sendDisabled || isOverLimit) return;
+    /* 한글이 하나도 없으면 전송 차단 + 입력 초기화 */
+    if (!containsKorean(trimmed)) {
+      setText("");
+      onKoreanError?.();
+      return;
+    }
     onSend(trimmed);
     setText("");
   };

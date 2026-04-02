@@ -6,7 +6,6 @@ import {
   getByteLength,
   MAX_NICKNAME_BYTES,
   generateRandomNickname,
-  generateUserCode,
   validateNickname,
 } from "@/lib/nicknameGenerator";
 
@@ -50,22 +49,6 @@ describe("generateRandomNickname", () => {
     for (let i = 0; i < 20; i++) {
       const nickname = generateRandomNickname();
       expect(koreanRegex.test(nickname)).toBe(true);
-    }
-  });
-});
-
-describe("generateUserCode", () => {
-  it("6자리 문자열을 반환한다", () => {
-    for (let i = 0; i < 20; i++) {
-      const code = generateUserCode();
-      expect(code).toHaveLength(6);
-    }
-  });
-
-  it("숫자로만 구성된다", () => {
-    for (let i = 0; i < 20; i++) {
-      const code = generateUserCode();
-      expect(/^\d{6}$/.test(code)).toBe(true);
     }
   });
 });

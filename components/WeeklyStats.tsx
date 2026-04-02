@@ -19,22 +19,30 @@ export default function WeeklyStats({ stats }: WeeklyStatsProps) {
     <div className="mx-5 grid grid-cols-3 gap-2.5">
       <StatBox
         icon={<MessageCircle size={18} strokeWidth={1.8} />}
-        label="대화"
-        value={`${stats.conversationCount}회`}
+        label="누적 대화 횟수"
+        value={`${stats.conversation_count}회`}
         highlight={false}
       />
       <StatBox
-        icon={<Star size={18} strokeWidth={1.8} />}
+        icon={<Star size={18} strokeWidth={1.8} fill="var(--color-accent)" color="var(--color-accent)" />}
         label="평균 점수"
-        value={`${stats.averageScore.toFixed(1)}점`}
+        value={`${stats.average_score.toFixed(1)}점`}
         highlight={false}
       />
-      <StatBox
-        icon={<Flame size={18} strokeWidth={1.8} />}
-        label="스트릭"
-        value={`${stats.streakDays}일`}
-        highlight={true}
-      />
+      {/* 스트릭 — 준비 중 (블러 + 🚧) */}
+      <div className="relative pointer-events-none select-none">
+        <div className="blur-[3px]">
+          <StatBox
+            icon={<Flame size={18} strokeWidth={1.8} />}
+            label="스트릭"
+            value={`${stats.streak_days}일`}
+            highlight={true}
+          />
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-4xl">🚧</span>
+        </div>
+      </div>
     </div>
   );
 }

@@ -8,18 +8,18 @@
    ────────────────────────────────────────── */
 
 import { Trophy } from "lucide-react";
-import { UserProfile, TIER_BORDER_COLOR, TIER_TEXT_COLOR } from "@/types/user";
+import { UserProfile, GRADE_BORDER_COLOR, GRADE_TEXT_COLOR } from "@/types/user";
 
 interface TierCardProps {
   user: UserProfile;
 }
 
 export default function TierCard({ user }: TierCardProps) {
-  const borderColor = TIER_BORDER_COLOR[user.tier];
-  const textColor = TIER_TEXT_COLOR[user.tier];
+  const borderColor = GRADE_BORDER_COLOR[user.grade];
+  const textColor = GRADE_TEXT_COLOR[user.grade];
 
   const progressPercent = Math.min(
-    Math.round((user.xp / user.xpMax) * 100),
+    Math.round((user.xp / user.xp_max) * 100),
     100
   );
 
@@ -35,7 +35,7 @@ export default function TierCard({ user }: TierCardProps) {
             <Trophy size={18} strokeWidth={1.8} className={textColor} />
           </div>
           <div>
-            <span className={`text-lg font-bold ${textColor} block leading-tight`}>{user.tier}</span>
+            <span className={`text-lg font-bold ${textColor} block leading-tight`}>{user.grade}</span>
             <span className="text-[11px] text-tab-inactive">현재 등급</span>
           </div>
         </div>
@@ -44,7 +44,7 @@ export default function TierCard({ user }: TierCardProps) {
             {user.xp.toLocaleString()}
           </span>
           <span className="text-[11px] text-tab-inactive">
-            / {user.xpMax.toLocaleString()} XP
+            / {user.xp_max.toLocaleString()} XP
           </span>
         </div>
       </div>
@@ -55,7 +55,7 @@ export default function TierCard({ user }: TierCardProps) {
           className="h-full rounded-full transition-all duration-500"
           style={{
             width: `${progressPercent}%`,
-            backgroundColor: tierProgressColor(user.tier),
+            backgroundColor: gradeProgressColor(user.grade),
           }}
         />
       </div>
@@ -64,7 +64,7 @@ export default function TierCard({ user }: TierCardProps) {
       <p className="text-[11px] text-tab-inactive text-right">
         다음 티어까지{" "}
         <span className="text-foreground font-semibold">
-          {user.xpToNextTier.toLocaleString()} XP
+          {user.xp_to_next.toLocaleString()} XP
         </span>{" "}
         남음
       </p>
@@ -73,13 +73,13 @@ export default function TierCard({ user }: TierCardProps) {
 }
 
 /* 티어별 진행 바 색상 */
-function tierProgressColor(tier: UserProfile["tier"]): string {
-  const colors: Record<UserProfile["tier"], string> = {
+function gradeProgressColor(grade: UserProfile["grade"]): string {
+  const colors: Record<UserProfile["grade"], string> = {
     Bronze: "#CD7F32",
     Silver: "#C0C0C0",
     Gold: "#FFD700",
     Platinum: "#E5E4E2",
     Diamond: "#B9F2FF",
   };
-  return colors[tier];
+  return colors[grade];
 }

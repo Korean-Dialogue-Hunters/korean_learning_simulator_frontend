@@ -14,8 +14,8 @@ import { Persona } from "@/types/api";
 export interface CounterpartInfo {
   name: string;
   age: number;
-  occupation: string;
-  avatarUrl?: string;
+  role: string;
+  avatar_url?: string;
 }
 
 interface PersonaProfileCardProps {
@@ -52,9 +52,9 @@ export default function PersonaProfileCard({
               color: "var(--color-btn-primary-text)",
             }}
           >
-            {persona.avatarUrl ? (
+            {persona.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={persona.avatarUrl} alt={persona.name} className="w-full h-full object-cover rounded-full" />
+              <img src={persona.avatar_url} alt={persona.name} className="w-full h-full object-cover rounded-full" />
             ) : (
               persona.name.charAt(0)
             )}
@@ -65,7 +65,7 @@ export default function PersonaProfileCard({
               <p className="text-[13px] font-bold truncate text-foreground">{persona.name}</p>
             </div>
             <p className="text-[11px] text-tab-inactive truncate">
-              {persona.age}세 · {persona.occupation}
+              {persona.age}세 · {persona.role}
             </p>
           </div>
         </div>
@@ -82,9 +82,9 @@ export default function PersonaProfileCard({
               color: "var(--color-tab-inactive)",
             }}
           >
-            {counterpart.avatarUrl ? (
+            {counterpart.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={counterpart.avatarUrl} alt={counterpart.name} className="w-full h-full object-cover rounded-full" />
+              <img src={counterpart.avatar_url} alt={counterpart.name} className="w-full h-full object-cover rounded-full" />
             ) : (
               counterpart.name.charAt(0)
             )}
@@ -95,7 +95,7 @@ export default function PersonaProfileCard({
               <p className="text-[13px] font-bold text-foreground truncate">{counterpart.name}</p>
             </div>
             <p className="text-[11px] text-tab-inactive truncate">
-              {counterpart.age}세 · {counterpart.occupation}
+              {counterpart.age}세 · {counterpart.role}
             </p>
           </div>
         </div>
@@ -104,7 +104,7 @@ export default function PersonaProfileCard({
       {/* 하단: 미션 + 턴 카운터 */}
       <div className="flex items-start justify-between gap-2">
         <p className="text-[12px] text-foreground/80 leading-snug flex-1">
-          🎯 {scenarioTitle ?? persona.purpose}
+          🎯 {scenarioTitle ?? persona.mission}
         </p>
         <div
           className="text-[11px] font-medium px-2.5 py-1 rounded-full shrink-0"

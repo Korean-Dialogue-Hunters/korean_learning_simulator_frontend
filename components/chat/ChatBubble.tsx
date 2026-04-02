@@ -15,7 +15,7 @@ interface ChatBubbleProps {
 }
 
 export default function ChatBubble({ message, personaName }: ChatBubbleProps) {
-  const isUser = message.sender === "user";
+  const isUser = message.speaker === "user";
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3`}>
@@ -42,7 +42,7 @@ export default function ChatBubble({ message, personaName }: ChatBubbleProps) {
             border: isUser ? "none" : "1px solid var(--color-card-border)",
           }}
         >
-          {message.text}
+          {message.utterance}
         </div>
       </div>
     </div>

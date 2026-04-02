@@ -15,20 +15,20 @@ import { useRouter } from "next/navigation";
 import { Trophy, Star, ArrowRight, Home } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { ResultData } from "@/types/result";
-import { TIER_COLORS } from "@/types/user";
+import { GRADE_COLORS } from "@/types/user";
 import RadarChart from "@/components/result/RadarChart";
 
 /* ── Mock 결과 데이터 ── */
 const MOCK_RESULT: ResultData = {
-  sessionId: "mock-session-1",
-  totalScore: 7.2,
-  tier: "Silver",
+  session_id: "mock-session-1",
+  total_score_10: 7.2,
+  grade: "Silver",
   scores: {
     vocabulary: 6.5,
     situation: 8.0,
     grammar: 6.8,
   },
-  summary: "자연스러운 인사와 장소 묻기를 잘 수행했어요! 문법을 조금 더 연습하면 좋겠어요.",
+  llm_summary: "자연스러운 인사와 장소 묻기를 잘 수행했어요! 문법을 조금 더 연습하면 좋겠어요.",
 };
 
 /* ── 점수에 따른 등급 텍스트 ── */
@@ -81,7 +81,7 @@ function ScoreCircle({ score, label }: { score: number; label: string }) {
 export default function ResultPage() {
   const router = useRouter();
   const result = MOCK_RESULT;
-  const tierColor = TIER_COLORS[result.tier];
+  const gradeColor = GRADE_COLORS[result.grade];
 
   return (
     <div
@@ -100,7 +100,7 @@ export default function ResultPage() {
           <Trophy size={32} strokeWidth={1.5} />
         </div>
         <h1 className="text-xl font-bold text-foreground mb-1">대화 완료!</h1>
-        <p className="text-sm text-tab-inactive">{getGrade(result.totalScore)}</p>
+        <p className="text-sm text-tab-inactive">{getGrade(result.total_score_10)}</p>
       </div>
 
       {/* ── 총점 카드 (#41) ── */}
@@ -114,7 +114,7 @@ export default function ResultPage() {
         <p className="text-sm text-tab-inactive mb-2">총점</p>
         <div className="flex items-baseline justify-center gap-1 mb-3">
           <span className="text-5xl font-bold text-foreground">
-            {result.totalScore}
+            {result.total_score_10}
           </span>
           <span className="text-lg text-tab-inactive">/ 10</span>
         </div>
@@ -126,8 +126,8 @@ export default function ResultPage() {
               key={i}
               size={16}
               strokeWidth={1.5}
-              fill={i < Math.round(result.totalScore) ? "var(--color-accent)" : "none"}
-              color={i < Math.round(result.totalScore) ? "var(--color-accent)" : "var(--color-card-border)"}
+              fill={i < Math.round(result.total_score_10) ? "var(--color-accent)" : "none"}
+              color={i < Math.round(result.total_score_10) ? "var(--color-accent)" : "var(--color-card-border)"}
             />
           ))}
         </div>
@@ -138,20 +138,20 @@ export default function ResultPage() {
         className={`${COMMON_CLASSES.cardRounded} p-4 flex items-center justify-between mb-4`}
         style={{
           backgroundColor: "var(--color-card-bg)",
-          border: `2px solid ${tierColor}`,
+          border: `2px solid ${gradeColor}`,
         }}
       >
         <div>
           <p className="text-xs text-tab-inactive mb-0.5">현재 티어</p>
-          <p className="text-lg font-bold" style={{ color: tierColor }}>
-            {result.tier}
+          <p className="text-lg font-bold" style={{ color: gradeColor }}>
+            {result.grade}
           </p>
         </div>
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center text-lg"
           style={{
-            backgroundColor: tierColor + "20",
-            color: tierColor,
+            backgroundColor: gradeColor + "20",
+            color: gradeColor,
           }}
         >
           <Trophy size={24} strokeWidth={1.5} />
@@ -195,7 +195,7 @@ export default function ResultPage() {
         }}
       >
         <p className="text-sm leading-relaxed" style={{ color: "var(--color-foreground)" }}>
-          {result.summary}
+          {result.llm_summary}
         </p>
       </div>
 

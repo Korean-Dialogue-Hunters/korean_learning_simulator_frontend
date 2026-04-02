@@ -21,10 +21,9 @@ import {
 interface NicknameInputProps {
   value: string;
   onChange: (nickname: string) => void;
-  userCode: string;
 }
 
-export default function NicknameInput({ value, onChange, userCode }: NicknameInputProps) {
+export default function NicknameInput({ value, onChange }: NicknameInputProps) {
   const [placeholder, setPlaceholder] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
@@ -73,7 +72,7 @@ export default function NicknameInput({ value, onChange, userCode }: NicknameInp
           </div>
 
           <div className="flex-1 min-w-0">
-            {/* 입력 + #코드 */}
+            {/* 입력 */}
             <div className="flex items-center gap-1">
               <input
                 type="text"
@@ -88,12 +87,6 @@ export default function NicknameInput({ value, onChange, userCode }: NicknameInp
                   caretColor: WARM_THEME.accent,
                 }}
               />
-              <span
-                className="text-sm font-mono shrink-0"
-                style={{ color: WARM_THEME.textSub }}
-              >
-                #{userCode}
-              </span>
             </div>
             {/* 바이트 카운터 */}
             <div className="flex items-center justify-between mt-1">

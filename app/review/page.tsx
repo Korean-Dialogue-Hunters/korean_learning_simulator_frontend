@@ -5,8 +5,9 @@
 
 export default function Page() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <p className="text-tab-inactive text-sm">/review — 준비 중</p>
+    <div className="flex flex-col items-center justify-center min-h-screen gap-3">
+      <span className="text-5xl">🚧</span>
+      <p className="text-tab-inactive text-sm">We are working on it!</p>
     </div>
   );
 }

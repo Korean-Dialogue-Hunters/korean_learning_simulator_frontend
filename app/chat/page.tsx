@@ -28,13 +28,13 @@ const FALLBACK_PERSONA: Persona = {
   name: "김민준",
   age: 23,
   gender: "남성",
-  occupation: "대학생",
-  purpose: "한강 자전거길을 달리다 길을 잃어 도움을 요청하는 대학생",
+  role: "대학생",
+  mission: "한강 자전거길을 달리다 길을 잃어 도움을 요청하는 대학생",
 };
 const FALLBACK_COUNTERPART: CounterpartInfo = {
   name: "이서연",
   age: 28,
-  occupation: "직장인",
+  role: "직장인",
 };
 
 export default function ChatPage() {
@@ -69,6 +69,13 @@ export default function ChatPage() {
 
   /* 시나리오 타이틀 (BE 메타데이터 연동 시 sessionStorage에서 읽기) */
   const scenarioTitle: string | null = null; // TODO: sessionStorage.getItem("scenarioTitle")
+
+  /* 한글 미포함 경고 메시지 */
+  const [koreanWarning, setKoreanWarning] = useState(false);
+  const handleKoreanError = () => {
+    setKoreanWarning(true);
+    setTimeout(() => setKoreanWarning(false), 3000);
+  };
 
   /* 메시지 추가 시 자동 스크롤 */
   useEffect(() => {
@@ -122,7 +129,7 @@ export default function ChatPage() {
           <ChatBubble
             key={msg.id}
             message={msg}
-            personaName={msg.sender === "ai" ? counterpart.name : undefined}
+            personaName={msg.speaker === "ai" ? counterpart.name : undefined}
           />
         ))}
 
@@ -190,12 +197,24 @@ export default function ChatPage() {
         </div>
       )}
 
+      {/* 한글 미포함 경고 */}
+      {koreanWarning && (
+        <div className="px-4 pb-1">
+          <p className="text-[13px] text-tab-inactive text-center">
+            한글을 사용해 문장을 완성해주세요!
+            <br />
+            Let&apos;s try to use Korean in the sentences!
+          </p>
+        </div>
+      )}
+
       {/* ── 하단 입력창 (#36) ── */}
       <ChatInput
         onSend={sendMessage}
         disabled={isFinished}
         sendDisabled={isAiTyping}
         placeholder={isFinished ? "대화가 종료되었습니다" : "메시지를 입력하세요..."}
+        onKoreanError={handleKoreanError}
       />
     </div>
   );
