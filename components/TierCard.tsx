@@ -19,7 +19,7 @@ export default function TierCard({ user }: TierCardProps) {
   const textColor = GRADE_TEXT_COLOR[user.grade];
 
   const progressPercent = Math.min(
-    Math.round((user.xp / user.xp_max) * 100),
+    Math.round((user.xp / user.xpMax) * 100),
     100
   );
 
@@ -44,7 +44,7 @@ export default function TierCard({ user }: TierCardProps) {
             {user.xp.toLocaleString()}
           </span>
           <span className="text-[11px] text-tab-inactive">
-            / {user.xp_max.toLocaleString()} XP
+            / {user.xpMax.toLocaleString()} XP
           </span>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function TierCard({ user }: TierCardProps) {
       <p className="text-[11px] text-tab-inactive text-right">
         다음 티어까지{" "}
         <span className="text-foreground font-semibold">
-          {user.xp_to_next.toLocaleString()} XP
+          {user.xpToNext.toLocaleString()} XP
         </span>{" "}
         남음
       </p>

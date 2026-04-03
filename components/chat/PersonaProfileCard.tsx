@@ -15,7 +15,7 @@ export interface CounterpartInfo {
   name: string;
   age: number;
   role: string;
-  avatar_url?: string;
+  avatarUrl?: string;
 }
 
 interface PersonaProfileCardProps {
@@ -52,9 +52,9 @@ export default function PersonaProfileCard({
               color: "var(--color-btn-primary-text)",
             }}
           >
-            {persona.avatar_url ? (
+            {persona.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={persona.avatar_url} alt={persona.name} className="w-full h-full object-cover rounded-full" />
+              <img src={persona.avatarUrl} alt={persona.name} className="w-full h-full object-cover rounded-full" />
             ) : (
               persona.name.charAt(0)
             )}
@@ -82,9 +82,9 @@ export default function PersonaProfileCard({
               color: "var(--color-tab-inactive)",
             }}
           >
-            {counterpart.avatar_url ? (
+            {counterpart.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={counterpart.avatar_url} alt={counterpart.name} className="w-full h-full object-cover rounded-full" />
+              <img src={counterpart.avatarUrl} alt={counterpart.name} className="w-full h-full object-cover rounded-full" />
             ) : (
               counterpart.name.charAt(0)
             )}

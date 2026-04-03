@@ -8,11 +8,11 @@ import { SetupProfile } from "@/types/setup";
 
 /* ── 유효한 프로필 데이터 (기본 테스트용) ── */
 const VALID_PROFILE: SetupProfile = {
-  user_id: "550e8400-e29b-41d4-a716-446655440000",
+  userId: "550e8400-e29b-41d4-a716-446655440000",
   country: "US",
-  user_nickname: "빛나는별",
-  korean_level: "초급",
-  cultural_interest: "K-Pop",
+  userNickname: "빛나는별",
+  koreanLevel: "초급",
+  culturalInterest: "K-Pop",
   location: "hangang",
 };
 
@@ -44,30 +44,30 @@ describe("validateSetupProfile", () => {
     expect(errors).not.toContain("country");
   });
 
-  /* ── korean_level 검증 ── */
-  test("korean_level이 유효하지 않은 값이면 에러 반환", () => {
+  /* ── koreanLevel 검증 ── */
+  test("koreanLevel이 유효하지 않은 값이면 에러 반환", () => {
     const errors = validateSetupProfile({
       ...VALID_PROFILE,
-      korean_level: "최고급" as SetupProfile["korean_level"],
+      koreanLevel: "최고급" as SetupProfile["koreanLevel"],
     });
-    expect(errors).toContain("korean_level");
+    expect(errors).toContain("koreanLevel");
   });
 
   test.each(["초급", "중급", "고급"] as const)(
-    "korean_level이 '%s'이면 통과",
-    (korean_level) => {
-      const errors = validateSetupProfile({ ...VALID_PROFILE, korean_level });
-      expect(errors).not.toContain("korean_level");
+    "koreanLevel이 '%s'이면 통과",
+    (koreanLevel) => {
+      const errors = validateSetupProfile({ ...VALID_PROFILE, koreanLevel });
+      expect(errors).not.toContain("koreanLevel");
     }
   );
 
-  /* ── cultural_interest 검증 ── */
-  test("cultural_interest가 유효하지 않은 값이면 에러 반환", () => {
+  /* ── culturalInterest 검증 ── */
+  test("culturalInterest가 유효하지 않은 값이면 에러 반환", () => {
     const errors = validateSetupProfile({
       ...VALID_PROFILE,
-      cultural_interest: "K-Unknown" as SetupProfile["cultural_interest"],
+      culturalInterest: "K-Unknown" as SetupProfile["culturalInterest"],
     });
-    expect(errors).toContain("cultural_interest");
+    expect(errors).toContain("culturalInterest");
   });
 
   test.each([
@@ -78,13 +78,13 @@ describe("validateSetupProfile", () => {
     "K-Gaming·eSports",
     "Others",
   ] as const)(
-    "cultural_interest가 '%s'이면 통과",
+    "culturalInterest가 '%s'이면 통과",
     (interest) => {
       const errors = validateSetupProfile({
         ...VALID_PROFILE,
-        cultural_interest: interest,
+        culturalInterest: interest,
       });
-      expect(errors).not.toContain("cultural_interest");
+      expect(errors).not.toContain("culturalInterest");
     }
   );
 
@@ -105,37 +105,37 @@ describe("validateSetupProfile", () => {
     expect(errors).not.toContain("location");
   });
 
-  /* ── user_nickname 검증 ── */
-  test("user_nickname이 빈 문자열이면 에러 반환", () => {
-    const errors = validateSetupProfile({ ...VALID_PROFILE, user_nickname: "" });
-    expect(errors).toContain("user_nickname");
+  /* ── userNickname 검증 ── */
+  test("userNickname이 빈 문자열이면 에러 반환", () => {
+    const errors = validateSetupProfile({ ...VALID_PROFILE, userNickname: "" });
+    expect(errors).toContain("userNickname");
   });
 
-  test("user_nickname이 32바이트 초과면 에러 반환", () => {
-    const errors = validateSetupProfile({ ...VALID_PROFILE, user_nickname: "빛나는고양이와사자와호랑" });
-    expect(errors).toContain("user_nickname");
+  test("userNickname이 32바이트 초과면 에러 반환", () => {
+    const errors = validateSetupProfile({ ...VALID_PROFILE, userNickname: "빛나는고양이와사자와호랑" });
+    expect(errors).toContain("userNickname");
   });
 
-  test("user_nickname이 유효하면 통과", () => {
-    const errors = validateSetupProfile({ ...VALID_PROFILE, user_nickname: "빛나는별" });
-    expect(errors).not.toContain("user_nickname");
+  test("userNickname이 유효하면 통과", () => {
+    const errors = validateSetupProfile({ ...VALID_PROFILE, userNickname: "빛나는별" });
+    expect(errors).not.toContain("userNickname");
   });
 
   /* ── 다중 에러 ── */
   test("여러 필드가 동시에 잘못되면 모두 에러 반환", () => {
     const errors = validateSetupProfile({
-      user_id: "some-uuid",
+      userId: "some-uuid",
       country: "",
-      user_nickname: "",
-      korean_level: "없음" as SetupProfile["korean_level"],
-      cultural_interest: "없음" as SetupProfile["cultural_interest"],
+      userNickname: "",
+      koreanLevel: "없음" as SetupProfile["koreanLevel"],
+      culturalInterest: "없음" as SetupProfile["culturalInterest"],
       location: "없음" as SetupProfile["location"],
     });
     expect(errors).toHaveLength(5);
     expect(errors).toContain("country");
-    expect(errors).toContain("user_nickname");
-    expect(errors).toContain("korean_level");
-    expect(errors).toContain("cultural_interest");
+    expect(errors).toContain("userNickname");
+    expect(errors).toContain("koreanLevel");
+    expect(errors).toContain("culturalInterest");
     expect(errors).toContain("location");
   });
 });

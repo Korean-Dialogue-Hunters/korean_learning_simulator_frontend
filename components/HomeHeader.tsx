@@ -22,7 +22,7 @@ export default function HomeHeader({ user }: HomeHeaderProps) {
   const borderColor = GRADE_BORDER_COLOR[user.grade];
 
   // 유저 닉네임 첫 글자를 이니셜로 표시
-  const initial = user.user_nickname.charAt(0).toUpperCase();
+  const initial = user.userNickname.charAt(0).toUpperCase();
 
   return (
     <header className="flex items-center justify-between px-5 pt-6 pb-3">
@@ -52,11 +52,11 @@ export default function HomeHeader({ user }: HomeHeaderProps) {
           <div
             className={`w-10 h-10 rounded-full border-2 ${borderColor} flex items-center justify-center overflow-hidden bg-surface`}
           >
-            {user.avatar_url ? (
+            {user.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={user.avatar_url}
-                alt={`${user.user_nickname} 프로필`}
+                src={user.avatarUrl}
+                alt={`${user.userNickname} 프로필`}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -64,7 +64,7 @@ export default function HomeHeader({ user }: HomeHeaderProps) {
             )}
           </div>
           {/* @유저ID */}
-          <span className="text-[10px] text-tab-inactive">@{user.user_nickname}</span>
+          <span className="text-[10px] text-tab-inactive">@{user.userNickname}</span>
         </div>
       </div>
     </header>

@@ -20,15 +20,15 @@ import RadarChart from "@/components/result/RadarChart";
 
 /* ── Mock 결과 데이터 ── */
 const MOCK_RESULT: ResultData = {
-  session_id: "mock-session-1",
-  total_score_10: 7.2,
+  sessionId: "mock-session-1",
+  totalScore10: 7.2,
   grade: "Silver",
   scores: {
     vocabulary: 6.5,
     situation: 8.0,
     grammar: 6.8,
   },
-  llm_summary: "자연스러운 인사와 장소 묻기를 잘 수행했어요! 문법을 조금 더 연습하면 좋겠어요.",
+  llmSummary: "자연스러운 인사와 장소 묻기를 잘 수행했어요! 문법을 조금 더 연습하면 좋겠어요.",
 };
 
 /* ── 점수에 따른 등급 텍스트 ── */
@@ -100,7 +100,7 @@ export default function ResultPage() {
           <Trophy size={32} strokeWidth={1.5} />
         </div>
         <h1 className="text-xl font-bold text-foreground mb-1">대화 완료!</h1>
-        <p className="text-sm text-tab-inactive">{getGrade(result.total_score_10)}</p>
+        <p className="text-sm text-tab-inactive">{getGrade(result.totalScore10)}</p>
       </div>
 
       {/* ── 총점 카드 (#41) ── */}
@@ -114,7 +114,7 @@ export default function ResultPage() {
         <p className="text-sm text-tab-inactive mb-2">총점</p>
         <div className="flex items-baseline justify-center gap-1 mb-3">
           <span className="text-5xl font-bold text-foreground">
-            {result.total_score_10}
+            {result.totalScore10}
           </span>
           <span className="text-lg text-tab-inactive">/ 10</span>
         </div>
@@ -126,8 +126,8 @@ export default function ResultPage() {
               key={i}
               size={16}
               strokeWidth={1.5}
-              fill={i < Math.round(result.total_score_10) ? "var(--color-accent)" : "none"}
-              color={i < Math.round(result.total_score_10) ? "var(--color-accent)" : "var(--color-card-border)"}
+              fill={i < Math.round(result.totalScore10) ? "var(--color-accent)" : "none"}
+              color={i < Math.round(result.totalScore10) ? "var(--color-accent)" : "var(--color-card-border)"}
             />
           ))}
         </div>
@@ -195,7 +195,7 @@ export default function ResultPage() {
         }}
       >
         <p className="text-sm leading-relaxed" style={{ color: "var(--color-foreground)" }}>
-          {result.llm_summary}
+          {result.llmSummary}
         </p>
       </div>
 

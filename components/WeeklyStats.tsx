@@ -20,13 +20,13 @@ export default function WeeklyStats({ stats }: WeeklyStatsProps) {
       <StatBox
         icon={<MessageCircle size={18} strokeWidth={1.8} />}
         label="누적 대화 횟수"
-        value={`${stats.conversation_count}회`}
+        value={`${stats.conversationCount}회`}
         highlight={false}
       />
       <StatBox
         icon={<Star size={18} strokeWidth={1.8} fill="var(--color-accent)" color="var(--color-accent)" />}
         label="평균 점수"
-        value={`${stats.average_score.toFixed(1)}점`}
+        value={`${stats.averageScore.toFixed(1)}점`}
         highlight={false}
       />
       {/* 스트릭 — 준비 중 (블러 + 🚧) */}
@@ -35,7 +35,7 @@ export default function WeeklyStats({ stats }: WeeklyStatsProps) {
           <StatBox
             icon={<Flame size={18} strokeWidth={1.8} />}
             label="스트릭"
-            value={`${stats.streak_days}일`}
+            value={`${stats.streakDays}일`}
             highlight={true}
           />
         </div>

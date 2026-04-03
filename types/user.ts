@@ -1,6 +1,7 @@
 /* ──────────────────────────────────────────
    유저 관련 타입 정의
-   - BE API 필드명 기준으로 통일
+   - FE 내부 필드명: camelCase
+   - BE 실제 전송 필드명: snake_case (주석으로 표기)
    ────────────────────────────────────────── */
 
 // 등급 종류 (낮은 순서대로)
@@ -34,18 +35,20 @@ export const GRADE_COLORS: Record<Grade, string> = {
 };
 
 // 유저 프로필 데이터 구조
+// BE: { user_nickname, country, korean_level, cultural_interest, latest_grade }
 export interface UserProfile {
-  user_nickname: string;  // 예: "learner_42"
-  grade: Grade;           // 현재 등급
-  xp: number;             // 현재 XP (BE 미제공, FE 자체)
-  xp_max: number;         // 현재 등급 최대 XP (BE 미제공, FE 자체)
-  xp_to_next: number;     // 다음 등급까지 남은 XP (BE 미제공, FE 자체)
-  avatar_url?: string;    // 프로필 이미지 URL (없으면 이니셜 표시)
+  userNickname: string;   // BE: user_nickname
+  grade: Grade;           // BE: latest_grade
+  xp: number;             // FE 전용 (BE 미제공)
+  xpMax: number;          // FE 전용 (BE 미제공) — BE: xp_max
+  xpToNext: number;       // FE 전용 (BE 미제공) — BE: xp_to_next
+  avatarUrl?: string;     // FE 전용 (BE 미제공) — BE: avatar_url
 }
 
 // 주간 통계 데이터 구조
+// BE: { conversation_count, average_score, latest_grade }
 export interface WeeklyStats {
-  conversation_count: number; // 이번 주 대화 수
-  average_score: number;      // 평균 점수 (0~10)
-  streak_days: number;        // 연속 학습일 수 (BE 미제공, FE 자체)
+  conversationCount: number;  // BE: conversation_count
+  averageScore: number;       // BE: average_score
+  streakDays: number;         // FE 전용 (BE 미제공) — BE: streak_days
 }

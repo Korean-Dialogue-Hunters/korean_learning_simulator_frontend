@@ -143,9 +143,9 @@ function PersonaCard({
             ${isSelected ? "bg-accent/20 text-accent" : "bg-surface-border text-foreground"}
           `}
         >
-          {persona.avatar_url ? (
+          {persona.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={persona.avatar_url} alt={persona.name} className="w-full h-full object-cover rounded-full" />
+            <img src={persona.avatarUrl} alt={persona.name} className="w-full h-full object-cover rounded-full" />
           ) : (
             initial
           )}

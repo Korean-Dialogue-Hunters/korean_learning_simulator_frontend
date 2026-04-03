@@ -1,6 +1,7 @@
 /* ──────────────────────────────────────────
    채팅 관련 타입 정의
-   - BE API 필드명 기준으로 통일
+   - FE 내부 필드명: camelCase
+   - BE 실제 전송 필드명: snake_case (주석으로 표기)
    ────────────────────────────────────────── */
 
 /** 채팅 메시지 발신자 */
@@ -11,16 +12,17 @@ export interface ChatMessage {
   id: string;              // FE 전용 (고유 식별)
   speaker: MessageSender;  // BE: speaker
   utterance: string;       // BE: utterance
-  timestamp: number;       // FE 전용
+  timestamp: number;       // FE 전용 (BE 미제공)
 }
 
 /** 채팅 세션 상태 */
+// BE: { session_id, selected_role, turn_limit, is_finished }
 export interface ChatSession {
-  session_id: string;
-  selected_role: "A" | "B";
-  persona_name: string;
-  turn_limit: number;
-  turns_left: number;
-  is_finished: boolean;
+  sessionId: string;          // BE: session_id
+  selectedRole: "A" | "B";   // BE: selected_role
+  personaName: string;        // FE 전용
+  turnLimit: number;          // BE: turn_limit
+  turnsLeft: number;          // FE 전용 (turnLimit - turnCount)
+  isFinished: boolean;        // BE: is_finished
   messages: ChatMessage[];
 }

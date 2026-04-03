@@ -23,17 +23,17 @@ import { isSetupDone } from "@/hooks/useSetup";
 
 /* ── Mock Data (BE API 완성 후 실제 데이터로 교체) ── */
 const MOCK_USER: UserProfile = {
-  user_nickname: "learner_42",
+  userNickname: "learner_42",
   grade: "Silver",
   xp: 3200,
-  xp_max: 5000,
-  xp_to_next: 1800,
+  xpMax: 5000,
+  xpToNext: 1800,
 };
 
 const MOCK_WEEKLY_STATS: WeeklyStatsType = {
-  conversation_count: 5,
-  average_score: 7.4,
-  streak_days: 3,
+  conversationCount: 5,
+  averageScore: 7.4,
+  streakDays: 3,
 };
 
 export default function HomePage() {

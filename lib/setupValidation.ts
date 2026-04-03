@@ -32,24 +32,24 @@ export function validateSetupProfile(
 ): string[] {
   const errors: string[] = [];
 
-  // nationality: 비어있거나 2자 미만이면 에러
+  // country: 비어있거나 2자 미만이면 에러
   if (!profile.country || profile.country.trim().length < 2) {
     errors.push("country");
   }
 
-  // user_nickname: 닉네임 유효성 검사
-  if (!profile.user_nickname || !validateNickname(profile.user_nickname).valid) {
-    errors.push("user_nickname");
+  // userNickname: 닉네임 유효성 검사
+  if (!profile.userNickname || !validateNickname(profile.userNickname).valid) {
+    errors.push("userNickname");
   }
 
-  // level: 허용된 값(초급/중급/고급) 중 하나여야 함
-  if (!(VALID_LEVELS as readonly string[]).includes(profile.korean_level)) {
-    errors.push("korean_level");
+  // koreanLevel: 허용된 값(초급/중급/고급) 중 하나여야 함
+  if (!(VALID_LEVELS as readonly string[]).includes(profile.koreanLevel)) {
+    errors.push("koreanLevel");
   }
 
-  // cultural_interest: 허용된 값 중 하나여야 함
-  if (!(VALID_INTERESTS as readonly string[]).includes(profile.cultural_interest)) {
-    errors.push("cultural_interest");
+  // culturalInterest: 허용된 값 중 하나여야 함
+  if (!(VALID_INTERESTS as readonly string[]).includes(profile.culturalInterest)) {
+    errors.push("culturalInterest");
   }
 
   // location: LOCATION_OPTIONS에 존재하는 ID여야 함

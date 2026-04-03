@@ -88,16 +88,16 @@ export function useSetup() {
     // 타입 안전성: 모든 값이 채워져 있는지 검증
     if (!country || !userNickname || !koreanLevel || !culturalInterest || !location) return;
 
-    // UUID 생성 (기존 user_id가 있으면 재사용)
+    // UUID 생성 (기존 userId가 있으면 재사용)
     const existingId = localStorage.getItem(USER_ID_KEY);
-    const user_id = existingId || crypto.randomUUID();
+    const userId = existingId || crypto.randomUUID();
 
     const profile: SetupProfile = {
-      user_id,
+      userId,
       country,
-      user_nickname: userNickname.trim(),
-      korean_level: koreanLevel,
-      cultural_interest: culturalInterest,
+      userNickname: userNickname.trim(),
+      koreanLevel,
+      culturalInterest,
       location,
     };
 
@@ -106,7 +106,7 @@ export function useSetup() {
     if (errors.length > 0) return;
 
     // 로컬스토리지에 저장
-    localStorage.setItem(USER_ID_KEY, user_id);
+    localStorage.setItem(USER_ID_KEY, userId);
     localStorage.setItem(SETUP_PROFILE_KEY, JSON.stringify(profile));
     localStorage.setItem(SETUP_DONE_KEY, "true");
   };

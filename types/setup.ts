@@ -1,6 +1,7 @@
 /* ──────────────────────────────────────────
    맞춤 학습 설정 관련 타입 및 상수 정의
-   - BE API 필드명 기준으로 통일
+   - FE 내부 필드명: camelCase
+   - BE 실제 전송 필드명: snake_case (주석으로 표기)
    ────────────────────────────────────────── */
 
 // 한국어 수준 선택지
@@ -25,13 +26,14 @@ export const LOCATION_OPTIONS = [
 export type LocationId = (typeof LOCATION_OPTIONS)[number]["id"];
 
 // 맞춤 학습 설정에서 수집하는 사용자 프로필 데이터
+// BE: { user_id, country, user_nickname, korean_level, cultural_interest, location }
 export interface SetupProfile {
-  user_id: string;                    // UUID (자동 생성, 유저에게 노출하지 않음)
-  country: string;                    // 국적 (ISO 국가코드, 예: "KR", "US")
-  user_nickname: string;              // 닉네임
-  korean_level: KoreanLevel;          // 한국어 수준
-  cultural_interest: CulturalInterest; // 관심 한국 문화
-  location: LocationId;               // 가보고 싶은 장소
+  userId: string;                     // BE: user_id — UUID (자동 생성, 유저에게 노출하지 않음)
+  country: string;                    // BE: country — 국적 (ISO 국가코드, 예: "KR", "US")
+  userNickname: string;               // BE: user_nickname — 닉네임
+  koreanLevel: KoreanLevel;           // BE: korean_level — 한국어 수준
+  culturalInterest: CulturalInterest; // BE: cultural_interest — 관심 한국 문화
+  location: LocationId;               // BE: location — 가보고 싶은 장소
 }
 
 // 맞춤 학습 설정 단계 번호 (1~5)
