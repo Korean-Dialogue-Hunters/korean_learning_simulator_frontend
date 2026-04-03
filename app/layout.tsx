@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="dark" suppressHydrationWarning>
+    <html lang="ko" className="" suppressHydrationWarning>
       <head>
         {/* 테마 플래시 방지 스크립트
             - 페이지가 그려지기 전에 실행되어 테마 클래스를 즉시 적용
@@ -45,10 +45,10 @@ export default function RootLayout({
             __html: `
               try {
                 var t = localStorage.getItem('theme');
-                if (t === 'light') {
-                  document.documentElement.classList.remove('dark');
-                } else {
+                if (t === 'dark') {
                   document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
                 }
               } catch(e) {}
             `,

@@ -7,16 +7,16 @@
    ────────────────────────────────────────── */
 
 import { Clapperboard, Music, Sparkles, UtensilsCrossed, Gamepad2, Heart } from "lucide-react";
-import { KultureInterest } from "@/types/setup";
+import { CulturalInterest } from "@/types/setup";
 import { warmCardStyle, WARM_THEME } from "@/lib/designSystem";
 
 interface CultureSelectProps {
-  value: KultureInterest | "";
-  onChange: (interest: KultureInterest) => void;
+  value: CulturalInterest | "";
+  onChange: (interest: CulturalInterest) => void;
 }
 
 const CULTURE_OPTIONS: {
-  value: KultureInterest;
+  value: CulturalInterest;
   icon: React.ReactNode;
 }[] = [
   { value: "K-Content", icon: <Clapperboard size={24} strokeWidth={1.6} /> },

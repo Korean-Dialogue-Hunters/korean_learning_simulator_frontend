@@ -5,6 +5,7 @@
    ────────────────────────────────────────── */
 
 import { SetupProfile, LOCATION_OPTIONS } from "@/types/setup";
+import { validateNickname } from "@/lib/nicknameGenerator";
 
 // 유효한 수준 목록
 const VALID_LEVELS = ["초급", "중급", "고급"] as const;
@@ -31,24 +32,29 @@ export function validateSetupProfile(
 ): string[] {
   const errors: string[] = [];
 
-  // nationality: 비어있거나 2자 미만이면 에러
-  if (!profile.nationality || profile.nationality.trim().length < 2) {
-    errors.push("nationality");
+  // country: 비어있거나 2자 미만이면 에러
+  if (!profile.country || profile.country.trim().length < 2) {
+    errors.push("country");
   }
 
-  // level: 허용된 값(초급/중급/고급) 중 하나여야 함
-  if (!(VALID_LEVELS as readonly string[]).includes(profile.level)) {
-    errors.push("level");
+  // userNickname: 닉네임 유효성 검사
+  if (!profile.userNickname || !validateNickname(profile.userNickname).valid) {
+    errors.push("userNickname");
   }
 
-  // kulturalInterest: 허용된 값 중 하나여야 함
-  if (!(VALID_INTERESTS as readonly string[]).includes(profile.kulturalInterest)) {
-    errors.push("kulturalInterest");
+  // koreanLevel: 허용된 값(초급/중급/고급) 중 하나여야 함
+  if (!(VALID_LEVELS as readonly string[]).includes(profile.koreanLevel)) {
+    errors.push("koreanLevel");
   }
 
-  // preferredLocation: LOCATION_OPTIONS에 존재하는 ID여야 함
-  if (!(VALID_LOCATION_IDS as readonly string[]).includes(profile.preferredLocation)) {
-    errors.push("preferredLocation");
+  // culturalInterest: 허용된 값 중 하나여야 함
+  if (!(VALID_INTERESTS as readonly string[]).includes(profile.culturalInterest)) {
+    errors.push("culturalInterest");
+  }
+
+  // location: LOCATION_OPTIONS에 존재하는 ID여야 함
+  if (!(VALID_LOCATION_IDS as readonly string[]).includes(profile.location)) {
+    errors.push("location");
   }
 
   return errors;

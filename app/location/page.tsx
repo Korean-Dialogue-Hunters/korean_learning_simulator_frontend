@@ -13,8 +13,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, MapPin, Check } from "lucide-react";
 import { LOCATION_OPTIONS, LocationId } from "@/types/setup";
-// import { getSavedProfile } from "@/hooks/useSetup"; // API 연동 시 활성화
 
 // 장소별 배경 설명 텍스트
 const LOCATION_DESC: Record<string, string> = {
@@ -35,28 +35,12 @@ export default function LocationPage() {
   const [selected, setSelected] = useState<LocationId | "">("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // 저장된 프로필 (시나리오 API 연동 시 level 전달에 사용)
-  // const profile = getSavedProfile();
-
-  /* ── 선택 완료 버튼 핸들러 ── */
   const handleConfirm = async () => {
     if (!selected || isLoading) return;
     setIsLoading(true);
 
     try {
       // ⚡ BE API 연동 전: mock 응답 사용
-      // 실제 연동 시 아래 주석 해제 후 mock 부분 제거
-      /*
-      const res = await fetch("/api/conversation/scenario", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location: selected, level: profile?.level ?? "초급" }),
-      });
-      const data = await res.json();
-      sessionStorage.setItem("scenarioData", JSON.stringify(data));
-      */
-
-      // mock: 잠깐 로딩 효과 후 이동
       await new Promise((res) => setTimeout(res, 800));
       router.push("/persona");
     } catch {
@@ -65,27 +49,33 @@ export default function LocationPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-8 pb-28">
-      {/* 상단 뒤로가기 + 제목 */}
+    <div className="flex flex-col min-h-screen px-5 pt-6 pb-28" style={{ backgroundColor: "var(--color-background)" }}>
+      {/* 상단 헤더 */}
       <button
         type="button"
         onClick={() => router.back()}
-        className="text-tab-inactive text-sm mb-6 self-start"
+        className="flex items-center gap-1 text-sm text-tab-inactive mb-8 self-start hover:opacity-70 transition-opacity"
       >
-        ← 뒤로
+        <ArrowLeft size={16} strokeWidth={2} />
+        <span>뒤로</span>
       </button>
 
-      <h1 className="text-xl font-bold text-foreground mb-1">
-        어디서 대화할까요?
-      </h1>
-      <p className="text-xs text-tab-inactive mb-8">
-        장소를 선택하면 그에 맞는 상황이 준비돼요
-      </p>
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-2">
+          <MapPin size={20} strokeWidth={2} className="text-accent" />
+          <h1 className="text-xl font-extrabold text-foreground">
+            어디서 대화할까요?
+          </h1>
+        </div>
+        <p className="text-sm text-tab-inactive">
+          장소를 선택하면 그에 맞는 상황이 준비돼요
+        </p>
+      </div>
 
-      {/* 장소 버튼 목록 (LOCATION_OPTIONS 배열 기반 동적 렌더링) */}
-      <div className="flex flex-col gap-3">
+      {/* 장소 카드 목록 */}
+      <div className="flex flex-col gap-4">
         {LOCATION_OPTIONS.map((loc) => {
-          const isDisabled = !loc.available; // MVP: 한강만 활성
+          const isDisabled = !loc.available;
           const isSelected = selected === loc.id;
 
           return (
@@ -94,39 +84,59 @@ export default function LocationPage() {
               type="button"
               disabled={isDisabled}
               onClick={() => !isDisabled && setSelected(loc.id)}
-              className={`
-                relative w-full rounded-2xl px-5 py-4 text-left border transition-all
-                ${
-                  isDisabled
-                    ? "opacity-35 cursor-not-allowed bg-surface border-surface-border"
-                    : isSelected
-                    ? "bg-orange/10 border-orange"
-                    : "bg-surface border-surface-border hover:bg-card-bg active:scale-[0.98]"
-                }
-              `}
+              className="relative w-full rounded-2xl text-left transition-all active:scale-[0.98]"
+              style={{
+                backgroundColor: isSelected
+                  ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-card-bg))"
+                  : isDisabled
+                  ? "var(--color-surface)"
+                  : "var(--color-card-bg)",
+                border: isSelected
+                  ? "2px solid var(--color-accent)"
+                  : "1px solid var(--color-card-border)",
+                opacity: isDisabled ? 0.4 : 1,
+                cursor: isDisabled ? "not-allowed" : "pointer",
+                padding: isSelected ? "19px" : "20px",
+              }}
             >
-              {/* 이모지 + 장소명 */}
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{LOCATION_EMOJI[loc.id] ?? "📍"}</span>
-                <div>
+              <div className="flex items-center gap-4">
+                {/* 이모지 원형 배경 */}
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 text-2xl"
+                  style={{
+                    backgroundColor: isSelected
+                      ? "color-mix(in srgb, var(--color-accent) 20%, transparent)"
+                      : "var(--color-surface)",
+                  }}
+                >
+                  {LOCATION_EMOJI[loc.id] ?? "📍"}
+                </div>
+
+                <div className="flex-1 min-w-0">
                   <p className="font-bold text-base text-foreground">{loc.label}</p>
-                  <p className="text-[11px] text-tab-inactive mt-0.5">
+                  <p className="text-[12px] text-tab-inactive mt-1 leading-relaxed">
                     {LOCATION_DESC[loc.id]}
                   </p>
                 </div>
+
+                {/* 선택 체크 / 비활성 뱃지 */}
+                {isSelected && (
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                    style={{
+                      backgroundColor: "var(--color-accent)",
+                      color: "var(--color-btn-primary-text)",
+                    }}
+                  >
+                    <Check size={16} strokeWidth={3} />
+                  </div>
+                )}
+                {isDisabled && (
+                  <span className="text-[10px] text-tab-inactive border border-card-border rounded-full px-2 py-0.5 shrink-0">
+                    준비 중
+                  </span>
+                )}
               </div>
-
-              {/* 비활성 뱃지 */}
-              {isDisabled && (
-                <span className="absolute top-3 right-4 text-[10px] text-tab-inactive border border-surface-border rounded px-1.5 py-0.5">
-                  준비 중
-                </span>
-              )}
-
-              {/* 선택 완료 체크 */}
-              {isSelected && (
-                <span className="absolute top-3 right-4 text-orange text-lg">✓</span>
-              )}
             </button>
           );
         })}
@@ -138,14 +148,19 @@ export default function LocationPage() {
           type="button"
           onClick={handleConfirm}
           disabled={!selected || isLoading}
-          className={`
-            w-full py-4 rounded-2xl font-bold text-sm transition-all
-            ${
-              selected && !isLoading
-                ? "bg-orange text-background active:scale-95 shadow-lg shadow-orange/20"
-                : "bg-surface border border-surface-border text-tab-inactive cursor-not-allowed"
-            }
-          `}
+          className="w-full py-4 rounded-2xl font-bold text-sm transition-all active:scale-95"
+          style={{
+            backgroundColor: selected && !isLoading
+              ? "var(--color-accent)"
+              : "var(--color-surface)",
+            color: selected && !isLoading
+              ? "var(--color-btn-primary-text)"
+              : "var(--color-tab-inactive)",
+            boxShadow: selected && !isLoading
+              ? "0 4px 12px color-mix(in srgb, var(--color-accent) 30%, transparent)"
+              : "none",
+            cursor: selected && !isLoading ? "pointer" : "not-allowed",
+          }}
         >
           {isLoading ? "시나리오 생성 중..." : "이 장소로 시작하기"}
         </button>

@@ -102,7 +102,7 @@ export default function TutorialOverlay({
       return (
         <div
           key={i}
-          className="fixed z-50 rounded-[14px] border-2 border-orange pointer-events-none"
+          className="fixed z-50 rounded-[14px] border-2 border-accent pointer-events-none"
           style={{
             top: rect.top - PADDING,
             left: rect.left - PADDING,
@@ -143,7 +143,7 @@ export default function TutorialOverlay({
                     key={i}
                     className={`block rounded-full transition-all duration-300 ${
                       i === currentStep
-                        ? "w-4 h-1.5 bg-orange"
+                        ? "w-4 h-1.5 bg-accent"
                         : "w-1.5 h-1.5 bg-surface-border"
                     }`}
                   />
@@ -159,7 +159,7 @@ export default function TutorialOverlay({
             {step.targets.map((target, i) => (
               <li key={i} className="flex items-start gap-2">
                 {/* 주황 불릿 */}
-                <span className="mt-[3px] w-1.5 h-1.5 rounded-full bg-orange shrink-0" />
+                <span className="mt-[3px] w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
                 <span className="text-sm text-foreground/90 leading-snug">
                   {target.message}
                 </span>
@@ -172,7 +172,7 @@ export default function TutorialOverlay({
             <button
               type="button"
               onClick={onNext}
-              className="w-full py-3 rounded-xl bg-orange text-background font-bold text-sm active:scale-95 transition-transform shadow-md shadow-orange/30"
+              className="w-full py-3 rounded-xl bg-accent text-btn-primary-text font-bold text-sm active:scale-95 transition-transform shadow-md shadow-accent/30"
             >
               {isLastStep ? "시작하기! 🎉" : "다음 →"}
             </button>

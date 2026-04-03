@@ -6,22 +6,6 @@
 
 ---
 
-## 🚀 세션 시작 시 필수 체크 (Claude Code 열 때마다)
-
-Claude Code를 열면 가장 먼저 아래를 실행할 것:
-
-```
-1. git fetch origin 실행
-2. 로컬과 원격 dev 브랜치 차이 확인
-3. 업데이트가 있으면:
-   "⚠️ dev에 새로운 변경사항이 있어요. pull 받을까요?"
-   → 승인 시 아래 순서로 자동 실행:
-   git stash → git pull origin dev → git checkout {직전 작업 브랜치} → git merge dev → git stash pop
-4. 없으면: "✅ 최신 상태입니다. 작업을 시작할게요."
-```
-
----
-
 ## 🤖 모델 가이드
 
 - **기본**: Sonnet 4.6으로 진행
@@ -41,33 +25,47 @@ Claude Code를 열면 가장 먼저 아래를 실행할 것:
 
 ## 📋 내 기능 목록 (우선순위 순)
 
-| 우선순위 | 기능 ID | 기능명 | 핵심 내용 |
-|----------|---------|--------|-----------|
-| 🔴 Must | F-HOME | 홈 화면 | TierCard / WeeklyStats / CTA버튼 / BottomTabBar |
-| 🔴 Must | F-01 | 맞춤 학습 설정 UI | 웰컴 화면 + 국적(드롭다운+IP자동) / 수준 / 관심문화 / 가보고싶은 곳 |
-| 🔴 Must | F-TUT | 튜토리얼 | 스포트라이트 오버레이 8단계 (최초 1회) |
-| 🔴 Must | F-02a | 장소 선택 UI | MVP: 한강만 우선 / 장소 목록 미확정·추후 추가 가능 |
-| 🔴 Must | F-03 | 메신저형 채팅 UI | AI 페르소나 프로필 카드 + 실시간 스트리밍 대화창 |
-| 🔴 Must | F-04 | 결과 & 점수 화면 | 총점 / 티어 표시 |
-| 🟡 Should | F-05a | 피드백 UI | 오답 빨간 음영 + 대화 요약 + 총점(10점) |
-| 🟡 Should | F-05b | 방사형 그래프 | 어휘(30%) / 상황(50%) / 문법(20%) 시각화 |
-| 🟡 Should | F-06a | 초성 퀴즈 UI | 객관식 4지선다 |
-| 🟡 Should | F-HOME-S | 홈 Should | XP 진행 바 애니메이션 / RetryCard / ReviewBanner |
-| 🟢 Could | F-05c | Scaffolding 팝업 | AI 발화 클릭 시 어절 단위 한→영 해석 |
-| 🟢 Could | F-06b | 플래시 카드 UI | 오답 단어 복습 카드 |
-| 🟢 Could | F-HOME-C | 홈 Could | 카드 페이드인 / 스트릭 토스트 / 스켈레톤 로딩 |
+| 우선순위 | 기능 ID | 기능명 | 핵심 내용 | 상태 |
+|----------|---------|--------|-----------|------|
+| 🔴 Must | F-HOME | 홈 화면 | TierCard / WeeklyStats / CTA버튼 / BottomTabBar / 재도전카드 / 복습배너 | ✅ 완료 (미완성 기능 🚧 블러 처리) |
+| 🔴 Must | F-01 | 맞춤 학습 설정 UI | 웰컴 화면 + 국적(드롭다운+IP자동) / 수준 / 관심문화 / 가보고싶은 곳 | ✅ 완료 |
+| 🔴 Must | F-TUT | 튜토리얼 | 기존 스포트라이트 제거, 새 방식 미정 | ⏳ 재설계 대기 |
+| 🔴 Must | F-02a | 장소 선택 UI | MVP: 한강만 우선 / 이모지 원형 + 체크 아이콘 | ✅ 완료 |
+| 🔴 Must | F-PERSONA | 역할(페르소나) 선택 | 사용자가 맡을 역할/미션 A/B 카드 선택 | ✅ 완료 |
+| 🔴 Must | F-03 | 메신저형 채팅 UI | 가로 반반 프로필 + 스트리밍 대화 + 한국어 입력 검증 | ✅ 완료 |
+| 🔴 Must | F-04 | 결과 & 점수 화면 | 총점(10점) / 등급(Grade) / 별점 / 레이더 그래프 | ✅ 완료 |
+| 🟡 Should | F-05a | 피드백 UI | 오답 빨간 음영 + 대화 요약 + 오답 단어 목록 | ✅ 완료 |
+| 🟡 Should | F-05b | 방사형 그래프 | Recharts — 어휘(30%) / 상황(50%) / 문법(20%) | ✅ 완료 |
+| 🟡 Should | F-06a | 초성 퀴즈 UI | 주간 복습 페이지 | 🚧 미구현 (페이지 placeholder) |
+| 🟡 Should | F-HOME-S | 홈 Should | XP 진행 바 / RetryCard / ReviewBanner | 🚧 레이아웃만 완료 (BE 미연동) |
+| 🟢 Could | F-05c | Scaffolding 팝업 | AI 발화 클릭 시 어절 단위 한→영 해석 | 미착수 |
+| 🟢 Could | F-06b | 플래시 카드 UI | 오답 단어 복습 카드 | 미착수 |
+| 🟢 Could | F-HOME-C | 홈 Could | 카드 페이드인 / 스트릭 토스트 / 스켈레톤 로딩 | 미착수 |
+| 🟢 Could | F-PROFILE | 내정보 탭 | 프로필 페이지 | 🚧 placeholder |
 
 ---
 
-## 🖥 화면 구성 (FE가 만들 페이지)
+## 🖥 화면 구성 (FE 페이지 현황)
 
 ```
-웰컴 → 맞춤학습설정(/setup) → [튜토리얼 팝업] → 홈(/) → 장소선택(/location)
+웰컴 → 맞춤학습설정(/setup) → 홈(/) → 장소선택(/location)
 → 역할선택(/persona) → 채팅(/chat) → 결과(/result) → 피드백(/feedback)
-→ 주간복습(/review)
 
 하단 탭: / | /chat | /history | /review | /profile
 ```
+
+| 라우트 | 파일 | 상태 | 설명 |
+|--------|------|------|------|
+| `/` | `app/page.tsx` | ✅ | 홈 화면 (TierCard, WeeklyStats, CTA, 재도전카드, 복습배너) |
+| `/setup` | `app/setup/page.tsx` | ✅ | 맞춤 학습 설정 (5단계: 국적→닉네임→수준→문화→장소) |
+| `/location` | `app/location/page.tsx` | ✅ | 장소 선택 (MVP: 한강만 활성) |
+| `/persona` | `app/persona/page.tsx` | ✅ | 역할(페르소나) A/B 선택 |
+| `/chat` | `app/chat/page.tsx` | ✅ | 메신저형 채팅 (스트리밍 + 한국어 입력 검증) |
+| `/result` | `app/result/page.tsx` | ✅ | 결과 & 점수 (총점/등급/레이더 그래프) |
+| `/feedback` | `app/feedback/page.tsx` | ✅ | 상세 피드백 (오답 하이라이트 + 오답 단어 목록) |
+| `/history` | `app/history/page.tsx` | 🚧 | placeholder ("We are working on it!") |
+| `/review` | `app/review/page.tsx` | 🚧 | placeholder ("We are working on it!") |
+| `/profile` | `app/profile/page.tsx` | 🚧 | placeholder ("We are working on it!") |
 
 ---
 
@@ -78,14 +76,23 @@ Claude Code를 열면 가장 먼저 아래를 실행할 것:
 
 ---
 
-## 🎨 디자인 토큰
+## 🎨 디자인 토큰 (globals.css 기준)
+
+| 토큰 | 라이트 | 다크 |
+|------|--------|------|
+| background | `#FFFFFF` 화이트 | `#2A2A2A` 소프트 다크 |
+| foreground | `#1A1A1A` | `#F5F5F5` |
+| accent (CTA/강조) | `#A8D8C8` 민트 | `#D0A95C` 딥 골드 |
+| btn-primary-text | `#4A4A4A` 회색 | `#1A1A1A` 다크 |
+| card-bg | `#F7F7F7` 연회색 | `#363636` |
+| card-border | `#E5E5E5` | `#4A4A4A` |
+| surface | `#F0F0F0` | `#333333` |
+| tab-active | `#A8D8C8` 민트 | `#D0A95C` 딥 골드 |
+| tab-inactive | `#6B6B6B` | `#9CA3AF` |
+| setup-accent | `#A8D8C8` 민트 | `#B7933B` |
 
 ```
-다크 배경:  #16140F
-Gold:       #FAC775
-주황:       #EF9F27
-
-티어 테두리:
+등급(Grade) 컬러 (라이트/다크 동일):
   Bronze    #CD7F32
   Silver    #C0C0C0
   Gold      #FFD700
@@ -93,41 +100,84 @@ Gold:       #FAC775
   Diamond   #B9F2FF
 ```
 
+- 테마 전환: `useTheme` 훅 — `html.dark` 클래스 토글, localStorage 저장
+- 기본 테마: 다크 (`layout.tsx`의 inline script로 FOUC 방지)
+- setup 화면도 앱 테마(민트/골드)와 통일 (v1.3에서 변경)
+
 ---
 
-## 🔗 BE 연계 API (이강산 담당, 확정 전 예시)
+## 🔗 BE 연계 API (이강산 담당)
 
-| 화면 | API | 주고받는 것 | 상태 |
-|------|-----|-------------|------|
-| 홈 | `GET /user/profile` | 유저정보, XP, 티어, 스트릭 | 🆕 요청 필요 |
-| 홈 | `GET /user/weekly-stats` | 대화수, 평균점수, 스트릭 | 🆕 요청 필요 |
-| 홈 | `GET /review/retry-card` | 최저점 세션 정보 | 🆕 요청 필요 |
-| 홈 | `GET /review/count` | 퀴즈/카드 개수 | 🆕 요청 필요 |
-| 장소선택 | `POST /conversation/scenario` | 장소+수준 → 시나리오+페르소나 | 기존 |
-| 채팅 | `POST /conversation/turn` | 내 메시지 → AI 응답 (스트리밍) | 기존 |
-| 결과 | `GET /evaluation/result` | 3지표 점수, 총점, 티어 | 기존 |
-| 피드백 | `GET /evaluation/feedback` | 오답 단어, 하이라이트 로그 | 기존 |
-| 복습 | `GET /review/weekly` | 초성 퀴즈, 플래시 카드 목록 | 기존 |
+> **BE 레포**: `Korean-Dialogue-Hunters/korean_learning_simulator_backend` (FastAPI)
+> **상세 매핑**: `docs/API_MAPPING.md` 참조
+> **필드 네이밍**: BE snake_case 기준으로 FE 통일 완료 (2026-04-02)
 
-> 🆕 표시 항목은 이강산에게 API 생성 요청 필요
+| 화면 | API | FE 타입 | 연동 상태 |
+|------|-----|---------|-----------|
+| 장소선택→채팅 | `POST /v1/sessions` | `CreateSessionRequest` → `CreateSessionResponse` | ⏳ mock |
+| 역할선택 | `POST /v1/sessions/{id}/role` | `SelectRoleRequest` → `SessionStateResponse` | ⏳ mock |
+| 채팅 | `POST /v1/sessions/{id}/turns` | `CreateTurnRequest` → `SessionStateResponse` | ⏳ mock |
+| 결과+피드백 | `POST /v1/sessions/{id}/evaluation` | `EvaluationResponse` | ⏳ mock |
+| 홈 프로필 | `GET /v1/users/{nickname}/profile` | `UserProfile` | ⏳ mock |
+| 홈 통계 | `GET /v1/users/{nickname}/weekly-stats` | `WeeklyStats` | ⏳ mock |
+| 홈 복습 | `GET /v1/users/{nickname}/review/count` | 초성퀴즈/플래시카드 수 | ⏳ mock |
+| 복습 | `GET /v1/users/{nickname}/review/weekly` | 퀴즈/카드 목록 | 미구현 |
+
 > IP 기반 국가 감지는 FE에서 ipapi.co 직접 호출로 처리 (BE 불필요)
+> XP, streakDays, 3축 개별 점수(vocabulary/situation/grammar)는 BE에 없음 — `docs/API_MAPPING.md` 하단 참조
 
 ---
 
-## 📁 FE 개발 범위 (내가 손대는 파일)
+## 📁 FE 프로젝트 구조
 
 ```
-korean_learning_simulator/
-├── app/
-│   └── ui.py          ← 이성준 전권
-└── platform/          ← 이성준 전권 (Next.js 앱 전체)
-    ├── app/           (페이지 라우트)
-    ├── components/    (재사용 UI 컴포넌트)
-    ├── hooks/         (커스텀 훅)
-    └── types/         (타입 정의)
+korean_learning_simulator_frontend/     ← 이 레포 전체 = FE 전권
+├── app/                                (페이지 라우트)
+│   ├── layout.tsx                      (루트 레이아웃: 480px 모바일 고정 + 테마 스크립트)
+│   ├── globals.css                     (Tailwind v4 @theme + 라이트/다크 CSS 변수)
+│   ├── page.tsx                        (홈 /)
+│   ├── setup/page.tsx                  (맞춤 학습 설정)
+│   ├── location/page.tsx               (장소 선택)
+│   ├── persona/page.tsx                (역할 선택)
+│   ├── chat/page.tsx                   (채팅)
+│   ├── result/page.tsx                 (결과)
+│   ├── feedback/page.tsx               (피드백)
+│   ├── history/page.tsx                (대화 기록 🚧)
+│   ├── review/page.tsx                 (복습 🚧)
+│   └── profile/page.tsx                (내정보 🚧)
+├── components/
+│   ├── BottomTabBar.tsx                (하단 5탭 네비게이션)
+│   ├── HomeHeader.tsx                  (홈 헤더: 앱명 + 테마토글 + 프로필)
+│   ├── TierCard.tsx                    (등급 카드 + XP 바)
+│   ├── WeeklyStats.tsx                 (주간 통계 3칸)
+│   ├── chat/                           (채팅 관련 컴포넌트)
+│   │   ├── ChatBubble.tsx              (말풍선)
+│   │   ├── ChatInput.tsx               (입력창: 1000바이트 제한 + 한국어 검증)
+│   │   ├── PersonaProfileCard.tsx      (가로 반반 프로필 카드)
+│   │   └── StreamingBubble.tsx         (AI 스트리밍 말풍선)
+│   ├── result/RadarChart.tsx           (Recharts 레이더 그래프)
+│   └── setup/                          (설정 단계별 컴포넌트)
+├── hooks/
+│   ├── useChat.ts                      (채팅 상태 + 턴 관리)
+│   ├── useSetup.ts                     (설정 상태 + localStorage + UUID)
+│   └── useTheme.ts                     (다크/라이트 테마 토글)
+├── types/
+│   ├── api.ts                          (BE API 요청/응답 타입)
+│   ├── chat.ts                         (ChatMessage, ChatSession)
+│   ├── result.ts                       (ResultData, FeedbackData, FeedbackMessage)
+│   ├── setup.ts                        (SetupProfile, KoreanLevel, CulturalInterest)
+│   ├── user.ts                         (UserProfile, WeeklyStats, Grade)
+│   └── countries.ts                    (국가 목록 데이터)
+├── lib/
+│   ├── designSystem.ts                 (WARM_THEME, APP_THEME, 공통 스타일 헬퍼)
+│   ├── nicknameGenerator.ts            (닉네임 생성 + 유효성 검사)
+│   └── setupValidation.ts             (설정 프로필 유효성 검사)
+├── __tests__/                          (Jest 테스트)
+├── docs/                               (CLAUDE.md, PLAN.md, TODO.md, API_MAPPING.md)
+└── package.json                        (Next.js 15 + React 19 + Recharts + Lucide)
 ```
 
-> ⚠️ 위 범위 밖 파일(BE/프롬프트/인프라)은 수정 금지.
+> ⚠️ BE 레포(`korean_learning_simulator_backend`)는 참조만 가능, 수정 금지.
 > 간섭/충돌 발생 시 비교 정리해서 이성준에게 알리고 판단 받기.
 
 ---

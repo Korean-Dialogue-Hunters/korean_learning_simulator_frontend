@@ -2,84 +2,137 @@
 
 /* ──────────────────────────────────────────
    클래스 기반 다크/라이트 모드
-   - html 태그에 class="dark" 또는 class="light"로 전환
+   - html 태그에 class="dark"로 전환
    - @variant dark: Tailwind의 dark: 접두사 클래스 활성화 조건 설정
    ────────────────────────────────────────── */
 @variant dark (&:is(.dark *));
 
-@theme inline {
-  /* ── 테마 전환 토큰 (dark 클래스 기반 전환) ── */
-  --color-background: #000000;
-  --color-foreground: #F5F5F5;
-  --color-btn-primary: #919191;
-  --color-btn-primary-text: #FFFFFF;
-  --color-card-bg: #1A1A1A;
-  --color-card-border: #2A2A2A;
-  /* surface: bg-white/5 대체용 — 카드/입력창 배경 */
-  --color-surface: #141414;
-  --color-surface-border: #303030;
+/* ══════════════════════════════════════════
+   컬러 토큰 테이블
+   ──────────────────────────────────────────
+   토큰                  │ 라이트 (화이트+민트) │ 다크 (소프트다크+딥골드)
+   ──────────────────────┼────────────────────┼────────────────────
+   background            │ #FFFFFF (화이트)   │ #2A2A2A (소프트 다크)
+   foreground            │ #1A1A1A (검정)     │ #F5F5F5 (흰색)
+   btn-primary           │ #A8D8C8 (민트)     │ #CCA352 (딥 골드)
+   btn-primary-text      │ #FFFFFF            │ #1A1A1A (다크 텍스트)
+   card-bg               │ #F7F7F7 (연회색)   │ #363636 (다크 카드)
+   card-border           │ #E5E5E5 (회색)     │ #4A4A4A (다크 보더)
+   surface               │ #F0F0F0 (연회색)   │ #333333 (다크 표면)
+   surface-border        │ #DBDBDB            │ #4A4A4A
+   gold                  │ #A8D8C8 (민트)     │ #CCA352 (딥 골드)
+   accent (CTA/강조)     │ #A8D8C8 (민트)     │ #CCA352 (딥 골드)
+   tab-active            │ #A8D8C8 (민트)     │ #CCA352 (딥 골드)
+   tab-inactive          │ #6B6B6B (회색)     │ #9CA3AF (회색)
+   ──────────────────────┼────────────────────┼────────────────────
+   setup-bg              │ #F5F0E8            │ #2A2A2A
+   setup-card            │ #FFFFFF            │ #1A1A1A
+   setup-card-border     │ #E8E0D4            │ #2A2A2A
+   setup-text            │ #3D3529            │ #F5F5F5
+   setup-text-sub        │ #8C8070            │ #9CA3AF
+   setup-accent          │ #D4A843            │ #AD8A34 (딥)
+   setup-accent-light    │ rgba(212,168,67,.12)│ rgba(173,138,52,.15)
+   setup-accent-hover    │ #C49A3A            │ #9F8143 (딥)
+   setup-dot-inactive    │ #D4CFC6            │ #3A3A3A
+   ──────────────────────┼────────────────────┼────────────────────
+   tier-bronze           │ #CD7F32            │ (동일)
+   tier-silver           │ #C0C0C0            │ (동일)
+   tier-gold             │ #FFD700            │ (동일)
+   tier-platinum         │ #E5E4E2            │ (동일)
+   tier-diamond          │ #B9F2FF            │ (동일)
+   ══════════════════════════════════════════ */
 
-  /* ── 고정 토큰 (다크/라이트 무관하게 항상 동일) ── */
-  --color-gold: #FAC775;
-  --color-orange: #EF9F27;
+@theme {
+  /* ── 라이트모드 기본값 (Tailwind 클래스 참조) ── */
+  --color-background: #FFFFFF;
+  --color-foreground: #1A1A1A;
+  --color-btn-primary: #A8D8C8;
+  --color-btn-primary-text: #4A4A4A;
+  --color-card-bg: #F7F7F7;
+  --color-card-border: #E5E5E5;
+  --color-surface: #F0F0F0;
+  --color-surface-border: #DBDBDB;
+  --color-gold: #A8D8C8;
+  --color-accent: #A8D8C8;
 
-  /* 티어별 테두리 컬러 */
+  /* 티어별 테두리 (라이트/다크 동일) */
   --color-tier-bronze: #CD7F32;
   --color-tier-silver: #C0C0C0;
   --color-tier-gold: #FFD700;
   --color-tier-platinum: #E5E4E2;
   --color-tier-diamond: #B9F2FF;
 
-  /* 탭바 상태 컬러 */
-  --color-tab-active: #EF9F27;
-  --color-tab-inactive: #6B7280;
+  /* 탭바 */
+  --color-tab-active: #A8D8C8;
+  --color-tab-inactive: #6B6B6B;
 
-  /* ── 맞춤 학습 설정(setup) 전용 따뜻한 컬러 ── */
-  --color-setup-bg: #F5F0E8;
-  --color-setup-card: #FFFFFF;
-  --color-setup-card-border: #E8E0D4;
-  --color-setup-text: #3D3529;
-  --color-setup-text-sub: #8C8070;
-  --color-setup-accent: #D4A843;
-  --color-setup-accent-light: rgba(212, 168, 67, 0.12);
-  --color-setup-accent-hover: #C49A3A;
-  --color-setup-dot-inactive: #D4CFC6;
+  /* 맞춤 학습 설정(setup) */
+  --color-setup-bg: #FFFFFF;
+  --color-setup-card: #F7F7F7;
+  --color-setup-card-border: #E5E5E5;
+  --color-setup-text: #1A1A1A;
+  --color-setup-text-sub: #6B6B6B;
+  --color-setup-accent: #A8D8C8;
+  --color-setup-accent-light: rgba(168, 216, 200, 0.12);
+  --color-setup-accent-hover: #8DCBB8;
+  --color-setup-dot-inactive: #D4D4D4;
 
   /* 폰트 */
   --font-sans: "Pretendard", system-ui, sans-serif;
 }
 
 /* ──────────────────────────────────────────
-   다크모드 (기본)
+   라이트모드 (기본)
    ────────────────────────────────────────── */
 :root {
-  --color-background: #000000;
-  --color-foreground: #F5F5F5;
-  --color-btn-primary: #919191;
-  --color-btn-primary-text: #FFFFFF;
-  --color-card-bg: #1A1A1A;
-  --color-card-border: #2A2A2A;
-  --color-surface: #141414;
-  --color-surface-border: #303030;
+  --color-background: #FFFFFF;
+  --color-foreground: #1A1A1A;
+  --color-btn-primary: #A8D8C8;
+  --color-btn-primary-text: #4A4A4A;
+  --color-card-bg: #F7F7F7;
+  --color-card-border: #E5E5E5;
+  --color-surface: #F0F0F0;
+  --color-surface-border: #DBDBDB;
+  --color-gold: #A8D8C8;
+  --color-accent: #A8D8C8;
+  --color-tab-active: #A8D8C8;
+  --color-tab-inactive: #6B6B6B;
+  --color-setup-bg: #FFFFFF;
+  --color-setup-card: #F7F7F7;
+  --color-setup-card-border: #E5E5E5;
+  --color-setup-text: #1A1A1A;
+  --color-setup-text-sub: #6B6B6B;
+  --color-setup-accent: #A8D8C8;
+  --color-setup-accent-light: rgba(168, 216, 200, 0.12);
+  --color-setup-accent-hover: #8DCBB8;
+  --color-setup-dot-inactive: #D4D4D4;
 }
 
 /* ──────────────────────────────────────────
-   라이트모드 — dark 클래스가 없을 때 적용
-   따뜻한 베이지/크림 계열로 통일
+   다크모드 — html에 class="dark" 적용 시
    ────────────────────────────────────────── */
-:root:not(.dark) {
-  --color-background: #F5F0E8;
-  --color-foreground: #3D3529;
-  --color-btn-primary: #D4A843;
-  --color-btn-primary-text: #FFFFFF;
-  --color-card-bg: #FFFFFF;
-  --color-card-border: #E8E0D4;
-  --color-surface: #EDE8DF;
-  --color-surface-border: #D9D1C4;
-  --color-gold: #D4A843;
-  --color-orange: #D4A843;
-  --color-tab-active: #D4A843;
-  --color-tab-inactive: #8C8070;
+:root.dark {
+  --color-background: #2A2A2A;
+  --color-foreground: #F5F5F5;
+  --color-btn-primary: #D0A95C;
+  --color-btn-primary-text: #1A1A1A;
+  --color-card-bg: #363636;
+  --color-card-border: #4A4A4A;
+  --color-surface: #333333;
+  --color-surface-border: #4A4A4A;
+  --color-gold: #D0A95C;
+  --color-accent: #D0A95C;
+  --color-tab-active: #D0A95C;
+  --color-tab-inactive: #9CA3AF;
+  --color-setup-bg: #2A2A2A;
+  --color-setup-card: #363636;
+  --color-setup-card-border: #4A4A4A;
+  --color-setup-text: #F5F5F5;
+  --color-setup-text-sub: #9CA3AF;
+  --color-setup-accent: #B7933B;
+  --color-setup-accent-light: rgba(183, 147, 59, 0.15);
+  --color-setup-accent-hover: #AA8B45;
+  --color-setup-dot-inactive: #4A4A4A;
 }
 
 /* ──────────────────────────────────────────

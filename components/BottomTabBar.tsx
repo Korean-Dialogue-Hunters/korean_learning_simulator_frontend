@@ -33,8 +33,8 @@ const TABS: Tab[] = [
   { href: "/profile", label: "내정보", icon: <User size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
 ];
 
-// 탭바를 항상 숨기는 경로 목록
-const HIDDEN_PATHS = ["/setup"];
+// 탭바를 숨기는 경로 목록
+const HIDDEN_PATHS = ["/setup", "/location", "/persona"];
 
 export default function BottomTabBar() {
   const pathname = usePathname();
@@ -53,7 +53,7 @@ export default function BottomTabBar() {
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-background border-t border-card-border z-50"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-card-bg border-t border-card-border z-50"
     >
       <ul className="flex items-center justify-around py-2.5">
         {TABS.map((tab) => {

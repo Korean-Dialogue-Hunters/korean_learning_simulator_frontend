@@ -32,7 +32,7 @@ export const APP_THEME = {
   surface: "var(--color-surface)",
   surfaceBorder: "var(--color-surface-border)",
   gold: "var(--color-gold)",
-  orange: "var(--color-orange)",
+  accent: "var(--color-accent)",
   tabActive: "var(--color-tab-active)",
   tabInactive: "var(--color-tab-inactive)",
 } as const;

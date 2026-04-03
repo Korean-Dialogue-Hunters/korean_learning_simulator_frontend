@@ -1,13 +1,14 @@
 /* ──────────────────────────────────────────
    유저 관련 타입 정의
-   - BE API 연동 전까지 mock data와 함께 사용
+   - FE 내부 필드명: camelCase
+   - BE 실제 전송 필드명: snake_case (주석으로 표기)
    ────────────────────────────────────────── */
 
-// 티어 종류 (낮은 순서대로)
-export type Tier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond";
+// 등급 종류 (낮은 순서대로)
+export type Grade = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond";
 
-// 티어별 테두리 색상 (Tailwind 클래스)
-export const TIER_BORDER_COLOR: Record<Tier, string> = {
+// 등급별 테두리 색상 (Tailwind 클래스)
+export const GRADE_BORDER_COLOR: Record<Grade, string> = {
   Bronze: "border-tier-bronze",
   Silver: "border-tier-silver",
   Gold: "border-tier-gold",
@@ -15,8 +16,8 @@ export const TIER_BORDER_COLOR: Record<Tier, string> = {
   Diamond: "border-tier-diamond",
 };
 
-// 티어별 텍스트 색상 (Tailwind 클래스)
-export const TIER_TEXT_COLOR: Record<Tier, string> = {
+// 등급별 텍스트 색상 (Tailwind 클래스)
+export const GRADE_TEXT_COLOR: Record<Grade, string> = {
   Bronze: "text-tier-bronze",
   Silver: "text-tier-silver",
   Gold: "text-tier-gold",
@@ -24,19 +25,30 @@ export const TIER_TEXT_COLOR: Record<Tier, string> = {
   Diamond: "text-tier-diamond",
 };
 
+// 등급별 실제 HEX 색상 (인라인 스타일용)
+export const GRADE_COLORS: Record<Grade, string> = {
+  Bronze: "#CD7F32",
+  Silver: "#C0C0C0",
+  Gold: "#FFD700",
+  Platinum: "#E5E4E2",
+  Diamond: "#B9F2FF",
+};
+
 // 유저 프로필 데이터 구조
+// BE: { user_nickname, country, korean_level, cultural_interest, latest_grade }
 export interface UserProfile {
-  userId: string;       // 예: "learner_42"
-  tier: Tier;           // 현재 티어
-  xp: number;           // 현재 XP
-  xpMax: number;        // 현재 티어 최대 XP
-  xpToNextTier: number; // 다음 티어까지 남은 XP
-  avatarUrl?: string;   // 프로필 이미지 URL (없으면 이니셜 표시)
+  userNickname: string;   // BE: user_nickname
+  grade: Grade;           // BE: latest_grade
+  xp: number;             // FE 전용 (BE 미제공)
+  xpMax: number;          // FE 전용 (BE 미제공) — BE: xp_max
+  xpToNext: number;       // FE 전용 (BE 미제공) — BE: xp_to_next
+  avatarUrl?: string;     // FE 전용 (BE 미제공) — BE: avatar_url
 }
 
 // 주간 통계 데이터 구조
+// BE: { conversation_count, average_score, latest_grade }
 export interface WeeklyStats {
-  conversationCount: number; // 이번 주 대화 수
-  averageScore: number;      // 평균 점수 (0~10)
-  streakDays: number;        // 연속 학습일 수
+  conversationCount: number;  // BE: conversation_count
+  averageScore: number;       // BE: average_score
+  streakDays: number;         // FE 전용 (BE 미제공) — BE: streak_days
 }

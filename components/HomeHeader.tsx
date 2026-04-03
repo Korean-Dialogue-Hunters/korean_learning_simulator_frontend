@@ -8,7 +8,7 @@
    ────────────────────────────────────────── */
 
 import { Sun, Moon } from "lucide-react";
-import { UserProfile, TIER_BORDER_COLOR } from "@/types/user";
+import { UserProfile, GRADE_BORDER_COLOR } from "@/types/user";
 import { useTheme } from "@/hooks/useTheme";
 
 interface HomeHeaderProps {
@@ -19,16 +19,16 @@ export default function HomeHeader({ user }: HomeHeaderProps) {
   const { isDark, toggleTheme } = useTheme();
 
   // 티어에 맞는 테두리 색상 클래스
-  const borderColor = TIER_BORDER_COLOR[user.tier];
+  const borderColor = GRADE_BORDER_COLOR[user.grade];
 
-  // 유저 ID 첫 글자를 이니셜로 표시
-  const initial = user.userId.charAt(0).toUpperCase();
+  // 유저 닉네임 첫 글자를 이니셜로 표시
+  const initial = user.userNickname.charAt(0).toUpperCase();
 
   return (
     <header className="flex items-center justify-between px-5 pt-6 pb-3">
       {/* 좌측: 앱 타이틀 */}
       <div>
-        <h1 className="text-xl font-bold text-gold leading-tight">코대헌</h1>
+        <h1 className="text-2xl font-extrabold text-gold leading-tight">코대헌</h1>
         <p className="text-[11px] text-tab-inactive tracking-wide">
           Korean Dialogue Hunters
         </p>
@@ -56,7 +56,7 @@ export default function HomeHeader({ user }: HomeHeaderProps) {
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={user.avatarUrl}
-                alt={`${user.userId} 프로필`}
+                alt={`${user.userNickname} 프로필`}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -64,7 +64,7 @@ export default function HomeHeader({ user }: HomeHeaderProps) {
             )}
           </div>
           {/* @유저ID */}
-          <span className="text-[10px] text-tab-inactive">@{user.userId}</span>
+          <span className="text-[10px] text-tab-inactive">@{user.userNickname}</span>
         </div>
       </div>
     </header>
