@@ -6,22 +6,6 @@
 
 ---
 
-## 🚀 세션 시작 시 필수 체크 (Claude Code 열 때마다)
-
-Claude Code를 열면 가장 먼저 아래를 실행할 것:
-
-```
-1. git fetch origin 실행
-2. 로컬과 원격 feat/이성준 브랜치 차이 확인
-3. 업데이트가 있으면:
-   "⚠️ dev에 새로운 변경사항이 있어요. pull 받을까요?"
-   → 승인 시 아래 순서로 자동 실행:
-   git stash → git pull origin feat/이성준 → git stash pop
-4. 없으면: "✅ dev 브랜치가 최신 상태입니다. 작업을 시작할게요."
-```
-
----
-
 ## 🤖 모델 가이드
 
 - **기본**: Sonnet 4.6으로 진행
