@@ -21,9 +21,9 @@ export type CulturalInterest = string[];
 
 // 가보고 싶은 장소 선택지 (데이터 배열 기반 — 추후 항목 추가 시 여기만 수정)
 export const LOCATION_OPTIONS = [
-  { id: "한강", label: "한강", available: true },
-  { id: "명동", label: "명동", available: false },
-  { id: "롯데월드", label: "롯데월드", available: false },
+  { id: "한강", label: "한강 - Hangang", available: true },
+  { id: "명동", label: "명동 - Myeongdong", available: false },
+  { id: "롯데월드", label: "롯데월드 - Lotte World", available: false },
 ] as const;
 
 export type LocationId = (typeof LOCATION_OPTIONS)[number]["id"];

@@ -7,23 +7,17 @@
    - 선택된 장소 강조 표시
    - 선택 완료 → 시나리오 생성 API 호출 → /persona 이동
 
-   ⚡ BE API 연동 전 mock response 사용 중
-   🔗 연동 필요: POST /conversation/scenario
+   🔗 연동: POST /v1/sessions → 세션 생성 + 페르소나 수신
    ────────────────────────────────────────── */
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, MapPin, Check } from "lucide-react";
 import { LOCATION_OPTIONS, LocationId } from "@/types/setup";
+import { getSavedProfile } from "@/hooks/useSetup";
+import { createSession } from "@/lib/api";
 
-// 장소별 배경 설명 텍스트
-const LOCATION_DESC: Record<string, string> = {
-  "한강": "서울 한강변에서 다양한 사람들과 대화해보세요",
-  "명동": "명동 거리의 활기찬 분위기 속 대화",
-  "롯데월드": "롯데월드에서 즐거운 한국어 대화",
-};
-
-// 장소별 이모지
 const LOCATION_EMOJI: Record<string, string> = {
   "한강": "🌊",
   "명동": "🛍️",
@@ -32,18 +26,47 @@ const LOCATION_EMOJI: Record<string, string> = {
 
 export default function LocationPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<LocationId | "">("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const LOCATION_DESC: Record<string, string> = {
+    "한강": t("location.hangang_desc"),
+    "명동": t("location.myeongdong_desc"),
+    "롯데월드": t("location.lotteworld_desc"),
+  };
 
   const handleConfirm = async () => {
     if (!selected || isLoading) return;
     setIsLoading(true);
+    setError("");
 
     try {
-      // ⚡ BE API 연동 전: mock 응답 사용
-      await new Promise((res) => setTimeout(res, 800));
+      /* localStorage에서 셋업 프로필 가져오기 */
+      const profile = getSavedProfile();
+      if (!profile) {
+        router.replace("/setup");
+        return;
+      }
+
+      /* POST /v1/sessions — 세션 생성 */
+      const res = await createSession({
+        userId: profile.userId,
+        userNickname: profile.userNickname,
+        country: profile.country,
+        koreanLevel: profile.koreanLevel,
+        culturalInterest: profile.culturalInterest,
+        location: selected,
+      });
+
+      /* 세션 데이터를 sessionStorage에 저장 (역할 선택 페이지에서 사용) */
+      sessionStorage.setItem("sessionId", res.sessionId);
+      sessionStorage.setItem("scenarioData", JSON.stringify(res));
+
       router.push("/persona");
-    } catch {
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "세션 생성에 실패했습니다");
       setIsLoading(false);
     }
   };
@@ -57,18 +80,18 @@ export default function LocationPage() {
         className="flex items-center gap-1 text-sm text-tab-inactive mb-8 self-start hover:opacity-70 transition-opacity"
       >
         <ArrowLeft size={16} strokeWidth={2} />
-        <span>뒤로</span>
+        <span>{t("common.back")}</span>
       </button>
 
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
           <MapPin size={20} strokeWidth={2} className="text-accent" />
           <h1 className="text-xl font-extrabold text-foreground">
-            어디서 대화할까요?
+            {t("location.title")}
           </h1>
         </div>
         <p className="text-sm text-tab-inactive">
-          장소를 선택하면 그에 맞는 상황이 준비돼요
+          {t("location.subtitle")}
         </p>
       </div>
 
@@ -133,7 +156,7 @@ export default function LocationPage() {
                 )}
                 {isDisabled && (
                   <span className="text-[10px] text-tab-inactive border border-card-border rounded-full px-2 py-0.5 shrink-0">
-                    준비 중
+                    {t("common.comingSoon")}
                   </span>
                 )}
               </div>
@@ -141,6 +164,11 @@ export default function LocationPage() {
           );
         })}
       </div>
+
+      {/* 에러 메시지 */}
+      {error && (
+        <p className="text-sm text-center mt-4" style={{ color: "#DC3C3C" }}>{error}</p>
+      )}
 
       {/* 하단 고정 확인 버튼 */}
       <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-5">
@@ -162,7 +190,7 @@ export default function LocationPage() {
             cursor: selected && !isLoading ? "pointer" : "not-allowed",
           }}
         >
-          {isLoading ? "시나리오 생성 중..." : "이 장소로 시작하기"}
+          {isLoading ? t("location.creating") : t("location.startHere")}
         </button>
       </div>
     </div>

@@ -1,0 +1,168 @@
+{
+  "common": {
+    "back": "← 뒤로",
+    "prev": "← 이전",
+    "goBack": "← 돌아가기",
+    "next": "다음",
+    "complete": "완료",
+    "loading": "불러오는 중...",
+    "home": "홈으로 돌아가기",
+    "error": "오류가 발생했습니다",
+    "comingSoon": "준비 중",
+    "of5": "/ 5"
+  },
+  "welcome": {
+    "subtitle": "Korean Dialogue Hunters",
+    "description": "실제 한국에서 쓰는 대화를\nAI와 함께 연습해보세요",
+    "feature1": "내 수준에 맞는 맞춤 대화",
+    "feature2": "실제 장소 기반 시나리오",
+    "feature3": "AI가 알려주는 상세 피드백",
+    "startBtn": "맞춤 학습 설정 시작하기",
+    "timeNote": "약 1분이면 완료됩니다"
+  },
+  "setup": {
+    "step1Title": "어느 나라에서 오셨나요?",
+    "step2Title": "닉네임을 정해주세요",
+    "step3Title": "관심 있는 한국 문화는?",
+    "step4Title": "현재 한국어 실력은요?",
+    "step4Subtitle": "응답에 따라 난이도와 대화 턴수의 초기 설정이 정해집니다.",
+    "step5Title": "가장 가보고 싶은 곳은?"
+  },
+  "nickname": {
+    "placeholder": "닉네임을 입력하세요",
+    "recommended": "추천:",
+    "tapToUse": "탭하여 사용",
+    "randomBtn": "랜덤 닉네임 생성"
+  },
+  "level": {
+    "beginner": "초급",
+    "intermediate": "중급",
+    "advanced": "고급",
+    "beginnerDesc": "안녕하세요, 감사합니다 정도",
+    "intermediateDesc": "일상 대화가 가능한 수준",
+    "advancedDesc": "자연스러운 표현 구사 가능",
+    "beginnerTurns": "대화 3회",
+    "intermediateTurns": "대화 5회",
+    "advancedTurns": "대화 7회"
+  },
+  "culture": {
+    "othersPlaceholder": "관심 있는 문화를 입력해주세요",
+    "selectedCount": "{{count}}개 선택됨",
+    "enteredInterest": "입력한 관심사:"
+  },
+  "quickStart": {
+    "question": "{{location}}(으)로 바로 시작할까요?",
+    "subText": "지금 시작하거나, 나중에 홈에서 시작할 수 있어요.",
+    "yes": "네, 지금 시작할게요!",
+    "no": "아니요, 나중에 할게요"
+  },
+  "home": {
+    "retryTitle": "지난 대화를 다시 도전해봐요!",
+    "retrySubTitle": "한강 자전거길에서 길 찾기",
+    "retryScoreLabel": "지난주 최저점:",
+    "retryBtn": "재도전",
+    "weeklyReviewTitle": "주간 복습 준비됐어요!",
+    "weeklyReviewContent": "초성퀴즈 {{quiz}}개, 플래시카드 {{flash}}개",
+    "startBtn": "대화 시작하기"
+  },
+  "tierCard": {
+    "welcome": "님, 환영해요!",
+    "nextTier": "다음 티어까지 {{xp}} XP"
+  },
+  "weeklyStats": {
+    "conversationCount": "누적 대화 횟수",
+    "averageScore": "평균 점수",
+    "streak": "스트릭"
+  },
+  "location": {
+    "title": "어디서 대화할까요?",
+    "subtitle": "장소를 선택하면 그에 맞는 상황이 준비돼요",
+    "startHere": "이 장소로 시작하기",
+    "creating": "시나리오 생성 중...",
+    "hangang_desc": "서울 한강변에서 다양한 사람들과 대화해보세요",
+    "myeongdong_desc": "명동 거리의 활기찬 분위기 속 대화",
+    "lotteworld_desc": "롯데월드에서 즐거운 한국어 대화"
+  },
+  "persona": {
+    "title": "어떤 역할을 맡아볼까요?",
+    "subtitle": "선택한 페르소나가 되어 AI와 대화 연습을 해보세요",
+    "scenario": "시나리오",
+    "startBtn": "이 페르소나로 대화 시작",
+    "loading": "역할 설정 중...",
+    "loadingScenario": "시나리오 불러오는 중...",
+    "failedRole": "역할 선택에 실패했습니다"
+  },
+  "chat": {
+    "leave": "나가기",
+    "missionHint": "미션을 해결해보세요! 💬",
+    "finished": "대화가 끝났어요! 결과를 확인하러 가볼까요?",
+    "checkResult": "결과 확인하기",
+    "analyzeBtn": "결과 분석",
+    "analyzeHint": "최소 4턴 이후 분석을 요청할 수 있어요",
+    "koreanWarning": "한글을 사용해 문장을 완성해주세요!",
+    "koreanWarningEn": "Let's try to use Korean in the sentences!",
+    "placeholder": "메시지를 입력하세요...",
+    "finishedPlaceholder": "대화가 종료되었습니다"
+  },
+  "review": {
+    "title": "주간 복습",
+    "subtitle": "대화에서 배운 표현을 복습해보세요",
+    "chosungTitle": "초성 퀴즈",
+    "chosungDesc": "대화에서 사용한 단어의 초성을 보고 맞춰보세요",
+    "chosungCount": "{{count}}문제",
+    "flashcardTitle": "플래시카드",
+    "flashcardDesc": "단어의 뜻을 확인하고 암기해보세요",
+    "flashcardCount": "{{count}}장",
+    "startBtn": "시작하기",
+    "loading": "복습 콘텐츠를 생성하고 있어요...",
+    "loadFailed": "복습 콘텐츠를 불러올 수 없습니다",
+    "empty": "아직 복습할 콘텐츠가 없어요.\n대화를 완료하면 자동으로 생성됩니다!",
+    "backToList": "목록으로",
+    "quizQuestion": "이 초성에 해당하는 단어는?",
+    "showAnswer": "정답 보기",
+    "nextQuestion": "다음 문제",
+    "quizComplete": "퀴즈 완료!",
+    "quizScore": "{{correct}} / {{total}} 정답",
+    "retryQuiz": "다시 풀기",
+    "flipCard": "탭하여 뒤집기",
+    "cardProgress": "{{current}} / {{total}}",
+    "prevCard": "이전",
+    "nextCard": "다음",
+    "reviewDone": "복습 완료!",
+    "backToReview": "복습 목록으로"
+  },
+  "result": {
+    "title": "대화 완료!",
+    "gradeText_great": "훌륭해요!",
+    "gradeText_good": "잘했어요!",
+    "gradeText_ok": "괜찮아요",
+    "gradeText_practice": "더 연습해봐요",
+    "totalScore": "총점",
+    "thisConvGrade": "이번 대화 등급",
+    "detail": "세부 평가",
+    "vocab": "어휘 (30%)",
+    "context": "맥락 (50%)",
+    "spelling": "맞춤법 (20%)",
+    "radarTitle": "역량 분석",
+    "feedbackBtn": "상세 피드백 보기",
+    "reviewBtn": "복습하기",
+    "analyzing": "대화를 분석하고 있어요...",
+    "loadFailed": "결과를 불러올 수 없습니다"
+  },
+  "feedback": {
+    "title": "상세 피드백",
+    "totalScoreLabel": "총점",
+    "radarTitle": "역량 분석",
+    "logTitle": "대화 다시보기",
+    "viewAll": "전체 대화 보기 ({{count}})",
+    "collapse": "접기",
+    "backBtn": "결과로 돌아가기",
+    "reviewBtn": "복습하기",
+    "loading": "피드백을 불러오는 중...",
+    "loadFailed": "피드백을 불러올 수 없습니다"
+  },
+  "language": {
+    "ko": "한국어 - Korean",
+    "en": "영어 - English"
+  }
+}
