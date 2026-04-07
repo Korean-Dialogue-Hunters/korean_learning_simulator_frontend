@@ -8,6 +8,7 @@
    ────────────────────────────────────────── */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Clapperboard, Music, Sparkles, UtensilsCrossed, Gamepad2, Heart, Check } from "lucide-react";
 import { CulturalInterestOption } from "@/types/setup";
 import { warmCardStyle, WARM_THEME } from "@/lib/designSystem";
@@ -34,6 +35,7 @@ const CULTURE_OPTIONS: {
 const FIXED_OPTIONS = CULTURE_OPTIONS.map((o) => o.value as string);
 
 export default function CultureSelect({ value, onChange }: CultureSelectProps) {
+  const { t } = useTranslation();
   /* Others 직접 입력 텍스트 상태 */
   const [othersText, setOthersText] = useState(() => {
     // 기존 value에서 고정 옵션이 아닌 항목 = Others 텍스트
@@ -134,7 +136,7 @@ export default function CultureSelect({ value, onChange }: CultureSelectProps) {
         <div className="space-y-2">
           <input
             type="text"
-            placeholder="관심 있는 문화를 입력해주세요"
+            placeholder={t("culture.othersPlaceholder")}
             value={othersText}
             onChange={(e) => handleOthersTextChange(e.target.value)}
             maxLength={50}
@@ -155,7 +157,7 @@ export default function CultureSelect({ value, onChange }: CultureSelectProps) {
                 color: WARM_THEME.accent,
               }}
             >
-              <span className="font-medium">입력한 관심사:</span>
+              <span className="font-medium">{t("culture.enteredInterest")}</span>
               <span>{othersText.trim()}</span>
             </div>
           )}
@@ -165,7 +167,7 @@ export default function CultureSelect({ value, onChange }: CultureSelectProps) {
       {/* 선택 현황 표시 */}
       {value.length > 0 && (
         <p className="text-[11px] text-right" style={{ color: WARM_THEME.textSub }}>
-          {value.filter((v) => v !== "Others").length}개 선택됨
+          {t("culture.selectedCount", { count: value.filter((v) => v !== "Others").length })}
         </p>
       )}
     </div>

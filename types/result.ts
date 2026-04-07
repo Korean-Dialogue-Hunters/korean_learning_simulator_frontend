@@ -6,11 +6,11 @@
 
 import { Grade } from "@/types/user";
 
-/** 3축 평가 점수 (BE에 개별 필드 없음, feedback 텍스트에서 파싱 or BE 추가 필요) */
+/** 3축 평가 점수 — BE 직접 제공 */
 export interface EvaluationScores {
-  vocabulary: number;   // 어휘 점수 (0~10)
-  situation: number;    // 상황 대처 점수 (0~10)
-  grammar: number;      // 문법 점수 (0~10)
+  vocabulary: number;   // BE: vocab_score — 어휘 점수 (0~10)
+  context: number;      // BE: context_score — 맥락 점수 (0~10)
+  spelling: number;     // BE: spelling_score — 맞춤법 점수 (0~10)
 }
 
 /** 결과 화면 데이터 */
@@ -30,13 +30,10 @@ export interface WrongWord {
   meaning: string;      // 뜻풀이
 }
 
-/** 피드백 - 대화 로그 (하이라이트 포함) */
-// BE highlighted_log: { speaker, text, highlight }
+/** 피드백 - 대화 로그 */
 export interface FeedbackMessage {
   speaker: "user" | "ai";
   utterance: string;
-  hasError: boolean;           // BE: has_error
-  errorHighlights?: string[]; // BE: error_highlights
 }
 
 /** 피드백 화면 데이터 */

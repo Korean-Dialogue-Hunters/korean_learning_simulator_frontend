@@ -21,8 +21,8 @@ interface RadarChartInnerProps {
 export default function RadarChartInner({ scores }: RadarChartInnerProps) {
   const data = [
     { axis: "어휘 (30%)", score: scores.vocabulary, fullMark: 10 },
-    { axis: "상황 (50%)", score: scores.situation, fullMark: 10 },
-    { axis: "문법 (20%)", score: scores.grammar, fullMark: 10 },
+    { axis: "맥락 (50%)", score: scores.context, fullMark: 10 },
+    { axis: "맞춤법 (20%)", score: scores.spelling, fullMark: 10 },
   ];
 
   return (

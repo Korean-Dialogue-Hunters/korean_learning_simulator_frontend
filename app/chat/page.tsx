@@ -14,6 +14,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
 import { Persona } from "@/types/api";
 import { useChat } from "@/hooks/useChat";
@@ -39,6 +40,7 @@ const FALLBACK_COUNTERPART: CounterpartInfo = {
 
 export default function ChatPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   /* sessionStorage에서 내 역할 + 상대방 읽기 */
@@ -100,7 +102,7 @@ export default function ChatPage() {
           className="flex items-center gap-1 text-sm text-tab-inactive hover:opacity-70 transition-opacity"
         >
           <ArrowLeft size={16} strokeWidth={2} />
-          <span>나가기</span>
+          <span>{t("chat.leave")}</span>
         </button>
 
         {/* 페르소나 프로필 + 남은 턴 (#34, #38) */}
@@ -119,7 +121,7 @@ export default function ChatPage() {
         {messages.length === 0 && !isAiTyping && (
           <div className="text-center py-8">
             <p className="text-sm text-tab-inactive">
-              미션을 해결해보세요! 💬
+              {t("chat.missionHint")}
             </p>
           </div>
         )}
@@ -151,7 +153,7 @@ export default function ChatPage() {
         {isFinished && (
           <div className="text-center py-6 space-y-4">
             <p className="text-base font-bold text-foreground">
-              대화가 끝났어요! 결과를 확인하러 가볼까요?
+              {t("chat.finished")}
             </p>
             <button
               type="button"
@@ -162,7 +164,7 @@ export default function ChatPage() {
                 color: "var(--color-btn-primary-text)",
               }}
             >
-              결과 확인하기
+              {t("chat.checkResult")}
             </button>
           </div>
         )}
@@ -189,10 +191,10 @@ export default function ChatPage() {
               cursor: usedTurns >= 4 ? "pointer" : "not-allowed",
             }}
           >
-            결과 분석
+            {t("chat.analyzeBtn")}
           </button>
           <p className="text-[13px] text-tab-inactive mt-1">
-            최소 4턴 이후 분석을 요청할 수 있어요
+            {t("chat.analyzeHint")}
           </p>
         </div>
       )}
@@ -201,9 +203,9 @@ export default function ChatPage() {
       {koreanWarning && (
         <div className="px-4 pb-1">
           <p className="text-[13px] text-tab-inactive text-center">
-            한글을 사용해 문장을 완성해주세요!
+            {t("chat.koreanWarning")}
             <br />
-            Let&apos;s try to use Korean in the sentences!
+            {t("chat.koreanWarningEn")}
           </p>
         </div>
       )}
@@ -213,7 +215,7 @@ export default function ChatPage() {
         onSend={sendMessage}
         disabled={isFinished}
         sendDisabled={isAiTyping}
-        placeholder={isFinished ? "대화가 종료되었습니다" : "메시지를 입력하세요..."}
+        placeholder={isFinished ? t("chat.finishedPlaceholder") : t("chat.placeholder")}
         onKoreanError={handleKoreanError}
       />
     </div>

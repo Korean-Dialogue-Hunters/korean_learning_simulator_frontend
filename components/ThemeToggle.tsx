@@ -18,10 +18,8 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       aria-label={isDark ? "라이트 모드로 전환" : "다크 모드로 전환"}
-      className="fixed z-50 w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
+      className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
       style={{
-        top: "1.5rem",
-        right: "max(1.5rem, calc((100vw - 480px) / 2 + 1.5rem))",
         backgroundColor: WARM_THEME.accentLight,
         color: WARM_THEME.accent,
         border: `1.5px solid ${WARM_THEME.accent}`,

@@ -60,8 +60,8 @@ export function useSetup() {
   const canProceed = (): boolean => {
     if (step === 1) return country.trim() !== "";
     if (step === 2) return validateNickname(userNickname).valid;
-    if (step === 3) return koreanLevel !== "";
-    if (step === 4) return culturalInterest.length > 0;
+    if (step === 3) return culturalInterest.length > 0;
+    if (step === 4) return koreanLevel !== "";
     if (step === 5) return location !== "";
     return false;
   };

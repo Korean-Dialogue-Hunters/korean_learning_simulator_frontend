@@ -82,17 +82,21 @@ export interface ConversationEntry {
 }
 
 /* ── POST /v1/sessions/{id}/evaluation ── */
-// BE: { session_id, conversation_log, location, scenario_title, highlighted_log,
-//       total_score_10, grade, feedback, llm_summary,
-//       SCK_match_count, SCK_total_tokens, SCK_match_rate, SCK_level_counts, SCK_level_word_counts }
 export interface EvaluationResponse {
   sessionId: string;                              // BE: session_id
   conversationLog: ConversationEntry[];           // BE: conversation_log
   location: string;
   scenarioTitle: string;                          // BE: scenario_title
+  scene: string;                                  // BE: scene
   highlightedLog: HighlightedEntry[];             // BE: highlighted_log
+  vocabScore: number;                             // BE: vocab_score — 어휘 점수
+  contextScore: number;                           // BE: context_score — 맥락 점수
+  contextSceneMatch: number;                      // BE: context_scene_match — 장면 반영도
+  contextRelationshipMatch: number;               // BE: context_relationship_match — 관계 반영도
+  contextMissionMatch: number;                    // BE: context_mission_match — 미션 달성도
+  spellingScore: number;                          // BE: spelling_score — 맞춤법 점수
   totalScore10: number;                           // BE: total_score_10
-  grade: string;
+  grade: string;                                  // BE: grade — "Beginner <B>" 형태
   feedback: string;
   llmSummary: string;                             // BE: llm_summary
   sckMatchCount: number;                          // BE: SCK_match_count
@@ -107,4 +111,39 @@ export interface HighlightedEntry {
   speaker: string;
   text: string;
   highlight: string;
+}
+
+/* ── GET /v1/users/{nickname}/review/count ── */
+export interface ReviewCountResponse {
+  userId: string;
+  userNickname: string;
+  chosungQuizCount: number;    // BE: chosungQuizCount
+  flashcardCount: number;      // BE: flashcardCount
+}
+
+/* ── GET /v1/users/{nickname}/review/weekly ── */
+export interface ChosungQuizItem {
+  [key: string]: unknown;       // BE 스키마가 유동적 — 실제 필드에 맞춰 확장
+}
+
+export interface FlashcardItem {
+  word: string;
+  meaning: string;
+  [key: string]: unknown;
+}
+
+export interface WeeklyReviewResponse {
+  userProfile: Record<string, unknown>;
+  selectedWeakSessions: { sessionId: string; score: number; [key: string]: unknown }[];
+  chosungQuiz: ChosungQuizItem[];
+  flashcards: FlashcardItem[];
+}
+
+/* ── GET /v1/users/{nickname}/weekly-stats ── */
+export interface WeeklyStatsResponse {
+  userId: string;
+  userNickname: string;
+  conversationCount: number;
+  averageScore: number;
+  latestGrade: string;
 }

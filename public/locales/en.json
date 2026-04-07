@@ -1,0 +1,168 @@
+{
+  "common": {
+    "back": "← Back",
+    "prev": "← Previous",
+    "goBack": "← Go Back",
+    "next": "Next",
+    "complete": "Complete",
+    "loading": "Loading...",
+    "home": "Go to Home",
+    "error": "An error occurred",
+    "comingSoon": "Coming Soon",
+    "of5": "/ 5"
+  },
+  "welcome": {
+    "subtitle": "Korean Dialogue Hunters",
+    "description": "Practice real Korean conversations\nwith AI",
+    "feature1": "Conversations tailored to your level",
+    "feature2": "Real location-based scenarios",
+    "feature3": "Detailed AI feedback",
+    "startBtn": "Start Setup",
+    "timeNote": "Takes about 1 minute"
+  },
+  "setup": {
+    "step1Title": "Where are you from?",
+    "step2Title": "Choose a nickname",
+    "step3Title": "What Korean culture interests you?",
+    "step4Title": "What's your Korean level?",
+    "step4Subtitle": "This sets the initial difficulty and number of conversation turns.",
+    "step5Title": "Where would you like to go?"
+  },
+  "nickname": {
+    "placeholder": "Choose a nickname",
+    "recommended": "Suggested:",
+    "tapToUse": "I like it!",
+    "randomBtn": "Generate Random Nickname"
+  },
+  "level": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "beginnerDesc": "Hello, Thank you level",
+    "intermediateDesc": "Can handle everyday conversations",
+    "advancedDesc": "Able to use natural expressions",
+    "beginnerTurns": "3 turns",
+    "intermediateTurns": "5 turns",
+    "advancedTurns": "7 turns"
+  },
+  "culture": {
+    "othersPlaceholder": "Enter your cultural interest",
+    "selectedCount": "{{count}} selected",
+    "enteredInterest": "Your input:"
+  },
+  "quickStart": {
+    "question": "Start at {{location}} right now?",
+    "subText": "Start now or begin from home later.",
+    "yes": "Yes, let's start now!",
+    "no": "No, I'll do it later"
+  },
+  "home": {
+    "retryTitle": "Challenge your last conversation again!",
+    "retrySubTitle": "Finding the way at Hangang Bike Path",
+    "retryScoreLabel": "Last week's lowest score:",
+    "retryBtn": "Retry",
+    "weeklyReviewTitle": "Weekly review is ready!",
+    "weeklyReviewContent": "{{quiz}} consonant quiz, {{flash}} flashcards",
+    "startBtn": "Start Conversation"
+  },
+  "tierCard": {
+    "welcome": ", welcome!",
+    "nextTier": "{{xp}} XP to next tier"
+  },
+  "weeklyStats": {
+    "conversationCount": "Total Conversations",
+    "averageScore": "Avg Score",
+    "streak": "Streak"
+  },
+  "location": {
+    "title": "Where would you like to talk?",
+    "subtitle": "Choose a location and we'll set the scene",
+    "startHere": "Start here",
+    "creating": "Creating scenario...",
+    "hangang_desc": "Chat with people along the Han River in Seoul",
+    "myeongdong_desc": "Conversations in the lively streets of Myeongdong",
+    "lotteworld_desc": "Fun Korean conversations at Lotte World"
+  },
+  "persona": {
+    "title": "Which role would you like?",
+    "subtitle": "Take on the chosen persona and practice with AI",
+    "scenario": "Scenario",
+    "startBtn": "Start with this persona",
+    "loading": "Setting up role...",
+    "loadingScenario": "Loading scenario...",
+    "failedRole": "Failed to select role"
+  },
+  "chat": {
+    "leave": "Leave",
+    "missionHint": "Try to complete your mission! 💬",
+    "finished": "Conversation over! Ready to see your results?",
+    "checkResult": "View Results",
+    "analyzeBtn": "Analyze",
+    "analyzeHint": "You can request analysis after at least 4 turns",
+    "koreanWarning": "한글을 사용해 문장을 완성해주세요!",
+    "koreanWarningEn": "Let's try to use Korean in the sentences!",
+    "placeholder": "Type a message...",
+    "finishedPlaceholder": "Conversation ended"
+  },
+  "review": {
+    "title": "Weekly Review",
+    "subtitle": "Review expressions from your conversations",
+    "chosungTitle": "Consonant Quiz",
+    "chosungDesc": "Guess the word from its initial consonants",
+    "chosungCount": "{{count}} questions",
+    "flashcardTitle": "Flashcards",
+    "flashcardDesc": "Check meanings and memorize words",
+    "flashcardCount": "{{count}} cards",
+    "startBtn": "Start",
+    "loading": "Generating review content...",
+    "loadFailed": "Could not load review content",
+    "empty": "No review content yet.\nComplete a conversation to generate it!",
+    "backToList": "Back",
+    "quizQuestion": "What word matches these consonants?",
+    "showAnswer": "Show Answer",
+    "nextQuestion": "Next",
+    "quizComplete": "Quiz Complete!",
+    "quizScore": "{{correct}} / {{total}} correct",
+    "retryQuiz": "Try Again",
+    "flipCard": "Tap to flip",
+    "cardProgress": "{{current}} / {{total}}",
+    "prevCard": "Prev",
+    "nextCard": "Next",
+    "reviewDone": "Review Complete!",
+    "backToReview": "Back to Review"
+  },
+  "result": {
+    "title": "Conversation Complete!",
+    "gradeText_great": "Excellent!",
+    "gradeText_good": "Well done!",
+    "gradeText_ok": "Not bad",
+    "gradeText_practice": "Keep practicing",
+    "totalScore": "Total Score",
+    "thisConvGrade": "This conversation's grade",
+    "detail": "Detailed Evaluation",
+    "vocab": "Vocab (30%)",
+    "context": "Context (50%)",
+    "spelling": "Spelling (20%)",
+    "radarTitle": "Skills Analysis",
+    "feedbackBtn": "View Detailed Feedback",
+    "reviewBtn": "Review Now",
+    "analyzing": "Analyzing your conversation...",
+    "loadFailed": "Could not load results"
+  },
+  "feedback": {
+    "title": "Detailed Feedback",
+    "totalScoreLabel": "Total Score",
+    "radarTitle": "Skills Analysis",
+    "logTitle": "Conversation Replay",
+    "viewAll": "View all ({{count}})",
+    "collapse": "Collapse",
+    "backBtn": "Back to Results",
+    "reviewBtn": "Review Now",
+    "loading": "Loading feedback...",
+    "loadFailed": "Could not load feedback"
+  },
+  "language": {
+    "ko": "한국어 - Korean",
+    "en": "영어 - English"
+  }
+}
