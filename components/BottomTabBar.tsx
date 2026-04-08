@@ -9,7 +9,7 @@
    ────────────────────────────────────────── */
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Home, MessageCircle, ClipboardList, BookOpen, User } from "lucide-react";
 import { SETUP_DONE_KEY } from "@/hooks/useSetup";
@@ -38,6 +38,7 @@ const HIDDEN_PATHS = ["/setup", "/location", "/persona"];
 
 export default function BottomTabBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSetupComplete, setIsSetupComplete] = useState(false);
 
   /* 마운트 시 맞춤 학습 설정 완료 여부 확인 */
@@ -51,6 +52,13 @@ export default function BottomTabBar() {
     return null;
   }
 
+  /* 대화 탭 클릭: 진행중 세션이 있으면 /chat, 없으면 /location */
+  const handleChatTab = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const sessionId = sessionStorage.getItem("sessionId");
+    router.push(sessionId ? "/chat" : "/location");
+  };
+
   return (
     <nav
       className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-card-bg border-t border-card-border z-50"
@@ -59,6 +67,24 @@ export default function BottomTabBar() {
         {TABS.map((tab) => {
           const isActive =
             tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+
+          /* 대화 탭은 세션 유무에 따라 동적 라우팅 */
+          if (tab.href === "/chat") {
+            return (
+              <li key={tab.href}>
+                <button
+                  type="button"
+                  onClick={handleChatTab}
+                  className={`flex flex-col items-center gap-1 px-3 py-0.5 transition-colors ${
+                    isActive ? "text-tab-active" : "text-tab-inactive"
+                  }`}
+                >
+                  {tab.icon}
+                  <span className="text-[10px] font-medium">{tab.label}</span>
+                </button>
+              </li>
+            );
+          }
 
           return (
             <li key={tab.href}>

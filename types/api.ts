@@ -146,4 +146,5 @@ export interface WeeklyStatsResponse {
   conversationCount: number;
   averageScore: number;
   latestGrade: string;
+  streakDays?: number; // BE 추가 예정 — 연속 학습 일수 (24시간 기준)
 }

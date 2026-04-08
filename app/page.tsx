@@ -59,7 +59,7 @@ export default function HomePage() {
         setWeeklyStats({
           conversationCount: res.conversationCount,
           averageScore: res.averageScore,
-          streakDays: 0, // BE 미제공 — 추후 별도 로직
+          streakDays: res.streakDays ?? 0,
         });
       })
       .catch(() => {});
@@ -104,13 +104,17 @@ export default function HomePage() {
           </div>
         </Link>
 
-        {/* 대화 시작 CTA */}
+        {/* 대화 시작 CTA — 진행 중 세션 있으면 /chat, 없으면 /location */}
         <div className="mx-5 mt-2">
-          <Link href="/location">
-            <button className="w-full py-4 rounded-2xl bg-btn-primary text-btn-primary-text font-bold text-[15px] active:scale-[0.97] transition-transform duration-100">
-              {t("home.startBtn")}
-            </button>
-          </Link>
+          <button
+            onClick={() => {
+              const sessionId = sessionStorage.getItem("sessionId");
+              router.push(sessionId ? "/chat" : "/location");
+            }}
+            className="w-full py-4 rounded-2xl bg-btn-primary text-btn-primary-text font-bold text-[15px] active:scale-[0.97] transition-transform duration-100"
+          >
+            {t("home.startBtn")}
+          </button>
         </div>
       </div>
     </>
