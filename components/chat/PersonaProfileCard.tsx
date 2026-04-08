@@ -7,6 +7,8 @@
    - 하단: 미션 설명 + 남은 턴
    ────────────────────────────────────────── */
 
+import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Persona } from "@/types/api";
 
 
@@ -24,6 +26,7 @@ interface PersonaProfileCardProps {
   turnsLeft: number;
   totalTurns: number;
   scenarioTitle?: string | null;
+  scene?: string | null;
 }
 
 export default function PersonaProfileCard({
@@ -32,7 +35,10 @@ export default function PersonaProfileCard({
   turnsLeft,
   totalTurns,
   scenarioTitle,
+  scene,
 }: PersonaProfileCardProps) {
+  const [showScene, setShowScene] = useState(false);
+
   return (
     <div
       className="rounded-2xl px-4 py-4 space-y-3"
@@ -116,6 +122,31 @@ export default function PersonaProfileCard({
           {turnsLeft} / {totalTurns}
         </div>
       </div>
+
+      {/* 장면(scene) 접기/펼치기 */}
+      {scene && (
+        <>
+          <button
+            type="button"
+            onClick={() => setShowScene(!showScene)}
+            className="flex items-center gap-1 text-[11px] text-tab-inactive hover:opacity-70 transition-opacity w-full"
+          >
+            <span>장면 상세</span>
+            {showScene ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </button>
+          {showScene && (
+            <div
+              className="rounded-xl px-3 py-2.5 text-[11px] leading-relaxed"
+              style={{
+                backgroundColor: "var(--color-surface)",
+                color: "var(--color-foreground)",
+              }}
+            >
+              {scene}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

@@ -17,6 +17,7 @@ import { EvaluationScores } from "@/types/result";
 import { EvaluationResponse } from "@/types/api";
 import RadarChart from "@/components/result/RadarChart";
 import { evaluateSession } from "@/lib/api";
+import { addHistory } from "@/lib/historyStorage";
 
 /* ── 점수에 따른 등급 텍스트 키 ── */
 function getGradeTextKey(score: number): string {
@@ -80,6 +81,19 @@ export default function ResultPage() {
         setScores(extractScores(res));
         /* 피드백 페이지에서도 사용할 수 있도록 저장 */
         sessionStorage.setItem("evaluationData", JSON.stringify(res));
+        /* 대화 기록에 저장 */
+        addHistory({
+          sessionId: res.sessionId,
+          scenarioTitle: res.scenarioTitle,
+          location: res.location,
+          scene: res.scene ?? "",
+          totalScore10: res.totalScore10,
+          grade: res.grade,
+          feedback: res.feedback,
+          llmSummary: res.llmSummary,
+          turnCount: res.conversationLog.filter((e) => e.role === "user").length,
+          createdAt: new Date().toISOString(),
+        });
       })
       .catch((e) => {
         setError(e instanceof Error ? e.message : "평가 요청에 실패했습니다");

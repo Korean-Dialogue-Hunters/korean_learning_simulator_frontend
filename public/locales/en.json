@@ -1,8 +1,8 @@
 {
   "common": {
-    "back": "← Back",
-    "prev": "← Previous",
-    "goBack": "← Go Back",
+    "back": "Back",
+    "prev": "Previous",
+    "goBack": "Go Back",
     "next": "Next",
     "complete": "Complete",
     "loading": "Loading...",
@@ -94,6 +94,10 @@
   },
   "chat": {
     "leave": "Leave",
+    "leaveConfirmTitle": "End this conversation?",
+    "leaveConfirmDesc": "Pressing \"Yes\" will delete this conversation session.",
+    "leaveYes": "Yes, end it",
+    "leaveNo": "No, continue",
     "missionHint": "Try to complete your mission! 💬",
     "finished": "Conversation over! Ready to see your results?",
     "checkResult": "View Results",
@@ -160,6 +164,19 @@
     "reviewBtn": "Review Now",
     "loading": "Loading feedback...",
     "loadFailed": "Could not load feedback"
+  },
+  "history": {
+    "title": "History",
+    "tabDialogue": "Dialogue",
+    "tabAchievement": "Achievement",
+    "tabSck": "SCK Collection",
+    "empty": "No conversation history yet.\nComplete a conversation to see it here!",
+    "score": "Score",
+    "sortRecent": "Recent",
+    "sortOldest": "Oldest",
+    "sortScoreHigh": "Highest score",
+    "sortScoreLow": "Lowest score",
+    "sortLocation": "By location"
   },
   "language": {
     "ko": "한국어 - Korean",

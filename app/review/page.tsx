@@ -39,19 +39,21 @@ export default function ReviewPage() {
   /* 모드 시작 → 데이터 로드 */
   const startMode = async (m: "quiz" | "flashcard") => {
     if (!profile) return;
+    setMode(m);
     setLoading(true);
     setError("");
     try {
       const data = await getWeeklyReview(profile.userNickname);
       setReviewData(data);
-      setMode(m);
     } catch (e) {
       setError(e instanceof Error ? e.message : t("review.loadFailed"));
+      setMode("list");
     } finally {
       setLoading(false);
     }
   };
 
+  /* 로딩 중 (모드 진입 후 데이터 대기) */
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-3">
@@ -72,7 +74,6 @@ export default function ReviewPage() {
   /* ── 모드 목록 화면 ── */
   const quizCount = counts?.chosungQuizCount ?? 0;
   const flashCount = counts?.flashcardCount ?? 0;
-  const isEmpty = quizCount === 0 && flashCount === 0;
 
   return (
     <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
@@ -86,46 +87,37 @@ export default function ReviewPage() {
         <p className="text-sm text-center mb-4" style={{ color: "#DC3C3C" }}>{error}</p>
       )}
 
-      {isEmpty ? (
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-tab-inactive text-center whitespace-pre-line">{t("review.empty")}</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {/* 초성퀴즈 카드 */}
-          <ModeCard
-            icon={<Zap size={24} strokeWidth={2} />}
-            title={t("review.chosungTitle")}
-            desc={t("review.chosungDesc")}
-            count={t("review.chosungCount", { count: quizCount })}
-            disabled={quizCount === 0}
-            onStart={() => startMode("quiz")}
-          />
+      <div className="flex flex-col gap-4">
+        {/* 초성퀴즈 카드 */}
+        <ModeCard
+          icon={<Zap size={24} strokeWidth={2} />}
+          title={t("review.chosungTitle")}
+          desc={t("review.chosungDesc")}
+          count={t("review.chosungCount", { count: quizCount })}
+          onStart={() => startMode("quiz")}
+        />
 
-          {/* 플래시카드 카드 */}
-          <ModeCard
-            icon={<Layers size={24} strokeWidth={2} />}
-            title={t("review.flashcardTitle")}
-            desc={t("review.flashcardDesc")}
-            count={t("review.flashcardCount", { count: flashCount })}
-            disabled={flashCount === 0}
-            onStart={() => startMode("flashcard")}
-          />
-        </div>
-      )}
+        {/* 플래시카드 카드 */}
+        <ModeCard
+          icon={<Layers size={24} strokeWidth={2} />}
+          title={t("review.flashcardTitle")}
+          desc={t("review.flashcardDesc")}
+          count={t("review.flashcardCount", { count: flashCount })}
+          onStart={() => startMode("flashcard")}
+        />
+      </div>
     </div>
   );
 }
 
 /* ── 모드 선택 카드 ── */
 function ModeCard({
-  icon, title, desc, count, disabled, onStart,
+  icon, title, desc, count, onStart,
 }: {
   icon: React.ReactNode;
   title: string;
   desc: string;
   count: string;
-  disabled: boolean;
   onStart: () => void;
 }) {
   const { t } = useTranslation();
@@ -135,7 +127,6 @@ function ModeCard({
       style={{
         backgroundColor: "var(--color-card-bg)",
         border: "1px solid var(--color-card-border)",
-        opacity: disabled ? 0.4 : 1,
       }}
     >
       <div className="flex items-start gap-4">
@@ -156,13 +147,11 @@ function ModeCard({
           <p className="text-xs text-tab-inactive leading-relaxed mb-3">{desc}</p>
           <button
             type="button"
-            disabled={disabled}
             onClick={onStart}
             className="px-5 py-2 rounded-xl text-sm font-bold transition-all active:scale-95"
             style={{
-              backgroundColor: disabled ? "var(--color-surface)" : "var(--color-accent)",
-              color: disabled ? "var(--color-tab-inactive)" : "var(--color-btn-primary-text)",
-              cursor: disabled ? "not-allowed" : "pointer",
+              backgroundColor: "var(--color-accent)",
+              color: "var(--color-btn-primary-text)",
             }}
           >
             {t("review.startBtn")}
@@ -179,32 +168,44 @@ function ModeCard({
 function ChosungQuizView({ items, onBack }: { items: ChosungQuizItem[]; onBack: () => void }) {
   const { t } = useTranslation();
   const [current, setCurrent] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
+  const [selected, setSelected] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
   const [done, setDone] = useState(false);
 
+  /* 데이터 없으면 생성 중 로딩 */
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
-        <p className="text-sm text-tab-inactive">{t("review.empty")}</p>
-        <button onClick={onBack} className="text-sm text-accent underline">{t("review.backToList")}</button>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        <p className="text-tab-inactive text-sm">{t("review.loading")}</p>
+        <button onClick={onBack} className="text-sm text-accent underline mt-4">{t("review.backToList")}</button>
       </div>
     );
   }
 
-  const item = items[current];
-  // BE 스키마 유동적: chosung/word/meaning 등 필드 추출
-  const chosung = (item as Record<string, unknown>).chosung as string ?? (item as Record<string, unknown>).quiz_id as string ?? "?";
-  const answer = (item as Record<string, unknown>).word as string ?? (item as Record<string, unknown>).answer as string ?? "";
-  const meaning = (item as Record<string, unknown>).meaning as string ?? "";
+  const item = items[current] as Record<string, unknown>;
+  /* BE 필드 추출 — 문장형 문제 + 4지선다 */
+  const sentence = (item.sentence as string) ?? (item.question as string) ?? "";
+  const chosung = (item.chosung as string) ?? (item.quizId as string) ?? "?";
+  const answer = (item.answer as string) ?? (item.word as string) ?? "";
+  const choices = (item.choices as string[]) ?? [];
+  const meaning = (item.meaning as string) ?? "";
 
-  const handleNext = (isCorrect: boolean) => {
-    if (isCorrect) setCorrect((c) => c + 1);
+  /* 정답 인덱스 */
+  const correctIdx = choices.indexOf(answer);
+
+  const handleSelect = (idx: number) => {
+    if (selected !== null) return;
+    setSelected(idx);
+    if (choices[idx] === answer) setCorrect((c) => c + 1);
+  };
+
+  const handleNext = () => {
     if (current + 1 >= items.length) {
       setDone(true);
     } else {
       setCurrent((c) => c + 1);
-      setShowAnswer(false);
+      setSelected(null);
     }
   };
 
@@ -218,7 +219,7 @@ function ChosungQuizView({ items, onBack }: { items: ChosungQuizItem[]; onBack: 
         <h2 className="text-xl font-bold text-foreground">{t("review.quizComplete")}</h2>
         <p className="text-sm text-tab-inactive">{t("review.quizScore", { correct, total: items.length })}</p>
         <div className="flex gap-3 mt-4">
-          <button onClick={() => { setCurrent(0); setCorrect(0); setDone(false); setShowAnswer(false); }}
+          <button onClick={() => { setCurrent(0); setCorrect(0); setDone(false); setSelected(null); }}
             className="px-5 py-2.5 rounded-xl text-sm font-bold"
             style={{ backgroundColor: "var(--color-card-bg)", color: "var(--color-foreground)", border: "1px solid var(--color-card-border)" }}>
             {t("review.retryQuiz")}
@@ -251,39 +252,86 @@ function ChosungQuizView({ items, onBack }: { items: ChosungQuizItem[]; onBack: 
           style={{ width: `${((current + 1) / items.length) * 100}%`, backgroundColor: "var(--color-accent)" }} />
       </div>
 
-      {/* 퀴즈 카드 */}
-      <div className={`${COMMON_CLASSES.cardRounded} p-8 text-center flex-1 flex flex-col items-center justify-center`}
+      {/* 문제 카드 */}
+      <div className={`${COMMON_CLASSES.cardRounded} p-6 mb-6`}
         style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
-        <p className="text-xs text-tab-inactive mb-4">{t("review.quizQuestion")}</p>
-        <p className="text-4xl font-black text-foreground tracking-[0.3em] mb-6">{chosung}</p>
+        {sentence && (
+          <p className="text-sm text-foreground leading-relaxed mb-4">{sentence}</p>
+        )}
+        <p className="text-3xl font-black text-center tracking-[0.3em] text-foreground">{chosung}</p>
+        {meaning && <p className="text-xs text-tab-inactive text-center mt-2">{meaning}</p>}
+      </div>
 
-        {showAnswer ? (
-          <div className="space-y-2">
-            <p className="text-2xl font-bold text-accent">{answer}</p>
-            {meaning && <p className="text-sm text-tab-inactive">{meaning}</p>}
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => handleNext(false)}
-                className="flex items-center gap-1 px-5 py-2.5 rounded-xl text-sm font-bold"
-                style={{ backgroundColor: "var(--color-surface)", color: "var(--color-tab-inactive)" }}>
-                <X size={16} />
-                <span>Nope</span>
+      {/* 4지선다 */}
+      {choices.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          {choices.map((choice, idx) => {
+            const isSelected = selected === idx;
+            const isCorrectChoice = idx === correctIdx;
+            const showResult = selected !== null;
+
+            let bgColor = "var(--color-card-bg)";
+            let borderColor = "var(--color-card-border)";
+            let textColor = "var(--color-foreground)";
+
+            if (showResult && isCorrectChoice) {
+              bgColor = "color-mix(in srgb, #22C55E 12%, var(--color-card-bg))";
+              borderColor = "#22C55E";
+              textColor = "#22C55E";
+            } else if (showResult && isSelected && !isCorrectChoice) {
+              bgColor = "color-mix(in srgb, #DC3C3C 12%, var(--color-card-bg))";
+              borderColor = "#DC3C3C";
+              textColor = "#DC3C3C";
+            }
+
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleSelect(idx)}
+                disabled={selected !== null}
+                className="w-full text-left px-5 py-3.5 rounded-xl text-sm font-medium transition-all active:scale-[0.98]"
+                style={{ backgroundColor: bgColor, border: `1.5px solid ${borderColor}`, color: textColor }}
+              >
+                <span className="font-bold mr-2">{idx + 1}.</span>
+                {choice}
               </button>
-              <button onClick={() => handleNext(true)}
-                className="flex items-center gap-1 px-5 py-2.5 rounded-xl text-sm font-bold"
+            );
+          })}
+
+          {/* 다음 버튼 */}
+          {selected !== null && (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="mt-4 w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}
+            >
+              {current + 1 >= items.length ? t("review.quizComplete") : t("review.nextQuestion")}
+            </button>
+          )}
+        </div>
+      ) : (
+        /* choices가 없는 경우 — 정답 공개 방식 폴백 */
+        <div className="flex-1 flex flex-col items-center justify-center">
+          {selected === null ? (
+            <button onClick={() => setSelected(0)}
+              className="px-6 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}>
+              {t("review.showAnswer")}
+            </button>
+          ) : (
+            <div className="text-center space-y-3">
+              <p className="text-2xl font-bold text-accent">{answer}</p>
+              <button onClick={handleNext}
+                className="px-6 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
                 style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}>
-                <Check size={16} />
-                <span>Got it!</span>
+                {t("review.nextQuestion")}
               </button>
             </div>
-          </div>
-        ) : (
-          <button onClick={() => setShowAnswer(true)}
-            className="px-6 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
-            style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}>
-            {t("review.showAnswer")}
-          </button>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -298,9 +346,10 @@ function FlashcardView({ items, onBack }: { items: FlashcardItem[]; onBack: () =
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
-        <p className="text-sm text-tab-inactive">{t("review.empty")}</p>
-        <button onClick={onBack} className="text-sm text-accent underline">{t("review.backToList")}</button>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        <p className="text-tab-inactive text-sm">{t("review.loading")}</p>
+        <button onClick={onBack} className="text-sm text-accent underline mt-4">{t("review.backToList")}</button>
       </div>
     );
   }

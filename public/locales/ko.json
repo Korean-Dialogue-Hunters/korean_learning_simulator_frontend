@@ -1,8 +1,8 @@
 {
   "common": {
-    "back": "← 뒤로",
-    "prev": "← 이전",
-    "goBack": "← 돌아가기",
+    "back": "뒤로",
+    "prev": "이전",
+    "goBack": "돌아가기",
     "next": "다음",
     "complete": "완료",
     "loading": "불러오는 중...",
@@ -94,6 +94,10 @@
   },
   "chat": {
     "leave": "나가기",
+    "leaveConfirmTitle": "대화를 그만할까요?",
+    "leaveConfirmDesc": "\"네\"를 누르면 대화 세션이 삭제됩니다.",
+    "leaveYes": "네, 그만할게요",
+    "leaveNo": "아니오, 계속할게요",
     "missionHint": "미션을 해결해보세요! 💬",
     "finished": "대화가 끝났어요! 결과를 확인하러 가볼까요?",
     "checkResult": "결과 확인하기",
@@ -160,6 +164,19 @@
     "reviewBtn": "복습하기",
     "loading": "피드백을 불러오는 중...",
     "loadFailed": "피드백을 불러올 수 없습니다"
+  },
+  "history": {
+    "title": "기록",
+    "tabDialogue": "대화 기록",
+    "tabAchievement": "업적",
+    "tabSck": "SCK 수집",
+    "empty": "아직 대화 기록이 없어요.\n대화를 완료하면 여기에 기록됩니다!",
+    "score": "총점",
+    "sortRecent": "최근 순",
+    "sortOldest": "오래된 순",
+    "sortScoreHigh": "점수 높은 순",
+    "sortScoreLow": "점수 낮은 순",
+    "sortLocation": "장소 기준"
   },
   "language": {
     "ko": "한국어 - Korean",
