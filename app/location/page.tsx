@@ -13,7 +13,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { MapPin, Check } from "lucide-react";
+import { ArrowLeft, MapPin, Check } from "lucide-react";
 import { LOCATION_OPTIONS, LocationId } from "@/types/setup";
 import { getSavedProfile } from "@/hooks/useSetup";
 import { createSession } from "@/lib/api";
@@ -73,7 +73,16 @@ export default function LocationPage() {
 
   return (
     <div className="flex flex-col min-h-screen px-5 pt-16 pb-28" style={{ backgroundColor: "var(--color-background)" }}>
-      <div className="mb-8 mt-8">
+      <button
+        type="button"
+        onClick={() => router.push("/")}
+        className="flex items-center gap-1 text-sm text-tab-inactive mb-6 self-start hover:opacity-70 transition-opacity"
+      >
+        <ArrowLeft size={16} strokeWidth={2} />
+        <span>{t("common.back")}</span>
+      </button>
+
+      <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
           <MapPin size={20} strokeWidth={2} className="text-accent" />
           <h1 className="text-xl font-extrabold text-foreground">
