@@ -8,6 +8,7 @@
    ────────────────────────────────────────── */
 
 import { useTranslation } from "react-i18next";
+import { Flag } from "lucide-react";
 import { Persona } from "@/types/api";
 
 
@@ -27,22 +28,26 @@ interface PersonaProfileCardProps {
   counterpart: CounterpartInfo;
 }
 
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export default function PersonaProfileCard({
   persona,
   counterpart,
 }: PersonaProfileCardProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isEn = i18n.language === "en";
 
-  const myRole = (isEn && persona.roleEn) || persona.role;
+  const myRole = capitalize((isEn && persona.roleEn) || persona.role);
   const myGender = (isEn && persona.genderEn) || persona.gender;
   const myMission = (isEn && persona.missionEn) || persona.mission;
-  const cpRole = (isEn && counterpart.roleEn) || counterpart.role;
+  const cpRole = capitalize((isEn && counterpart.roleEn) || counterpart.role);
   const cpGender = (isEn && counterpart.genderEn) || counterpart.gender;
 
   return (
     <div
-      className="rounded-2xl px-4 py-4 space-y-3"
+      className="rounded-2xl px-4 py-4"
       style={{
         backgroundColor: "var(--color-card-bg)",
         border: "1px solid var(--color-card-border)",
@@ -68,11 +73,14 @@ export default function PersonaProfileCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <span className="text-[9px] text-tab-inactive bg-surface px-1 py-0.5 rounded shrink-0">나</span>
+              <span className="text-[9px] text-tab-inactive bg-surface px-1 py-0.5 rounded shrink-0">{t("chat.me")}</span>
               <p className="text-[13px] font-bold truncate text-foreground">{persona.name}</p>
             </div>
-            <p className="text-[11px] text-tab-inactive truncate">
-              {persona.age}{isEn ? "y" : "세"} · {myGender} · {myRole}
+            <p className="text-[11px] text-tab-inactive">
+              {persona.age} · {myGender}
+            </p>
+            <p className="text-[11px] text-tab-inactive">
+              {myRole}
             </p>
           </div>
         </div>
@@ -98,20 +106,29 @@ export default function PersonaProfileCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <span className="text-[9px] text-tab-inactive bg-surface px-1 py-0.5 rounded shrink-0">상대</span>
+              <span className="text-[9px] text-tab-inactive bg-surface px-1 py-0.5 rounded shrink-0">{t("chat.partner")}</span>
               <p className="text-[13px] font-bold text-foreground truncate">{counterpart.name}</p>
             </div>
-            <p className="text-[11px] text-tab-inactive truncate">
-              {counterpart.age}{isEn ? "y" : "세"}{cpGender ? ` · ${cpGender}` : ""} · {cpRole}
+            <p className="text-[11px] text-tab-inactive">
+              {counterpart.age}{cpGender ? ` · ${cpGender}` : ""}
+            </p>
+            <p className="text-[11px] text-tab-inactive">
+              {cpRole}
             </p>
           </div>
         </div>
       </div>
 
       {/* 하단: 미션 */}
-      <p className="text-[12px] text-foreground/80 leading-snug">
-        🎯 {myMission}
-      </p>
+      <div
+        className="mt-3 pt-3"
+        style={{ borderTop: "1px solid var(--color-card-border)" }}
+      >
+        <p className="text-[12px] text-foreground/80 leading-snug flex items-start gap-1">
+          <Flag size={12} strokeWidth={2} className="shrink-0 mt-0.5" />
+          <span>{t("chat.missionLabel")}: {myMission}</span>
+        </p>
+      </div>
     </div>
   );
 }

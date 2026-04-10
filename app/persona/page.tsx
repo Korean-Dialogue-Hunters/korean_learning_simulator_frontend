@@ -2,7 +2,7 @@
 
 /* ──────────────────────────────────────────
    페르소나(미션) 선택 페이지 (/persona) — TODO 30~32
-   - sessionStorage에서 세션 데이터(personas) 읽기
+   - localStorage에서 세션 데이터(personas) 읽기
    - 사용자가 맡을 역할(페르소나) A / B 카드 표시
    - 선택 후 POST /v1/sessions/{id}/role → /chat 이동
    ────────────────────────────────────────── */
@@ -28,9 +28,9 @@ export default function PersonaPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  /* sessionStorage에서 세션 데이터(장소 선택에서 저장한 것) 읽기 */
+  /* localStorage에서 세션 데이터(장소 선택에서 저장한 것) 읽기 */
   useEffect(() => {
-    const raw = sessionStorage.getItem("scenarioData");
+    const raw = localStorage.getItem("scenarioData");
     if (!raw) {
       router.replace("/location");
       return;
@@ -43,7 +43,9 @@ export default function PersonaPage() {
       );
       setPersonas(personaList);
       setScene(data.scene || "");
-      setSceneEn(data.sceneEn || "");
+      /* BE는 top-level scene_en을 보내지 않으므로, persona 안의 scene_en에서 추출 */
+      const firstPersona = Object.values(data.personas)[0] as unknown as Record<string, unknown>;
+      setSceneEn((data.sceneEn || (firstPersona?.sceneEn as string)) || "");
     } catch {
       router.replace("/location");
     }
@@ -55,7 +57,7 @@ export default function PersonaPage() {
     setError("");
 
     try {
-      const sessionId = sessionStorage.getItem("sessionId");
+      const sessionId = localStorage.getItem("sessionId");
       if (!sessionId) {
         router.replace("/location");
         return;
@@ -67,8 +69,8 @@ export default function PersonaPage() {
       /* 내 역할 + 상대방 정보 저장 */
       const myPersona = personas.find((p) => p.id === selected)!;
       const counterpart = personas.find((p) => p.id !== selected)!;
-      sessionStorage.setItem("myPersona", JSON.stringify(myPersona));
-      sessionStorage.setItem("counterpart", JSON.stringify({
+      localStorage.setItem("myPersona", JSON.stringify(myPersona));
+      localStorage.setItem("counterpart", JSON.stringify({
         name: counterpart.name,
         age: counterpart.age,
         gender: counterpart.gender,
@@ -77,17 +79,19 @@ export default function PersonaPage() {
         roleEn: counterpart.roleEn,
       }));
       /* scene: BE 역할 선택 응답에서 확정된 scene 우선, 없으면 시나리오 데이터의 scene */
-      sessionStorage.setItem("scene", res.scene || scene);
-      sessionStorage.setItem("sceneEn", res.sceneEn || sceneEn);
+      localStorage.setItem("scene", res.scene || scene);
+      /* sceneEn: top-level 없으면 선택된 persona의 sceneEn 사용 */
+      const selectedPersonaData = res.personas?.[selected] as unknown as Record<string, unknown> | undefined;
+      localStorage.setItem("sceneEn", res.sceneEn || (selectedPersonaData?.sceneEn as string) || sceneEn);
       /* turnLimit: BE 응답 우선, 없으면 레벨 기반 폴백 */
       const profile = getSavedProfile();
       const fallbackTurns = profile ? (LEVEL_TURN_MAP[profile.koreanLevel] ?? 7) : 7;
       const turnLimit = res.turnLimit > 0 ? res.turnLimit : fallbackTurns;
-      sessionStorage.setItem("turnLimit", String(turnLimit));
+      localStorage.setItem("turnLimit", String(turnLimit));
 
       /* AI 첫 발화가 있으면 저장 */
       if (res.latestAiResponse) {
-        sessionStorage.setItem("firstAiMessage", res.latestAiResponse);
+        localStorage.setItem("firstAiMessage", res.latestAiResponse);
       }
 
       router.push("/chat");
@@ -185,10 +189,12 @@ function PersonaCard({
   onSelect: () => void;
   isEn: boolean;
 }) {
+  const { t } = useTranslation();
   const initial = persona.name.charAt(0);
-  const role = (isEn && persona.roleEn) || persona.role;
+  const role = ((isEn && persona.roleEn) || persona.role).replace(/^./, (c: string) => c.toUpperCase());
   const gender = (isEn && persona.genderEn) || persona.gender;
   const mission = (isEn && persona.missionEn) || persona.mission;
+  const missionLabel = isEn ? "Mission" : "미션";
 
   return (
     <button
@@ -230,10 +236,10 @@ function PersonaCard({
             </span>
           </div>
           <p className="text-xs text-tab-inactive mb-2">
-            {persona.age}{isEn ? "y" : "세"} · {gender} · {role}
+            {persona.age} · {gender} · {role}
           </p>
           <p className="text-xs text-foreground/80 leading-relaxed">
-            🎯 {mission}
+            🚩 {missionLabel}: {mission}
           </p>
         </div>
       </div>

@@ -10,7 +10,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Trophy, Star, ArrowRight, Home, BookOpen } from "lucide-react";
+import { Trophy, Star, ArrowRight, Home, BookOpen, AlertCircle } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { EvaluationScores } from "@/types/result";
@@ -18,6 +18,9 @@ import { EvaluationResponse } from "@/types/api";
 import RadarChart from "@/components/result/RadarChart";
 import { evaluateSession } from "@/lib/api";
 import { addHistory, getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
+import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpSystem";
+import { getUserId } from "@/hooks/useSetup";
+import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 
 /* ── 점수에 따른 등급 텍스트 키 ── */
 function getGradeTextKey(score: number): string {
@@ -66,9 +69,21 @@ export default function ResultPage() {
   const [scores, setScores] = useState<EvaluationScores>({ vocabulary: 5, context: 5, spelling: 5 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [errorKind, setErrorKind] = useState<"sessionLost" | "generic" | null>(null);
+  const [xpPopup, setXpPopup] = useState<Omit<XpGainPopupProps, "onClose"> | null>(null);
+
+  /* XP 지급 (중복 방지 포함) */
+  const awardConversationXp = (sessionId: string, totalScore10: number) => {
+    const userId = getUserId();
+    if (!userId || isXpAwarded(userId, `conv_${sessionId}`)) return;
+    const xp = calcConversationXp(totalScore10);
+    const result = addXp(userId, xp);
+    markXpAwarded(userId, `conv_${sessionId}`);
+    setXpPopup(result);
+  };
 
   useEffect(() => {
-    const sessionId = sessionStorage.getItem("sessionId");
+    const sessionId = localStorage.getItem("sessionId");
     if (!sessionId) {
       router.replace("/");
       return;
@@ -79,7 +94,8 @@ export default function ResultPage() {
     if (cached) {
       setEvalData(cached);
       setScores(extractScores(cached));
-      sessionStorage.setItem("evaluationData", JSON.stringify(cached));
+      localStorage.setItem("evaluationData", JSON.stringify(cached));
+      awardConversationXp(sessionId, cached.totalScore10);
       setLoading(false);
       return;
     }
@@ -89,7 +105,7 @@ export default function ResultPage() {
       .then((res) => {
         setEvalData(res);
         setScores(extractScores(res));
-        sessionStorage.setItem("evaluationData", JSON.stringify(res));
+        localStorage.setItem("evaluationData", JSON.stringify(res));
         saveEvaluationCache(sessionId, res);
         addHistory({
           sessionId: res.sessionId,
@@ -103,9 +119,17 @@ export default function ResultPage() {
           turnCount: res.conversationLog.filter((e) => e.role === "user").length,
           createdAt: new Date().toISOString(),
         });
+        awardConversationXp(sessionId, res.totalScore10);
       })
       .catch((e) => {
-        setError(e instanceof Error ? e.message : "평가 요청에 실패했습니다");
+        const msg = e instanceof Error ? e.message : String(e);
+        /* BE가 세션 메모리에서 잃어버린 경우: "session not found" / 400 */
+        if (/session not found/i.test(msg) || /\b400\b/.test(msg)) {
+          setErrorKind("sessionLost");
+        } else {
+          setErrorKind("generic");
+        }
+        setError(msg);
       })
       .finally(() => setLoading(false));
   }, [router]);
@@ -120,10 +144,75 @@ export default function ResultPage() {
   }
 
   if (error || !evalData) {
+    const isSessionLost = errorKind === "sessionLost";
+    const title = isSessionLost
+      ? t("result.sessionLostTitle")
+      : t("result.loadFailed");
+    const desc = isSessionLost ? t("result.sessionLostDesc") : null;
+
+    const handleRetry = () => {
+      /* 잃어버린 세션 정리 후 새 대화로 유도 */
+      localStorage.removeItem("sessionId");
+      localStorage.removeItem("scenarioData");
+      localStorage.removeItem("myPersona");
+      localStorage.removeItem("counterpart");
+      localStorage.removeItem("turnLimit");
+      localStorage.removeItem("firstAiMessage");
+      localStorage.removeItem("chatMessages");
+      localStorage.removeItem("scene");
+      localStorage.removeItem("sceneEn");
+      localStorage.removeItem("evaluationData");
+      router.push("/location");
+    };
+
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
-        <p className="text-sm" style={{ color: "#DC3C3C" }}>{error || t("result.loadFailed")}</p>
-        <button onClick={() => router.push("/")} className="text-sm text-accent underline">{t("common.home")}</button>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-5 px-6 text-center">
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center"
+          style={{
+            backgroundColor: "color-mix(in srgb, #DC3C3C 12%, transparent)",
+            color: "#DC3C3C",
+          }}
+        >
+          <AlertCircle size={32} strokeWidth={1.8} />
+        </div>
+        <div className="space-y-2 max-w-[320px]">
+          <p className="text-base font-bold" style={{ color: "var(--color-foreground)" }}>
+            {title}
+          </p>
+          {desc && (
+            <p className="text-sm leading-relaxed" style={{ color: "var(--color-tab-inactive)" }}>
+              {desc}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 w-full max-w-[260px] mt-2">
+          {isSessionLost && (
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-95"
+              style={{
+                backgroundColor: "var(--color-accent)",
+                color: "var(--color-btn-primary-text)",
+              }}
+            >
+              {t("result.sessionLostRetry")}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="w-full py-3 rounded-2xl text-sm font-medium transition-all active:scale-95"
+            style={{
+              backgroundColor: "var(--color-card-bg)",
+              color: "var(--color-foreground)",
+              border: "1px solid var(--color-card-border)",
+            }}
+          >
+            {t("common.home")}
+          </button>
+        </div>
       </div>
     );
   }
@@ -136,6 +225,9 @@ export default function ResultPage() {
 
   return (
     <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
+      {/* XP 획득 팝업 */}
+      {xpPopup && <XpGainPopup {...xpPopup} onClose={() => setXpPopup(null)} />}
+
       {/* ── 상단: 축하 메시지 ── */}
       <div className="text-center mb-8">
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -170,13 +262,14 @@ export default function ResultPage() {
           <p className="text-xs text-tab-inactive mb-1">{t("result.thisConvGrade")}</p>
           <p className="text-sm font-medium text-foreground">{gradeLabel}</p>
         </div>
-        {/* 스탬프 */}
-        <div className="w-16 h-16 rounded-full flex items-center justify-center -rotate-12"
+        {/* 빨간 도장 스타일 스탬프 */}
+        <div className="w-16 h-16 rounded-full flex items-center justify-center"
           style={{
             border: `3px solid ${gradeColor}`,
             color: gradeColor,
+            boxShadow: `inset 0 0 0 2px ${gradeColor}20`,
           }}>
-          <span className="text-2xl font-black tracking-tight">{gradeCode}</span>
+          <span className="text-3xl font-black">{gradeCode}</span>
         </div>
       </div>
 

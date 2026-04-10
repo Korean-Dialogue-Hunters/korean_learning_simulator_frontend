@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 
 export function useTheme() {
-  const [isDark, setIsDark] = useState(true); // 기본값: 다크
+  const [isDark, setIsDark] = useState(false); // 기본값: 라이트
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");
-    const dark = saved ? saved === "dark" : true;
+    const dark = saved ? saved === "dark" : false;
     setIsDark(dark);
     document.documentElement.classList.toggle("dark", dark);
   }, []);

@@ -4,34 +4,15 @@
    - BE 실제 전송 필드명: snake_case (주석으로 표기)
    ────────────────────────────────────────── */
 
-// 등급 종류 (낮은 순서대로)
-export type Grade = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond";
+// 등급 종류 (높은 순서대로)
+export type Grade = "S" | "A" | "B" | "C";
 
-// 등급별 테두리 색상 (Tailwind 클래스)
-export const GRADE_BORDER_COLOR: Record<Grade, string> = {
-  Bronze: "border-tier-bronze",
-  Silver: "border-tier-silver",
-  Gold: "border-tier-gold",
-  Platinum: "border-tier-platinum",
-  Diamond: "border-tier-diamond",
-};
-
-// 등급별 텍스트 색상 (Tailwind 클래스)
-export const GRADE_TEXT_COLOR: Record<Grade, string> = {
-  Bronze: "text-tier-bronze",
-  Silver: "text-tier-silver",
-  Gold: "text-tier-gold",
-  Platinum: "text-tier-platinum",
-  Diamond: "text-tier-diamond",
-};
-
-// 등급별 실제 HEX 색상 (인라인 스타일용)
-export const GRADE_COLORS: Record<Grade, string> = {
-  Bronze: "#CD7F32",
-  Silver: "#C0C0C0",
-  Gold: "#FFD700",
-  Platinum: "#E5E4E2",
-  Diamond: "#B9F2FF",
+// 등급별 HEX 색상 (인라인 스타일용)
+export const GRADE_COLORS: Record<string, string> = {
+  S: "#DC3C3C",
+  A: "#E8672A",
+  B: "#2A8ED8",
+  C: "#888888",
 };
 
 // 유저 프로필 데이터 구조
@@ -39,9 +20,10 @@ export const GRADE_COLORS: Record<Grade, string> = {
 export interface UserProfile {
   userNickname: string;   // BE: user_nickname
   grade: Grade;           // BE: latest_grade
-  xp: number;             // FE 전용 (BE 미제공)
-  xpMax: number;          // FE 전용 (BE 미제공) — BE: xp_max
-  xpToNext: number;       // FE 전용 (BE 미제공) — BE: xp_to_next
+  level: number;          // XP 시스템 레벨
+  xp: number;             // 현재 레벨 내 누적 XP
+  xpMax: number;          // 현재 레벨 → 다음 레벨 필요 XP
+  xpToNext: number;       // 다음 레벨까지 남은 XP
   avatarUrl?: string;     // FE 전용 (BE 미제공) — BE: avatar_url
 }
 

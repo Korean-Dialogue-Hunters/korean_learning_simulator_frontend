@@ -60,9 +60,9 @@ export default function LocationPage() {
         location: selected,
       });
 
-      /* 세션 데이터를 sessionStorage에 저장 (역할 선택 페이지에서 사용) */
-      sessionStorage.setItem("sessionId", res.sessionId);
-      sessionStorage.setItem("scenarioData", JSON.stringify(res));
+      /* 세션 데이터를 localStorage에 저장 (역할 선택 페이지에서 사용) */
+      localStorage.setItem("sessionId", res.sessionId);
+      localStorage.setItem("scenarioData", JSON.stringify(res));
 
       router.push("/persona");
     } catch (e) {

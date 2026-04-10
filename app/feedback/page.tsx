@@ -48,7 +48,7 @@ export default function FeedbackPage() {
   const [showFullLog, setShowFullLog] = useState(false);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem("evaluationData");
+    const raw = localStorage.getItem("evaluationData");
     if (!raw) {
       router.replace("/result");
       return;

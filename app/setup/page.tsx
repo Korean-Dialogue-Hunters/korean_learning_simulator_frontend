@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Globe, User, BookOpen, Heart, MapPin } from "lucide-react";
-import { useSetup, isSetupDone } from "@/hooks/useSetup";
+import { useSetup, isSetupDone, getSavedProfile } from "@/hooks/useSetup";
 import { LOCATION_OPTIONS } from "@/types/setup";
+import { createSession } from "@/lib/api";
 import { WARM_THEME, warmPageStyle, warmCtaStyle, COMMON_CLASSES } from "@/lib/designSystem";
 import WelcomeScreen from "@/components/setup/WelcomeScreen";
 import NationalitySelect from "@/components/setup/NationalitySelect";
@@ -14,6 +15,7 @@ import CultureSelect from "@/components/setup/CultureSelect";
 import NicknameInput from "@/components/setup/NicknameInput";
 import LocationSelect from "@/components/setup/LocationSelect";
 import QuickStartModal from "@/components/setup/QuickStartModal";
+import ScenarioLoading from "@/components/common/ScenarioLoading";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -33,6 +35,8 @@ export default function SetupPage() {
   } = useSetup();
 
   const [showWelcome, setShowWelcome] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
 
   useEffect(() => {
     if (isSetupDone()) {
@@ -48,7 +52,33 @@ export default function SetupPage() {
     5: { title: t("setup.step5Title"), subtitle: "", icon: <MapPin size={24} strokeWidth={1.8} /> },
   };
 
-  const handleYes = () => { saveProfile(); router.push("/location"); };
+  const handleYes = async () => {
+    saveProfile();
+    const profile = getSavedProfile();
+    if (!profile) {
+      router.push("/location");
+      return;
+    }
+    setIsCreating(true);
+    setCreateError("");
+    try {
+      /* POST /v1/sessions — 선택된 장소로 바로 세션 생성 */
+      const res = await createSession({
+        userId: profile.userId,
+        userNickname: profile.userNickname,
+        country: profile.country,
+        koreanLevel: profile.koreanLevel,
+        culturalInterest: profile.culturalInterest,
+        location: profile.location,
+      });
+      localStorage.setItem("sessionId", res.sessionId);
+      localStorage.setItem("scenarioData", JSON.stringify(res));
+      router.push("/persona");
+    } catch (e) {
+      setCreateError(e instanceof Error ? e.message : "세션 생성에 실패했습니다");
+      setIsCreating(false);
+    }
+  };
   const handleNo  = () => { saveProfile(); router.push("/"); };
 
   const selectedLocationLabel =
@@ -133,12 +163,27 @@ export default function SetupPage() {
         {step < 5 ? t("common.next") : t("common.complete")}
       </button>
 
-      {showModal && (
+      {showModal && !isCreating && (
         <QuickStartModal
           locationLabel={selectedLocationLabel}
           onYes={handleYes}
           onNo={handleNo}
         />
+      )}
+
+      {isCreating && <ScenarioLoading />}
+
+      {createError && !isCreating && (
+        <div
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-[440px] px-4 py-3 rounded-xl text-sm text-center z-[210]"
+          style={{
+            backgroundColor: "var(--color-card-bg)",
+            border: "1px solid #DC3C3C",
+            color: "#DC3C3C",
+          }}
+        >
+          {createError}
+        </div>
       )}
     </div>
   );

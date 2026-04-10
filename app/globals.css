@@ -10,30 +10,30 @@
 /* ══════════════════════════════════════════
    컬러 토큰 테이블
    ──────────────────────────────────────────
-   토큰                  │ 라이트 (화이트+민트) │ 다크 (소프트다크+딥골드)
+   토큰                  │ 라이트 (화이트+딥그린) │ 다크 (소프트다크+딥골드)
    ──────────────────────┼────────────────────┼────────────────────
    background            │ #FFFFFF (화이트)   │ #2A2A2A (소프트 다크)
    foreground            │ #1A1A1A (검정)     │ #F5F5F5 (흰색)
-   btn-primary           │ #A8D8C8 (민트)     │ #CCA352 (딥 골드)
+   btn-primary           │ #248562 (딥그린)   │ #D0A95C (딥 골드)
    btn-primary-text      │ #FFFFFF            │ #1A1A1A (다크 텍스트)
    card-bg               │ #F7F7F7 (연회색)   │ #363636 (다크 카드)
    card-border           │ #E5E5E5 (회색)     │ #4A4A4A (다크 보더)
    surface               │ #F0F0F0 (연회색)   │ #333333 (다크 표면)
    surface-border        │ #DBDBDB            │ #4A4A4A
-   gold                  │ #A8D8C8 (민트)     │ #CCA352 (딥 골드)
-   accent (CTA/강조)     │ #A8D8C8 (민트)     │ #CCA352 (딥 골드)
-   tab-active            │ #A8D8C8 (민트)     │ #CCA352 (딥 골드)
+   gold                  │ #248562 (딥그린)   │ #D0A95C (딥 골드)
+   accent (CTA/강조)     │ #248562 (딥그린)   │ #D0A95C (딥 골드)
+   tab-active            │ #248562 (딥그린)   │ #D0A95C (딥 골드)
    tab-inactive          │ #6B6B6B (회색)     │ #9CA3AF (회색)
    ──────────────────────┼────────────────────┼────────────────────
-   setup-bg              │ #F5F0E8            │ #2A2A2A
-   setup-card            │ #FFFFFF            │ #1A1A1A
-   setup-card-border     │ #E8E0D4            │ #2A2A2A
-   setup-text            │ #3D3529            │ #F5F5F5
-   setup-text-sub        │ #8C8070            │ #9CA3AF
-   setup-accent          │ #D4A843            │ #AD8A34 (딥)
-   setup-accent-light    │ rgba(212,168,67,.12)│ rgba(173,138,52,.15)
-   setup-accent-hover    │ #C49A3A            │ #9F8143 (딥)
-   setup-dot-inactive    │ #D4CFC6            │ #3A3A3A
+   setup-bg              │ #FFFFFF            │ #2A2A2A
+   setup-card            │ #F7F7F7            │ #363636
+   setup-card-border     │ #E5E5E5            │ #4A4A4A
+   setup-text            │ #1A1A1A            │ #F5F5F5
+   setup-text-sub        │ #6B6B6B            │ #9CA3AF
+   setup-accent          │ #248562 (딥그린)   │ #B7933B (딥)
+   setup-accent-light    │ rgba(36,133,98,.12) │ rgba(183,147,59,.15)
+   setup-accent-hover    │ #2C9D74            │ #AA8B45 (딥)
+   setup-dot-inactive    │ #D4D4D4            │ #4A4A4A
    ──────────────────────┼────────────────────┼────────────────────
    tier-bronze           │ #CD7F32            │ (동일)
    tier-silver           │ #C0C0C0            │ (동일)
@@ -46,14 +46,14 @@
   /* ── 라이트모드 기본값 (Tailwind 클래스 참조) ── */
   --color-background: #FFFFFF;
   --color-foreground: #1A1A1A;
-  --color-btn-primary: #A8D8C8;
-  --color-btn-primary-text: #4A4A4A;
+  --color-btn-primary: #248562;
+  --color-btn-primary-text: #FFFFFF;
   --color-card-bg: #F7F7F7;
   --color-card-border: #E5E5E5;
   --color-surface: #F0F0F0;
   --color-surface-border: #DBDBDB;
-  --color-gold: #A8D8C8;
-  --color-accent: #A8D8C8;
+  --color-gold: #248562;
+  --color-accent: #248562;
 
   /* 티어별 테두리 (라이트/다크 동일) */
   --color-tier-bronze: #CD7F32;
@@ -63,7 +63,7 @@
   --color-tier-diamond: #B9F2FF;
 
   /* 탭바 */
-  --color-tab-active: #A8D8C8;
+  --color-tab-active: #248562;
   --color-tab-inactive: #6B6B6B;
 
   /* 맞춤 학습 설정(setup) */
@@ -72,9 +72,9 @@
   --color-setup-card-border: #E5E5E5;
   --color-setup-text: #1A1A1A;
   --color-setup-text-sub: #6B6B6B;
-  --color-setup-accent: #A8D8C8;
-  --color-setup-accent-light: rgba(168, 216, 200, 0.12);
-  --color-setup-accent-hover: #8DCBB8;
+  --color-setup-accent: #248562;
+  --color-setup-accent-light: rgba(36, 133, 98, 0.12);
+  --color-setup-accent-hover: #2C9D74;
   --color-setup-dot-inactive: #D4D4D4;
 
   /* 폰트 */
@@ -87,24 +87,24 @@
 :root {
   --color-background: #FFFFFF;
   --color-foreground: #1A1A1A;
-  --color-btn-primary: #A8D8C8;
-  --color-btn-primary-text: #4A4A4A;
+  --color-btn-primary: #248562;
+  --color-btn-primary-text: #FFFFFF;
   --color-card-bg: #F7F7F7;
   --color-card-border: #E5E5E5;
   --color-surface: #F0F0F0;
   --color-surface-border: #DBDBDB;
-  --color-gold: #A8D8C8;
-  --color-accent: #A8D8C8;
-  --color-tab-active: #A8D8C8;
+  --color-gold: #248562;
+  --color-accent: #248562;
+  --color-tab-active: #248562;
   --color-tab-inactive: #6B6B6B;
   --color-setup-bg: #FFFFFF;
   --color-setup-card: #F7F7F7;
   --color-setup-card-border: #E5E5E5;
   --color-setup-text: #1A1A1A;
   --color-setup-text-sub: #6B6B6B;
-  --color-setup-accent: #A8D8C8;
-  --color-setup-accent-light: rgba(168, 216, 200, 0.12);
-  --color-setup-accent-hover: #8DCBB8;
+  --color-setup-accent: #248562;
+  --color-setup-accent-light: rgba(36, 133, 98, 0.12);
+  --color-setup-accent-hover: #2C9D74;
   --color-setup-dot-inactive: #D4D4D4;
 }
 

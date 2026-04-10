@@ -93,11 +93,10 @@
 
 ```
 등급(Grade) 컬러 (라이트/다크 동일):
-  Bronze    #CD7F32
-  Silver    #C0C0C0
-  Gold      #FFD700
-  Platinum  #E5E4E2
-  Diamond   #B9F2FF
+  S    #DC3C3C
+  A    #E8672A
+  B    #2A8ED8
+  C    #888888
 ```
 
 - 테마 전환: `useTheme` 훅 — `html.dark` 클래스 토글, localStorage 저장

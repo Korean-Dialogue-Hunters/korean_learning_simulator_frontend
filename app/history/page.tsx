@@ -44,7 +44,7 @@ export default function HistoryPage() {
 
   /* 카드 클릭 → evaluationData 복원 후 feedback 페이지로 이동 */
   const handleCardClick = (record: DialogueRecord) => {
-    sessionStorage.setItem("sessionId", record.sessionId);
+    localStorage.setItem("sessionId", record.sessionId);
     router.push("/result");
   };
 

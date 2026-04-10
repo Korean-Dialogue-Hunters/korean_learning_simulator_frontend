@@ -11,8 +11,10 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { BookOpen, Zap, Layers, ArrowLeft, Check, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
-import { getSavedProfile } from "@/hooks/useSetup";
+import { getSavedProfile, getUserId } from "@/hooks/useSetup";
 import { getReviewCount, getWeeklyReview } from "@/lib/api";
+import { addXp } from "@/lib/xpSystem";
+import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import type { ReviewCountResponse, WeeklyReviewResponse, ChosungQuizItem, FlashcardItem } from "@/types/api";
 
 type Mode = "list" | "quiz" | "flashcard";
@@ -24,6 +26,7 @@ export default function ReviewPage() {
   const [reviewData, setReviewData] = useState<WeeklyReviewResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [xpPopup, setXpPopup] = useState<Omit<XpGainPopupProps, "onClose"> | null>(null);
 
   const profile = typeof window !== "undefined" ? getSavedProfile() : null;
 
@@ -63,12 +66,29 @@ export default function ReviewPage() {
     );
   }
 
+  const handleXpGain = (amount: number) => {
+    const userId = getUserId();
+    if (!userId || amount <= 0) return;
+    const result = addXp(userId, amount);
+    setXpPopup(result);
+  };
+
   if (mode === "quiz" && reviewData) {
-    return <ChosungQuizView items={reviewData.chosungQuiz} onBack={() => setMode("list")} />;
+    return (
+      <>
+        {xpPopup && <XpGainPopup {...xpPopup} onClose={() => setXpPopup(null)} />}
+        <ChosungQuizView items={reviewData.chosungQuiz} onBack={() => setMode("list")} onXpGain={handleXpGain} />
+      </>
+    );
   }
 
   if (mode === "flashcard" && reviewData) {
-    return <FlashcardView items={reviewData.flashcards} onBack={() => setMode("list")} />;
+    return (
+      <>
+        {xpPopup && <XpGainPopup {...xpPopup} onClose={() => setXpPopup(null)} />}
+        <FlashcardView items={reviewData.flashcards} onBack={() => setMode("list")} onXpGain={handleXpGain} />
+      </>
+    );
   }
 
   /* ── 모드 목록 화면 ── */
@@ -165,12 +185,13 @@ function ModeCard({
 /* ══════════════════════════════════════════
    초성 퀴즈 뷰
    ══════════════════════════════════════════ */
-function ChosungQuizView({ items, onBack }: { items: ChosungQuizItem[]; onBack: () => void }) {
+function ChosungQuizView({ items, onBack, onXpGain }: { items: ChosungQuizItem[]; onBack: () => void; onXpGain?: (amount: number) => void }) {
   const { t } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
   const [done, setDone] = useState(false);
+  const [xpAwarded, setXpAwarded] = useState(false);
 
   /* 데이터 없으면 생성 중 로딩 */
   if (items.length === 0) {
@@ -209,6 +230,13 @@ function ChosungQuizView({ items, onBack }: { items: ChosungQuizItem[]; onBack: 
     }
   };
 
+  /* 퀴즈 완료 시 XP 지급 */
+  if (done && !xpAwarded && onXpGain) {
+    const xp = correct * 5;
+    if (xp > 0) onXpGain(xp);
+    setXpAwarded(true);
+  }
+
   if (done) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
@@ -219,7 +247,7 @@ function ChosungQuizView({ items, onBack }: { items: ChosungQuizItem[]; onBack: 
         <h2 className="text-xl font-bold text-foreground">{t("review.quizComplete")}</h2>
         <p className="text-sm text-tab-inactive">{t("review.quizScore", { correct, total: items.length })}</p>
         <div className="flex gap-3 mt-4">
-          <button onClick={() => { setCurrent(0); setCorrect(0); setDone(false); setSelected(null); }}
+          <button onClick={() => { setCurrent(0); setCorrect(0); setDone(false); setSelected(null); setXpAwarded(false); }}
             className="px-5 py-2.5 rounded-xl text-sm font-bold"
             style={{ backgroundColor: "var(--color-card-bg)", color: "var(--color-foreground)", border: "1px solid var(--color-card-border)" }}>
             {t("review.retryQuiz")}
@@ -339,7 +367,7 @@ function ChosungQuizView({ items, onBack }: { items: ChosungQuizItem[]; onBack: 
 /* ══════════════════════════════════════════
    플래시카드 뷰
    ══════════════════════════════════════════ */
-function FlashcardView({ items, onBack }: { items: FlashcardItem[]; onBack: () => void }) {
+function FlashcardView({ items, onBack, onXpGain }: { items: FlashcardItem[]; onBack: () => void; onXpGain?: (amount: number) => void }) {
   const { t } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -424,7 +452,10 @@ function FlashcardView({ items, onBack }: { items: FlashcardItem[]; onBack: () =
         {isLast ? (
           <button
             type="button"
-            onClick={onBack}
+            onClick={() => {
+              if (onXpGain) onXpGain(items.length * 3);
+              onBack();
+            }}
             className="flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
             style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}
           >

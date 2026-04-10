@@ -15,7 +15,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, X, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, X, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { Persona } from "@/types/api";
 import { useChat } from "@/hooks/useChat";
 import PersonaProfileCard, { CounterpartInfo } from "@/components/chat/PersonaProfileCard";
@@ -75,8 +75,8 @@ function LeaveConfirmModal({
             onClick={onConfirm}
             className="flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
             style={{
-              backgroundColor: "#DC3C3C",
-              color: "#fff",
+              backgroundColor: "var(--color-accent)",
+              color: "var(--color-btn-primary-text)",
             }}
           >
             {t("chat.leaveYes")}
@@ -97,25 +97,25 @@ export default function ChatPage() {
 
   /* 세션/페르소나가 없으면 적절한 화면으로 리다이렉트 */
   useEffect(() => {
-    if (!sessionStorage.getItem("sessionId")) {
+    if (!localStorage.getItem("sessionId")) {
       router.replace("/location");
       return;
     }
-    if (!sessionStorage.getItem("myPersona")) {
+    if (!localStorage.getItem("myPersona")) {
       router.replace("/persona");
       return;
     }
   }, [router]);
 
-  /* sessionStorage에서 내 역할 + 상대방 읽기 */
+  /* localStorage에서 내 역할 + 상대방 읽기 */
   const [persona, setPersona] = useState<Persona | null>(null);
   const [counterpart, setCounterpart] = useState<CounterpartInfo | null>(null);
 
   useEffect(() => {
     try {
-      const saved = sessionStorage.getItem("myPersona");
+      const saved = localStorage.getItem("myPersona");
       if (saved) setPersona(JSON.parse(saved));
-      const savedCounter = sessionStorage.getItem("counterpart");
+      const savedCounter = localStorage.getItem("counterpart");
       if (savedCounter) setCounterpart(JSON.parse(savedCounter));
     } catch { /* 리다이렉트로 처리됨 */ }
   }, []);
@@ -133,7 +133,7 @@ export default function ChatPage() {
     requestAnalysis,
   } = useChat(persona!);
 
-  /* 시나리오 메타데이터 (sessionStorage에서 읽기) */
+  /* 시나리오 메타데이터 (localStorage에서 읽기) */
   const [scenarioTitle, setScenarioTitle] = useState<string | null>(null);
   const [scene, setScene] = useState<string | null>(null);
   const [sceneEn, setSceneEnState] = useState<string | null>(null);
@@ -143,19 +143,21 @@ export default function ChatPage() {
     let sceneValue: string | null = null;
     let sceneEnValue: string | null = null;
     try {
-      const raw = sessionStorage.getItem("scenarioData");
+      const raw = localStorage.getItem("scenarioData");
       if (raw) {
         const data = JSON.parse(raw);
         setScenarioTitle(data.scenarioTitle ?? null);
         setKoreanLevel(data.koreanLevel ?? "");
         sceneValue = data.scene || null;
-        sceneEnValue = data.sceneEn || null;
+        /* BE는 top-level scene_en을 보내지 않으므로, persona 안의 sceneEn에서 추출 */
+        const firstPersona = data.personas ? Object.values(data.personas)[0] as Record<string, unknown> : null;
+        sceneEnValue = data.sceneEn || (firstPersona?.sceneEn as string) || null;
       }
     } catch { /* fallback */ }
     /* scene: 역할 선택 후 확정된 값 우선 */
-    const savedScene = sessionStorage.getItem("scene");
+    const savedScene = localStorage.getItem("scene");
     if (savedScene) sceneValue = savedScene;
-    const savedSceneEn = sessionStorage.getItem("sceneEn");
+    const savedSceneEn = localStorage.getItem("sceneEn");
     if (savedSceneEn) sceneEnValue = savedSceneEn;
     setScene(sceneValue);
     setSceneEnState(sceneEnValue);
@@ -184,32 +186,22 @@ export default function ChatPage() {
   /* 대화 종료 시 대화 기록 저장 */
   useEffect(() => {
     if (isFinished) {
-      sessionStorage.setItem("chatMessages", JSON.stringify(messages));
+      localStorage.setItem("chatMessages", JSON.stringify(messages));
     }
   }, [isFinished, messages]);
 
-  /* 나가기 확인 — "예": 세션 삭제 후 홈 */
+  /* 나가기 확인 — "네": 세션 유지한 채 홈으로 (이어하기 가능) */
   const handleLeaveConfirm = () => {
-    sessionStorage.removeItem("sessionId");
-    sessionStorage.removeItem("scenarioData");
-    sessionStorage.removeItem("myPersona");
-    sessionStorage.removeItem("counterpart");
-    sessionStorage.removeItem("turnLimit");
-    sessionStorage.removeItem("firstAiMessage");
-    sessionStorage.removeItem("chatMessages");
-    sessionStorage.removeItem("scene");
-    sessionStorage.removeItem("sceneEn");
     setShowLeaveModal(false);
     router.push("/");
   };
 
-  /* 나가기 확인 — "아니오": 세션 유지, 홈으로 */
+  /* 나가기 확인 — "아니오": 팝업만 닫기 */
   const handleLeaveCancel = () => {
     setShowLeaveModal(false);
-    router.push("/");
   };
 
-  /* 페르소나 로딩 대기 (리다이렉트 중이거나 sessionStorage 파싱 중) */
+  /* 페르소나 로딩 대기 (리다이렉트 중이거나 localStorage 파싱 중) */
   if (!persona || !counterpart) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -262,7 +254,7 @@ export default function ChatPage() {
               className="w-full flex items-center justify-between px-4 py-2.5 text-[12px] font-medium transition-opacity hover:opacity-70"
               style={{ color: "var(--color-tab-inactive)" }}
             >
-              <span>📍 {t("chat.sceneLabel")}</span>
+              <span className="flex items-center gap-1"><MapPin size={12} strokeWidth={2} />{t("chat.sceneLabel")}</span>
               {showScene ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
             {showScene && (
@@ -273,6 +265,24 @@ export default function ChatPage() {
                 {(isEn && sceneEn) || scene}
               </div>
             )}
+          </div>
+        )}
+
+        {/* 남은 턴 카운터 (scene 바로 아래, 우측 정렬) */}
+        {!isFinished && (
+          <div className="flex justify-end">
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] text-tab-inactive">{t("chat.leftTurns")}</span>
+              <div
+                className="text-[13px] font-medium px-3 py-1 rounded-full"
+                style={{
+                  backgroundColor: "color-mix(in srgb, var(--color-accent) 15%, transparent)",
+                  color: "var(--color-foreground)",
+                }}
+              >
+                {turnsLeft} / {totalTurns}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -335,58 +345,46 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* ── 결과 분석 버튼 (중급/고급만, 입력창 위) ── */}
-      {!isFinished && (koreanLevel === "중급" || koreanLevel === "고급" || koreanLevel === "Intermediate" || koreanLevel === "Advanced") && (
-        <div className="px-4 pb-1">
-          <button
-            type="button"
-            onClick={requestAnalysis}
-            disabled={usedTurns < 4}
-            className="text-[14px] font-medium px-4 py-2 rounded-full transition-all active:scale-95"
-            style={{
-              backgroundColor: usedTurns >= 4
-                ? "var(--color-accent)"
-                : "var(--color-surface)",
-              color: usedTurns >= 4
-                ? "var(--color-btn-primary-text)"
-                : "var(--color-tab-inactive)",
-              cursor: usedTurns >= 4 ? "pointer" : "not-allowed",
-            }}
-          >
-            {t("chat.analyzeBtn")}
-          </button>
-          <p className="text-[13px] text-tab-inactive mt-1">
-            {t("chat.analyzeHint")}
-          </p>
-        </div>
-      )}
-
-      {/* 한글 미포함 경고 */}
-      {koreanWarning && (
-        <div className="px-4 pb-1">
-          <p className="text-[13px] text-tab-inactive text-center">
-            {t("chat.koreanWarning")}
-            <br />
-            {t("chat.koreanWarningEn")}
-          </p>
-        </div>
-      )}
-
-      {/* ── 남은 턴 카운터 ── */}
+      {/* ── 하단 메타 영역: 좌측 한글 경고(고정) + 우측 결과분석 버튼 ── */}
       {!isFinished && (
-        <div className="flex justify-center py-1.5">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-tab-inactive">{t("chat.leftTurns")}</span>
-            <div
-              className="text-[11px] font-medium px-2.5 py-0.5 rounded-full"
-              style={{
-                backgroundColor: "color-mix(in srgb, var(--color-accent) 15%, transparent)",
-                color: "var(--color-foreground)",
-              }}
-            >
-              {turnsLeft} / {totalTurns}
-            </div>
+        <div className="flex items-end justify-between gap-3 px-4 pb-1.5 min-h-[64px]">
+          {/* 좌측: 한글 경고 (고정 영역, visibility로 토글 — 공간 유지) */}
+          <div
+            className="flex-1 min-w-0"
+            style={{ visibility: koreanWarning ? "visible" : "hidden" }}
+          >
+            <p className="text-[12px] text-tab-inactive leading-tight">
+              {t("chat.koreanWarning")}
+              <br />
+              {t("chat.koreanWarningEn")}
+            </p>
           </div>
+
+          {/* 우측: 결과분석 버튼 (중급/고급만) */}
+          {(koreanLevel === "중급" || koreanLevel === "고급" || koreanLevel === "Intermediate" || koreanLevel === "Advanced") && (
+            <div className="flex flex-col items-end shrink-0">
+              <button
+                type="button"
+                onClick={requestAnalysis}
+                disabled={usedTurns < 4}
+                className="text-[14px] font-medium px-4 py-2 rounded-full transition-all active:scale-95"
+                style={{
+                  backgroundColor: usedTurns >= 4
+                    ? "var(--color-accent)"
+                    : "var(--color-surface)",
+                  color: usedTurns >= 4
+                    ? "var(--color-btn-primary-text)"
+                    : "var(--color-tab-inactive)",
+                  cursor: usedTurns >= 4 ? "pointer" : "not-allowed",
+                }}
+              >
+                {t("chat.analyzeBtn")}
+              </button>
+              <p className="text-[13px] text-tab-inactive mt-1 text-right">
+                {t("chat.analyzeHint")}
+              </p>
+            </div>
+          )}
         </div>
       )}
 

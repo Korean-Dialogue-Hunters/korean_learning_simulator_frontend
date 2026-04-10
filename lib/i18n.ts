@@ -16,7 +16,7 @@ i18n
     fallbackLng: "ko",
     supportedLngs: ["ko", "en"],
     detection: {
-      order: ["localStorage", "navigator"],
+      order: ["localStorage"],
       caches: ["localStorage"],
       lookupLocalStorage: "appLanguage",
     },

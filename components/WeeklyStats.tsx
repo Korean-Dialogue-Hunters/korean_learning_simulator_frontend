@@ -15,13 +15,13 @@ export default function WeeklyStats({ stats }: WeeklyStatsProps) {
       <StatBox
         icon={<MessageCircle size={18} strokeWidth={1.8} />}
         label={t("weeklyStats.conversationCount")}
-        value={`${stats.conversationCount}${t("common.loading") ? "" : ""}회`}
+        value={t("weeklyStats.countValue", { count: stats.conversationCount })}
         highlight={false}
       />
       <StatBox
         icon={<Star size={18} strokeWidth={1.8} fill="var(--color-accent)" color="var(--color-accent)" />}
         label={t("weeklyStats.averageScore")}
-        value={`${stats.averageScore.toFixed(1)}점`}
+        value={t("weeklyStats.scoreValue", { score: stats.averageScore.toFixed(1) })}
         highlight={false}
       />
       <div className="relative pointer-events-none select-none">
@@ -29,7 +29,7 @@ export default function WeeklyStats({ stats }: WeeklyStatsProps) {
           <StatBox
             icon={<Flame size={18} strokeWidth={1.8} />}
             label={t("weeklyStats.streak")}
-            value={`${stats.streakDays}일`}
+            value={t("weeklyStats.streakValue", { days: stats.streakDays })}
             highlight={true}
           />
         </div>

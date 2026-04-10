@@ -77,7 +77,10 @@
   "weeklyStats": {
     "conversationCount": "누적 대화 횟수",
     "averageScore": "평균 점수",
-    "streak": "스트릭"
+    "streak": "스트릭",
+    "countValue": "{{count}}회",
+    "scoreValue": "{{score}}점",
+    "streakValue": "{{days}}일"
   },
   "location": {
     "title": "어디서 대화할까요?",
@@ -100,9 +103,9 @@
   "chat": {
     "leave": "나가기",
     "leaveConfirmTitle": "대화를 그만할까요?",
-    "leaveConfirmDesc": "\"네\"를 누르면 대화 세션이 삭제됩니다.",
-    "leaveYes": "네, 그만할게요",
-    "leaveNo": "아니오, 계속할게요",
+    "leaveConfirmDesc": "\"이어하기\"로 나중에 다시 대화할 수 있어요.",
+    "leaveYes": "네, 나갈게요",
+    "leaveNo": "아니오",
     "missionHint": "미션을 해결해보세요! 💬",
     "finished": "대화가 끝났어요! 결과를 확인하러 가볼까요?",
     "checkResult": "결과 확인하기",
@@ -110,6 +113,9 @@
     "analyzeHint": "최소 4턴 이후 분석을 요청할 수 있어요",
     "koreanWarning": "한글을 사용해 문장을 완성해주세요!",
     "koreanWarningEn": "Let's try to use Korean in the sentences!",
+    "me": "나",
+    "partner": "상대",
+    "missionLabel": "미션",
     "sceneLabel": "장면 상세",
     "leftTurns": "남은 턴",
     "placeholder": "메시지를 입력하세요...",
@@ -158,7 +164,10 @@
     "feedbackBtn": "상세 피드백 보기",
     "reviewBtn": "복습하기",
     "analyzing": "대화를 분석하고 있어요...",
-    "loadFailed": "결과를 불러올 수 없습니다"
+    "loadFailed": "결과를 불러올 수 없어요",
+    "sessionLostTitle": "대화 세션이 만료되었어요",
+    "sessionLostDesc": "서버가 이 대화의 기록을 더 이상 가지고 있지 않아요.\n잠시 후 새로운 대화를 시작해 주세요.",
+    "sessionLostRetry": "새 대화 시작하기"
   },
   "feedback": {
     "title": "상세 피드백",
@@ -190,6 +199,10 @@
     "sortScoreHigh": "점수 높은 순",
     "sortScoreLow": "점수 낮은 순",
     "sortLocation": "장소 기준"
+  },
+  "xp": {
+    "levelUp": "레벨 업!",
+    "nextLevel": "다음 레벨까지 {{xp}} XP"
   },
   "language": {
     "ko": "한국어 - Korean",

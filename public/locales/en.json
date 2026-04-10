@@ -77,7 +77,10 @@
   "weeklyStats": {
     "conversationCount": "Total Conversations",
     "averageScore": "Avg Score",
-    "streak": "Streak"
+    "streak": "Streak",
+    "countValue": "{{count}}",
+    "scoreValue": "{{score}}",
+    "streakValue": "{{days}}d"
   },
   "location": {
     "title": "Where would you like to talk?",
@@ -100,9 +103,9 @@
   "chat": {
     "leave": "Leave",
     "leaveConfirmTitle": "End this conversation?",
-    "leaveConfirmDesc": "Pressing \"Yes\" will delete this conversation session.",
-    "leaveYes": "Yes, end it",
-    "leaveNo": "No, continue",
+    "leaveConfirmDesc": "You can resume later with \"Continue\".",
+    "leaveYes": "Yes, leave",
+    "leaveNo": "No",
     "missionHint": "Try to complete your mission! 💬",
     "finished": "Conversation over! Ready to see your results?",
     "checkResult": "View Results",
@@ -110,6 +113,9 @@
     "analyzeHint": "You can request analysis after at least 4 turns",
     "koreanWarning": "한글을 사용해 문장을 완성해주세요!",
     "koreanWarningEn": "Let's try to use Korean in the sentences!",
+    "me": "Me",
+    "partner": "Partner",
+    "missionLabel": "Mission",
     "sceneLabel": "Scene Details",
     "leftTurns": "Turns Left",
     "placeholder": "Type a message...",
@@ -158,7 +164,10 @@
     "feedbackBtn": "View Detailed Feedback",
     "reviewBtn": "Review Now",
     "analyzing": "Analyzing your conversation...",
-    "loadFailed": "Could not load results"
+    "loadFailed": "Could not load results",
+    "sessionLostTitle": "This conversation has expired",
+    "sessionLostDesc": "The server no longer has a record of this conversation.\nPlease start a new one to try again.",
+    "sessionLostRetry": "Start a new conversation"
   },
   "feedback": {
     "title": "Detailed Feedback",
@@ -190,6 +199,10 @@
     "sortScoreHigh": "Highest score",
     "sortScoreLow": "Lowest score",
     "sortLocation": "By location"
+  },
+  "xp": {
+    "levelUp": "Level Up!",
+    "nextLevel": "{{xp}} XP to next level"
   },
   "language": {
     "ko": "한국어 - Korean",

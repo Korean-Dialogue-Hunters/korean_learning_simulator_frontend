@@ -17,10 +17,10 @@ function generateId(): string {
 }
 
 export function useChat(persona: Persona) {
-  /* turnLimit: sessionStorage에서 읽기 (BE 응답값), 기본 7 */
+  /* turnLimit: localStorage에서 읽기 (BE 응답값), 기본 7 */
   const [totalTurns] = useState(() => {
     if (typeof window === "undefined") return 7;
-    const saved = sessionStorage.getItem("turnLimit");
+    const saved = localStorage.getItem("turnLimit");
     return saved ? parseInt(saved, 10) : 7;
   });
 
@@ -32,7 +32,7 @@ export function useChat(persona: Persona) {
 
   /* 세션 초기화: 새 세션이면 firstAiMessage, 재진입이면 BE에서 대화 로그 복원 */
   useEffect(() => {
-    const firstMsg = sessionStorage.getItem("firstAiMessage");
+    const firstMsg = localStorage.getItem("firstAiMessage");
     if (firstMsg) {
       /* 새 세션 — AI 첫 발화만 표시 */
       const aiMsg: ChatMessage = {
@@ -42,12 +42,12 @@ export function useChat(persona: Persona) {
         timestamp: Date.now(),
       };
       setMessages([aiMsg]);
-      sessionStorage.removeItem("firstAiMessage");
+      localStorage.removeItem("firstAiMessage");
       return;
     }
 
     /* 재진입 — BE에서 대화 로그 + 턴 상태 복원 */
-    const sessionId = sessionStorage.getItem("sessionId");
+    const sessionId = localStorage.getItem("sessionId");
     if (!sessionId) return;
 
     getSession(sessionId)
@@ -76,7 +76,7 @@ export function useChat(persona: Persona) {
     async (text: string) => {
       if (isFinished || isAiTyping) return;
 
-      const sessionId = sessionStorage.getItem("sessionId");
+      const sessionId = localStorage.getItem("sessionId");
       if (!sessionId) return;
 
       /* 사용자 메시지 즉시 표시 */

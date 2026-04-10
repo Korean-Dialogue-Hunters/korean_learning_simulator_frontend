@@ -9,14 +9,17 @@ import HomeHeader from "@/components/HomeHeader";
 import TierCard from "@/components/TierCard";
 import WeeklyStats from "@/components/WeeklyStats";
 import { UserProfile, WeeklyStats as WeeklyStatsType, Grade } from "@/types/user";
-import { isSetupDone, getSavedProfile } from "@/hooks/useSetup";
+import { isSetupDone, getSavedProfile, getUserId } from "@/hooks/useSetup";
 import { getReviewCount, getWeeklyStats } from "@/lib/api";
+import { getXpData, getXpBarInfo } from "@/lib/xpSystem";
+import { getHistory } from "@/lib/historyStorage";
 
-/* grade 문자열("Beginner <B>")에서 Grade 타입으로 매핑 */
+/* grade 문자열("초급 <B>")에서 Grade 타입으로 매핑 */
 function parseGrade(raw: string): Grade {
-  const map: Record<string, Grade> = { B: "Bronze", S: "Silver", G: "Gold", P: "Platinum", D: "Diamond" };
-  const m = raw.match(/<(\w)>/);
-  return (m && map[m[1]]) ?? "Bronze";
+  const m = raw.match(/<(\w+)>/);
+  const code = m ? m[1] : raw;
+  if (["S", "A", "B", "C"].includes(code)) return code as Grade;
+  return "C";
 }
 
 export default function HomePage() {
@@ -31,7 +34,7 @@ export default function HomePage() {
 
   /* 세션 유무 감지 (팝업 닫힐 때도 재확인) */
   useEffect(() => {
-    setHasActiveSession(!!sessionStorage.getItem("sessionId"));
+    setHasActiveSession(!!localStorage.getItem("sessionId"));
   }, [showNoSessionModal]);
 
   useEffect(() => {
@@ -42,11 +45,17 @@ export default function HomePage() {
     const profile = getSavedProfile();
     if (!profile) return;
 
-    /* 프로필 기본값 세팅 (닉네임은 로컬, xp/grade는 API 대기) */
+    /* 프로필 기본값 세팅 (XP는 localStorage에서 읽기) */
+    const userId = getUserId();
+    const xpData = userId ? getXpData(userId) : { totalXp: 0 };
+    const bar = getXpBarInfo(xpData.totalXp);
     setUser({
       userNickname: profile.userNickname,
-      grade: "Bronze",
-      xp: 0, xpMax: 1000, xpToNext: 1000,
+      grade: "C",
+      level: bar.level,
+      xp: bar.currentLevelXp,
+      xpMax: bar.requiredLevelXp,
+      xpToNext: bar.requiredLevelXp - bar.currentLevelXp,
     });
 
     /* API 병렬 호출 */
@@ -69,7 +78,18 @@ export default function HomePage() {
           streakDays: res.streakDays ?? 0,
         });
       })
-      .catch(() => {});
+      .catch(() => {
+        /* BE 실패 시 localStorage historyStorage에서 fallback */
+        const history = getHistory();
+        if (history.length > 0) {
+          const avg = history.reduce((sum, r) => sum + r.totalScore10, 0) / history.length;
+          setWeeklyStats({
+            conversationCount: history.length,
+            averageScore: Math.round(avg * 10) / 10,
+            streakDays: 0,
+          });
+        }
+      });
   }, [router]);
 
   return (
@@ -174,7 +194,7 @@ export default function HomePage() {
                 return;
               }
               /* 떠났던 단계로 복원: 페르소나 미선택이면 /persona, 아니면 /chat */
-              const hasPersona = !!sessionStorage.getItem("myPersona");
+              const hasPersona = !!localStorage.getItem("myPersona");
               router.push(hasPersona ? "/chat" : "/persona");
             }}
             className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] active:scale-[0.97] transition-all duration-100 border-2"
