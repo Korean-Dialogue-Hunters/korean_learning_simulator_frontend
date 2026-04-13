@@ -47,7 +47,7 @@ export default function SetupPage() {
   const STEP_CONFIG: Record<number, { title: string; subtitle: string; icon: React.ReactNode }> = {
     1: { title: t("setup.step1Title"), subtitle: "", icon: <Globe size={24} strokeWidth={1.8} /> },
     2: { title: t("setup.step2Title"), subtitle: "", icon: <User size={24} strokeWidth={1.8} /> },
-    3: { title: t("setup.step3Title"), subtitle: "", icon: <Heart size={24} strokeWidth={1.8} /> },
+    3: { title: t("setup.step3Title"), subtitle: t("setup.step3Subtitle"), icon: <Heart size={24} strokeWidth={1.8} /> },
     4: { title: t("setup.step4Title"), subtitle: t("setup.step4Subtitle"), icon: <BookOpen size={24} strokeWidth={1.8} /> },
     5: { title: t("setup.step5Title"), subtitle: "", icon: <MapPin size={24} strokeWidth={1.8} /> },
   };
@@ -140,7 +140,7 @@ export default function SetupPage() {
         <h1 className="text-xl font-bold" style={{ color: WARM_THEME.text }}>
           {currentConfig.title}
         </h1>
-        {step === 4 && (
+        {(step === 3 || step === 4) && (
           <p className="text-sm mt-1" style={{ color: "var(--color-setup-text-sub)" }}>
             {currentConfig.subtitle}
           </p>

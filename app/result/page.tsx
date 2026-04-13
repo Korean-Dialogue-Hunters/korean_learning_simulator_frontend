@@ -203,12 +203,11 @@ export default function ResultPage() {
           </div>
         </div>
         {/* 오른쪽: 등급 도장 */}
-        <div className="flex flex-col items-center gap-1">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center"
-            style={{ border: `3px solid ${gradeColor}`, color: gradeColor, boxShadow: `inset 0 0 0 2px ${gradeColor}20` }}>
-            <span className="text-3xl font-black leading-none translate-y-[3px]">{gradeCode}</span>
-          </div>
-          <p className="text-[11px] text-tab-inactive">{gradeLabel}</p>
+        <div className="flex flex-col items-end">
+          <p className="text-[11px] text-tab-inactive mb-1">{gradeLabel}</p>
+          <span className="text-4xl font-black leading-none" style={{ color: gradeColor }}>
+            {gradeCode}
+          </span>
         </div>
       </div>
 
