@@ -72,7 +72,7 @@ export default function RadarChartInner({ scores }: RadarChartInnerProps) {
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onClick={undefined}>
-          <PolarGrid stroke="var(--color-card-border)" gridCount={4} />
+          <PolarGrid stroke="var(--color-card-border)" />
           <PolarAngleAxis
             dataKey="axis"
             tick={{ fontSize: 10, fill: "var(--color-tab-inactive)", style: { cursor: "default" } }}
