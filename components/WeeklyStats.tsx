@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { MessageCircle, Star, Flame } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { WeeklyStats as WeeklyStatsType } from "@/types/user";
@@ -10,12 +11,24 @@ interface WeeklyStatsProps {
 
 export default function WeeklyStats({ stats }: WeeklyStatsProps) {
   const { t } = useTranslation();
+  // i18n 언어가 SSR/client에서 달라 hydration mismatch가 나므로 mount 후에만 실제 값 렌더
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) {
+    return (
+      <div className="mx-5 grid grid-cols-3 gap-2.5">
+        <div className="h-[86px] rounded-2xl bg-card-bg border border-card-border" />
+        <div className="h-[86px] rounded-2xl bg-card-bg border border-card-border" />
+        <div className="h-[86px] rounded-2xl bg-card-bg border border-card-border" />
+      </div>
+    );
+  }
   return (
     <div className="mx-5 grid grid-cols-3 gap-2.5">
       <StatBox
         icon={<MessageCircle size={18} strokeWidth={1.8} />}
         label={t("weeklyStats.conversationCount")}
-        value={t("weeklyStats.countValue", { count: stats.conversationCount })}
+        value={t("weeklyStats.countValue", { count: stats.sessionsPerUserCount })}
         highlight={false}
       />
       <StatBox
@@ -24,19 +37,12 @@ export default function WeeklyStats({ stats }: WeeklyStatsProps) {
         value={t("weeklyStats.scoreValue", { score: stats.averageScore.toFixed(1) })}
         highlight={false}
       />
-      <div className="relative pointer-events-none select-none">
-        <div className="blur-[3px]">
-          <StatBox
-            icon={<Flame size={18} strokeWidth={1.8} />}
-            label={t("weeklyStats.streak")}
-            value={t("weeklyStats.streakValue", { days: stats.streakDays })}
-            highlight={true}
-          />
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-4xl">🚧</span>
-        </div>
-      </div>
+      <StatBox
+        icon={<Flame size={18} strokeWidth={1.8} />}
+        label={t("weeklyStats.streak")}
+        value={t("weeklyStats.streakValue", { days: stats.streakDays })}
+        highlight={true}
+      />
     </div>
   );
 }

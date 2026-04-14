@@ -3,8 +3,6 @@
 import { Globe, MessageCircle, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { WARM_THEME, COMMON_CLASSES } from "@/lib/designSystem";
-import LanguageSelector from "@/components/LanguageSelector";
-import ThemeToggle from "@/components/ThemeToggle";
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -15,11 +13,6 @@ export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen px-8 text-center">
-      {/* 우상단: 언어 + 테마 토글 */}
-      <div className="absolute top-6 right-5 flex items-center gap-2 z-10">
-        <LanguageSelector />
-        <ThemeToggle />
-      </div>
       <div className="mb-4">
         <div
           className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5"

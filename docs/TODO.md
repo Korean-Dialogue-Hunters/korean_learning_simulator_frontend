@@ -1,215 +1,187 @@
-# TODO.md — 이성준 FE 작업 목록
+# TODO.md — 코대헌 작업 목록 (재작성 v2)
 
-> **MVP 제약**: 초급 사용자 × 한강 맵만 우선 구현
-> **장소(맵)**: 확정된 목록 없음, 추후 추가 가능. 버튼은 데이터 기반 동적 렌더링으로 설계.
-> 작업은 위에서 아래 순서로 진행합니다.
-> 완료된 항목은 `- [x]`로 체크하고 worklog를 작성합니다.
-
----
-
-## 🔴 Must Have
-
-### SETUP | 프로젝트 초기 세팅
-
-- [x] **01** Next.js 15 + TypeScript + Tailwind CSS 초기화 (`feat/이성준` 브랜치)
-- [x] **02** 폴더 구조 생성 (`app/` / `components/` / `hooks/` / `types/`)
-- [x] **03** 공통 디자인 토큰 정의 (`globals.css @theme` — Tailwind v4 방식)
-  - 라이트: 배경 `#FFFFFF`, 액센트 `#A8D8C8` (민트), 카드 `#F7F7F7`
-  - 다크: 배경 `#2A2A2A`, 액센트 `#D0A95C` (딥 골드), 버튼 텍스트 `#1A1A1A`
-  - 티어별 테두리 컬러 (Bronze / Silver / Gold / Platinum / Diamond)
-- [x] **04** 전체 레이아웃 컴포넌트 구현 (`max-width: 480px`, `margin: 0 auto` — 모바일 웹 고정)
+> **작성 기준**: 2026-04-14, FE/BE 실제 코드 상태 교차 검증 후 재작성
+> **작업 단위**: 트랙별 묶음 작업 (이전 1-TODO-1-PR 방식 폐기)
+> **워크로그**: 푸시 단위로 작성 (`worklog/{push 단위 한 문장}.md`)
+> **디벨롭 필요** 태그: 작업 착수 시점에 초안을 다듬어 진행
 
 ---
 
-### F-HOME | 홈 화면 (Must)
+## 🔴 트랙 1 — 즉시 (블로커 / UX 구멍)
 
-- [x] **05** 홈 페이지 라우트 생성 (`/`)
-- [x] **06** `HomeHeader.tsx` — 앱 이름 "코대헌" + 영문 서브타이틀 / 우측 프로필 원형 아이콘 + @닉네임 / 등급(Grade) 테두리 컬러 동적 적용 _(BE 연동: 유저 프로필 API)_
-- [x] **07** `TierCard.tsx` — 등급명 / XP 현재·최대 / 다음 등급까지 남은 XP 표시 _(🚧 블러 처리, BE 미연동)_
-- [x] **08** `WeeklyStats.tsx` — 누적 대화 횟수 / 평균 점수(filled 별 아이콘) / 연속 학습일(스트릭, 🚧 블러) 3칸 가로 배열 _(BE 연동: 주간 통계 API)_
-- [x] **09** 대화 시작 CTA 버튼 — "대화 시작하기" / 클릭 시 `/location` 이동 / scale 눌림 애니메이션 / 그림자 없음
-- [x] **09-1** 재도전 카드 — 최저점 시나리오 + 재도전 버튼 _(🚧 블러 처리, BE 미연동)_
-- [x] **09-2** 복습 배너 — 초성 퀴즈/플래시 카드 개수 _(🚧 블러 처리, BE 미연동)_
-- [x] **10** `BottomTabBar.tsx` — 홈/대화/기록/복습/내정보 5탭 / lucide 아이콘 / 현재 경로 감지 자동 표시
-- [x] **11** 탭별 라우팅 연결 (`/` / `/chat` / `/history` / `/review` / `/profile`)
+- [ ] **T1-01** BE: 신규 유저 자동 생성 — **BE 요청 작성 완료** (`docs/BE_REQUESTS.md` BE-01)
+  - 옵션 A(권장): `POST /v1/users` 신설, FE 셋업 완료 시점에 호출
+  - 옵션 B: `POST /v1/sessions` 내부 자동 upsert
+  - BE 응답 결정 후 FE `lib/api.ts createUser()` + `useSetup.saveProfile()` 호출 추가
+- [x] **T1-02** FE: `/history` 404 → empty state fallback ✅ (`app/history/page.tsx` catch에서 404 / "user profile not found" 감지 시 records=[]로 처리)
+### T1 그룹: BE `WeeklyReviewResponse` 응답 경량화
 
-> ⚡ BE API 완성 전까지 mock data로 UI 먼저 완성
-> 🔗 **BE API**: `GET /v1/users/{nickname}/profile`, `GET /v1/users/{nickname}/weekly-stats`
+> **배경**: `GET /v1/users/{nickname}/review/weekly` 응답이 LangGraph `ReviewState` 덤프 그대로 노출되어 FE가 안 쓰는 필드 다수 포함. `build_weekly_review`(`learning_orchestrator.py:598,606`)가 `review_graph.invoke()` 결과를 거의 그대로 반환하는 구조를 명시 매핑으로 교체.
 
----
+**필드별 진단**
 
-### F-01 | 맞춤 학습 설정 UI (구 온보딩)
+| 필드 | 성격 | FE 필요 | 조치 |
+|---|---|---|---|
+| `userProfile` | 그래프 입력값 누수 | ❌ | 제거 |
+| `justBeforeSession` | 그래프 입력값 누수 + `conversation_log` 전체 포함 (페이로드 무거움) | ❌ | 제거 (또는 `sessionId`만) |
+| `wrongWordPool` | 중간 산출물 누수 (FE는 flashcards에 교정 결과 이미 들어옴) | ❌ | 제거 |
+| `chosungQuiz` | 최종 산출물 | ✅ | 유지 |
+| `flashcards` | 최종 산출물 | ✅ | 유지 |
 
-- [x] **12** 설정 페이지 라우트 생성 (`/setup`, 구 `/onboarding`에서 리네이밍)
-- [x] **13** 국적 선택 드롭다운 UI
-  - 자주 쓰는 국가 최상단 고정 배치
-  - 드롭다운 내 타이핑으로 국가 검색·자동완성
-  - IP 기반 자동 국가 선택 (FE에서 ipapi.co 직접 호출로 처리)
-- [x] **13-1** 닉네임 입력 UI (자동 생성 + 수동 편집, 32바이트 제한)
-- [x] **14** 한국어 수준 선택 UI (초급 / 중급 / 고급 버튼)
-- [x] **15** 관심 있는 한국 문화 선택 UI (**중복 선택 가능**, 버튼식)
-  - K-Content / K-Pop / K-Beauty / K-Food / K-Gaming·eSports / Others
-  - Others 선택 시 텍스트 직접 입력 + 입력 내용 미리보기
-  - BE 전송: `cultural_interest` (string[])
-  - 단계 순서: 3번째(관심문화) → 4번째(한국어실력) 순으로 변경됨
-- [x] **16** 가보고 싶은 곳 선택 UI (1가지, 버튼식)
-  - 현재 제공 장소: 한강 / 명동 / 롯데월드
-  - ※ 장소 목록 미확정. 버튼은 데이터 배열 기반으로 동적 렌더링 (추후 항목 추가 용이하게)
-  - location ID: 한글 기준 (`"한강"`, `"명동"`, `"롯데월드"`) — BE와 통일
-- [x] **17** 즉시 시작 팝업 — "이 장소로 대화를 바로 시작하시겠습니까?"
-  - YES → 시나리오 생성 API 호출 → 역할(A/B) 선택 화면으로 이동
-  - NO → 메인 화면(`/`)으로 이동
-- [x] **18** 입력값 유효성 검사 로직 작성 + 테스트 **(TDD)**
-- [x] **19** 완료 시 로컬스토리지에 사용자 프로필 저장 (UUID 자동 생성, `crypto.randomUUID()`)
-- [x] **20** 2회차 접속 시 설정 건너뛰고 홈으로 자동 이동 (UUID 존재 여부로 판단)
+**상세 노트**
+- `userProfile`: 그래프 내부 노드들이 한국어 수준 참조용으로 `ReviewState`에 넣어둔 입력값. `learning_orchestrator.py:616 _persist_review_artifacts`에서 `session_state["user_profile"]` 그대로 복사. 응답 노출은 `review_graph.invoke(state)`가 입력 상태 포함 dict 반환하기 때문.
+- `justBeforeSession`: 이름은 list지만 항상 원소 1개. `generate_flashcards.py:225`(명사 토크나이징), `generate_chosung_quiz.py:500`(퀴즈 소재), `ui.py:444`(Gradio weak_count 표시)에서 내부 사용. `conversation_log` 전체가 들어가 페이로드 큼.
+- `wrongWordPool`: 평가 그래프가 만든 "틀린→교정" 쌍. `generate_flashcards.py:253`에서 LLM 교정 경로 분기용 플래그로만 사용. 실제 데이터는 `just_before_session[0].wrong_words`에서 다시 파싱하므로 중복.
+- `chosungQuiz` / `flashcards`: 의도된 최종 산출물. 유지.
+
+- [ ] **T1-03** BE: `build_weekly_review` 명시 매핑으로 교체 — **BE 요청 작성 완료** (`docs/BE_REQUESTS.md` BE-02)
+  - `review_graph.invoke()` 결과에서 `chosung_quiz`, `flashcards`만 추출
+  - `WeeklyReviewResponse` Pydantic 스키마에서 `user_profile`, `just_before_session`, `wrong_word_pool` 3개 필드 제거
+  - 페이로드 대폭 축소 (`conversation_log` 전체가 빠짐)
+- [ ] **T1-04** FE: BE 정리 후 `types/api.ts WeeklyReviewResponse`에서 `userProfile`, `justBeforeSession`, `wrongWordPool` 제거
+- [ ] **T1-05** (보류) review 페이지 `justBeforeSession` 렌더 + 빈 데이터 fallback — BE 정리 결정 후 재검토
 
 ---
 
-### F-TUT | 튜토리얼 (추후 재설계 예정)
+## 🟡 트랙 2 — UI 디테일 (작업량 작음, 묶음 PR) ✅ 완료 (2026-04-14)
 
-- [ ] **21** 튜토리얼 UI/UX 재설계 및 구현 (기존 스포트라이트 방식 제거됨, 새 방식 미정)
-
----
-
-### F-02a | 장소 선택 UI
-
-- [x] **25** 장소 선택 페이지 라우트 생성 (`/location`)
-- [x] **26** 장소 버튼을 데이터 배열 기반으로 동적 렌더링 (장소 추가 시 배열만 수정하면 되도록)
-- [x] **27** MVP 단계: 한강 버튼만 활성화, 나머지 비활성(흐리게) 처리
-- [x] **28** 장소 선택 시 시각적 활성화 상태 표시 (선택된 버튼 강조)
-- [x] **29** 선택 완료 → 시나리오 생성 API 호출 → 역할 선택 화면(`/persona`)으로 이동
-
----
-
-### F-PERSONA | 역할(페르소나) 선택 화면
-
-- [x] **30** 역할 선택 페이지 라우트 생성 (`/persona`)
-- [x] **31** 페르소나 A/B 카드 표시 — **사용자가 맡을 역할/미션** 선택 (이름 / role / 나이 / mission)
-- [x] **32** 사용자가 A 또는 B 선택 → 선택한 역할(myPersona) + 안 고른 쪽(counterpart)을 sessionStorage에 저장 → 채팅 화면으로 이동
-  - 필드명: BE `Persona` 스키마와 통일 (`role`, `mission`, `avatar_url`)
+- [x] **T2-01** 셋업 한국어 수준 화면 — `LevelSelect.tsx`: 중급/고급 disabled, 태그/카피/버튼 크기 ↑
+- [x] **T2-02** 결과↔피드백 흐름 스왑 — 채팅 종료 → `/feedback` (평가 호출 + XP 지급) → "결과 요약 보기" → `/result`
+- [x] **T2-03** 결과 LLM 피드백 i18n — `evaluateSession(sessionId, lang)` 추가, `?lang=ko|en` 쿼리 전달
+  - **BE 확인 요청**: 백엔드가 `?lang=` 쿼리를 받아 `feedback`/`llm_summary`를 해당 언어로 생성하는지 점검 필요 (FE는 ko/en 두 값만 보냄)
+- [x] **T2-04** 결과 페이지 대화 로그 카드에 mission + scene 표시 (한/영 분기, `myPersona` + `scene`/`sceneEn`)
+- [x] **T2-05** 레이더 격자 4링 → 3링 (`ticks={[3.33, 6.67, 10]}`)
+- [x] **T2-06** SCK 어휘 사용 → `/feedback`로 이동 (피드백이 메인 결과 화면이 됨)
+- [x] **T2-07** TierCard 줄바꿈 — `{닉네임}님` / `환영해요!` (locale `tierCard.namePostfix` + `tierCard.welcome` 분리)
+- [x] **T2-08** 초성퀴즈 가독성 — 지시문 헤더 + 초성 강조 박스(5xl) + 의미 보조
+- [x] **T2-09** 플래시카드 마지막 카드 "다음" → "암기 완료" (`review.memorizeBtn`)
 
 ---
 
-### F-03 | 메신저형 채팅 UI
+## 🟠 트랙 3 — 설정 메뉴 + 셋업 재구성 (한 덩어리) ✅ 완료 (2026-04-14)
 
-- [x] **33** 채팅 페이지 라우트 생성 (`/chat`)
-- [x] **34** 프로필 카드 컴포넌트 — **가로 반반 레이아웃 (나 | 상대방)** + 미션 설명 + 턴 카운터
-- [x] **35** 말풍선형 채팅 메시지 컴포넌트 (`speaker`/`utterance` 필드, 내 메시지 우측 / AI 메시지 좌측)
-- [x] **36** 메시지 입력창 + 전송 버튼 UI (1000바이트 제한, 바이트 카운터 표시)
-- [x] **36-1** 한국어 입력 검증 — 영어만 입력 시 경고 메시지 (한/영 이중 표시)
-- [x] **37** AI 응답 스트리밍 표시 (글자가 순서대로 나타나는 효과)
-- [x] **38** 남은 턴 수 표시 UI (예: "남은 대화 5 / 7")
-- [x] **39** 대화 종료 → **"결과 확인하기" 버튼** 표시 → 클릭 시 `/result` 이동 (자동 이동 제거, 대화 스크롤 유지)
-- [x] **39-1** 최소 4턴 이후 **조기 결과 분석 요청** 버튼 (채팅 입력창 위 배치, 턴 충족 시 활성화)
+- [x] **T3-01** `/settings` 페이지 신설 (`app/settings/page.tsx`) — 홈 우상단 톱니바퀴(`HomeHeader.tsx`)에서 진입
+- [x] **T3-02** 언어/테마 토글 `/settings`로 통합 — `HomeHeader`, `WelcomeScreen`에서 `LanguageSelector`/`ThemeToggle` 제거
+- [x] **T3-03** 셋업 1단계 = "초기 설정" 신설 (`InitialSettingsStep.tsx`, 언어+테마 토글 즉시 반영)
+- [x] **T3-04** `/profile` 라우트 + BottomTabBar 탭 삭제 (3탭 구성: 홈/기록/복습)
+- [x] **T3-05** 셋업 장소 단계 삭제 → 5단계 재배치 (1 초기설정 / 2 국적 / 3 닉네임 / 4 문화 / 5 한국어 수준). 마지막 단계 후 `StartConfirmModal` ("지금 바로 대화 시작?") → 네 `/location`, 아니오 `/`. 셋업 내부 `createSession` 호출 제거
+- [x] **T3-06** 홈 빈 상태 CTA 카드 (재도전 카드 자리, 활성 세션 없을 때만) + "새로 하기" 버튼 펄스 애니메이션 (`animate-pulse` + glow ring)
 
 ---
 
-### F-04 | 결과 & 점수 화면
+## 🟢 트랙 4 — 대화 경험 강화
 
-- [x] **40** 결과 페이지 라우트 생성 (`/result`)
-- [x] **41** 총점 (`total_score_10`, 10점 만점) 표시 UI + 별점(filled) 시각화
-- [x] **42** 등급(`grade`) 표시 UI — Grade 컬러 동적 적용
-- [x] **43** 피드백 페이지로 이동하는 버튼
-- [x] **43-1** 레이더 그래프 (어휘/상황/문법 3축) — Recharts
-
----
-
-## 🟡 Should Have
-
-### F-05a | 피드백 UI
-
-- [x] **44** 피드백 페이지 라우트 생성 (`/feedback`)
-- [x] **45** 대화 로그 다시보기 UI (접기/펼치기, 기본 4개 표시)
-- [x] **46** 사용자 발화 중 오답 부분 빨간 음영 + wavy underline 표시 (`has_error`, `error_highlights`)
-- [x] **47** 틀린 단어 목록(`wrong_words`) + 뜻풀이 + 교정 표현 표시
-- [x] **48** 대화 요약 피드백 텍스트(`feedback`) 표시 + 레이더 그래프
-
----
-
-### F-05b | 방사형 그래프
-
-- [x] **49** 방사형(레이더) 그래프 라이브러리 선택 및 설치
-- [x] **50** 어휘(30%) / 상황(50%) / 문법(20%) 3축 그래프 구현
-- [x] **51** 평가 에이전트 결과값(어휘/상황/문법 점수) 받아서 그래프 3축에 표시
+- [x] **T4-01** 로딩화면 시스템 ✅ 2026-04-14
+  - 채택안: ①(메시지 회전) + ③(브랜드 스피너) + 깜빡임 방지(delay 200ms / minVisible 500ms)
+  - `components/common/LoadingScreen.tsx` 신설 — `active` prop 기반, variant: scenario/evaluation/review, 메시지 2.5s 회전
+  - i18n `loading.scenario|evaluation|review` 메시지 3개씩 (ko/en)
+  - 적용: `/location` (시나리오), `/result` `/feedback` (평가), `/review` 3곳
+  - 미사용 `ScenarioLoading.tsx` 삭제
+- [ ] **T4-02** 관계유형(relation type) 이미지화 (디벨롭 필요)
+  - **메모 (킵)**: 관계 리스트 유한 집합이면 사전 생성 (Midjourney/DALL-E) → 정적 자산. 런타임 LLM 호출은 지연/비용 X
+  - 선결: 관계 타입 리스트 확정
+- [x] **T4-03** 역할(persona) 선택 화면 리디자인 ✅ 2026-04-14
+  - 세로 평행 → 가로 평행(상하 스택) 큰 카드 2개, 배경 이미지 + 그라데이션 + 좌하단 텍스트 + A/B 배지
+  - 카드 탭 → `PersonaDetailModal` 풀스크린: 큰 인물 이미지 + 관계 헤더(내 역할 → 상대) + 정보/미션/시나리오 + 하단 CTA
+  - "선택 강조" 단계 제거 (탭=즉시 디테일 진입)
+  - 임시 SVG: `public/personas/{a,b}/1.svg` (실제 견본 이미지 다중 매핑은 향후)
+  - `lib/personaImage.ts` 헬퍼 — `avatarUrl` 우선, 폴백 `/personas/{id}/1.svg`
+  - i18n: `persona.relationLabel/youAre/partnerIs/missionLabel/infoLabel/tapToView/ageUnit`
+  - **연관**: BE-04 (페르소나/시나리오 영문 필드) 요청 등록
+- [x] **T4-04** 맵 선택 화면 배경 이미지 + 카드 리디자인 ✅ 2026-04-14
+  - 임시 SVG 3장 (`public/locations/{hangang,myeongdong,lotteworld}.svg`) — 그라데이션 + 일러스트
+  - `lib/locationImage.ts` 헬퍼 — 향후 실제 사진 덮어쓰기
+  - `/location` 카드 리디자인 — 배경 이미지 + 하단 그라데이션 + 좌하단 텍스트, 비활성 그레이스케일
+  - 화면 꽉차게 (스크롤 X): `h-screen overflow-hidden` + 카드 `flex-1 min-h-0` 균등 분할
+  - **UX 변경**: "Start here" 확인 버튼 제거 → 카드 탭 즉시 세션 생성 (선택 강조 단계 삭제)
 
 ---
 
-### F-06a | 초성 퀴즈 UI
+## 🔵 트랙 5 — Tier 시스템 (대형, 별도 PR 트랙)
 
-- [ ] **52** 주간 복습 페이지 라우트 생성 (`/review`)
-- [ ] **53** 초성 퀴즈 카드 컴포넌트 (문제 + 4지선다 보기)
-- [ ] **54** 정답 선택 시 정오답 피드백 UI (정답: 초록 / 오답: 빨강)
-- [ ] **55** 퀴즈 완료 후 결과 요약 표시
+> ⚠️ BE 스키마 마이그레이션부터 시작. 트랙 2~3 끝낸 뒤 진행 권장.
 
----
+### 데이터 모델
+- [ ] **T5-01** BE: `users.tier` 필드 추가 (1~6, 기본값은 셋업 한국어 레벨 매핑)
+  - 매핑: 초급→1, 중급→3, 고급→5 (또는 추후 확정)
+- [ ] **T5-02** Tier 매핑표 코드화
+  - 초급1=1급=sck1 / 초급2=2급=sck2 / 중급1=3급=sck3 / 중급2=4급=sck4 / 고급1=5급=sck5 / 고급2=6급=sck6
+- [ ] **T5-03** 티어 이름 확정 (현재 임시 1~6급)
 
-### F-HOME-S | 홈 화면 Should Have
+### 대화 난이도 차등
+- [ ] **T5-04** 티어별 대화 난이도 적용 (시나리오 / 턴수 / 미션 난이도)
 
-- [ ] **56** XP 진행 바 애니메이션 (화면 진입 시 0%→실제 비율까지 채워짐)
-- [x] **57** 재도전 카드 — 최저점 시나리오명 + 점수 뱃지 + 재도전 버튼 _(레이아웃 완료, 🚧 블러 처리, BE 미연동)_
-- [ ] **58** 재도전 버튼 클릭 시 해당 시나리오로 바로 진입 (장소 선택 스킵) — BE 연동 후 구현
-- [x] **59** 복습 배너 — 초성 퀴즈 N개 + 플래시 카드 N개 표시 _(레이아웃 완료, 🚧 블러 처리, BE 미연동)_
+### 승급 시스템
+- [ ] **T5-05** BE: 승급 자격 판정 로직
+  - 현재 티어 세션 5회 이상
+  - 최근 5회 평균 8점 이상
+- [ ] **T5-06** BE: 승급 시험 엔드포인트
+  - 다음 티어 대화 세션 생성 → A 이상 시 pass → tier +1
+- [ ] **T5-07** FE: 새 탭 "승급" 추가 (BottomTabBar)
+  - 자격 미달: "승급 응시 자격 미달성" 안내 화면
+  - 자격 충족: 응시 가능 + 탭에 알림 뱃지(말풍선 마크)
+- [ ] **T5-08** 보류: SCK 단어퀴즈 (현재 등급에 맞는)
+- [ ] **T5-09** 보류: 플래시카드(내 오답) 어휘 퀴즈
 
-> 🔗 **BE API**: `GET /v1/users/{nickname}/review/count`, `GET /v1/users/{nickname}/review/weekly`
-
----
-
-## 🟢 Could Have
-
-### F-05c | Scaffolding 팝업
-
-- [ ] **60** AI 발화 말풍선 클릭 시 팝업 표시
-- [ ] **61** 팝업 내 어절 단위 한→영 해석 표시
-
----
-
-### F-06b | 플래시 카드 UI
-
-- [ ] **62** 플래시 카드 컴포넌트 (앞: 한국어 / 뒤: 영어 + 예문)
-- [ ] **63** 카드 뒤집기 애니메이션
-- [ ] **64** "알았어요 / 모르겠어요" 버튼으로 복습 우선순위 조정
+### 강등 시스템
+- [ ] **T5-10** BE: 강등 로직
+  - 최근 3회 평균 5점 이하 → tier -1
+  - 티어 변경 시 평균 측정 리셋
 
 ---
 
-### F-HOME-C | 홈 화면 Could Have
+## 🟣 트랙 6 — 기록 탭 진척도 (디벨롭 후)
 
-- [ ] **65** 화면 진입 시 카드 순서대로 페이드인 애니메이션
-- [ ] **66** 스트릭 마일스톤 달성 시 축하 토스트 메시지 (7일·30일 달성 시)
-- [ ] **67** 스켈레톤 로딩 UI (API 응답 전 회색 박스로 레이아웃 유지)
-
----
-
-### F-PROFILE | 내정보 탭
-
-- [ ] **68** 프로필 페이지 라우트 생성 (`/profile`)
-- [ ] **69** 레벨·국적·설정 정보 표시
-- [ ] **70** "튜토리얼 다시 보기" 버튼 (tutorialDone 초기화 후 실행)
-
----
+- [ ] **T6-01** BE: 세션별 진척도 집계 로직
+  - 항목: ① 대화 grade A ② 초성퀴즈 4/5점 이상 ③ 플래시카드 5장 완료
+- [ ] **T6-02** FE: 기록 카드에 진척도 표시 (디벨롭 필요)
+  - **메모 (킵) — UI 후보**:
+    - 별 3개 ⭐⭐⭐ (게임적, 친숙) — **추천**
+    - 트로피 + 점 3개
+    - 3분할 진행바 ▰▰▱
+    - 체크박스 3개
+    - 도넛 차트
+  - 추천 초안: 별 3개 + 호버/탭 시 툴팁 (각 별이 무엇인지)
 
 ---
 
-## 🔗 BE API 연동 (다음 단계)
+## 🔵 트랙 7 — 문서 정합성
 
-> 모든 UI 구현 완료, mock 데이터 → BE API 연동이 다음 핵심 작업
-> 상세 매핑: `docs/API_MAPPING.md` 참조
-
-- [ ] **A-01** `POST /v1/sessions` — 장소 선택 후 세션 생성 연동
-- [ ] **A-02** `POST /v1/sessions/{id}/role` — 역할 선택 연동
-- [ ] **A-03** `POST /v1/sessions/{id}/turns` — 채팅 턴 연동 (mock 응답 → BE 응답)
-- [ ] **A-04** `POST /v1/sessions/{id}/evaluation` — 결과/피드백 연동
-- [ ] **A-05** `GET /v1/users/{nickname}/profile` — 홈 프로필 연동
-- [ ] **A-06** `GET /v1/users/{nickname}/weekly-stats` — 홈 통계 연동
-- [ ] **A-07** `GET /v1/users/{nickname}/review/count` — 홈 복습 배너 연동
-- [ ] **A-08** 🚧 블러/placeholder 해제 — BE 연동 완료된 기능부터 순차 해제
+- [ ] **T7-01** `docs/CLAUDE.md` 갱신
+  - 라우트 표 (`/history` `/review` 상태 갱신, `/profile` 삭제 반영)
+  - "BE 연계 API ⏳ mock" 표 → 실연동 상태로 갱신
+  - 레이더 그래프 축수 (3축 → 5축)
+- [x] **T7-02** 루트 `TODO.md` (BE WeeklyReviewResponse 정리 노트)를 `docs/TODO.md`로 흡수 → 루트 파일 삭제 완료
 
 ---
 
-## 📝 작업 규칙 리마인더
+## ⚪ 보류
 
-- 한 번에 하나의 TODO만 작업
-- 완료 시 `worklog/` 폴더에 md 파일 생성
-- 파일명 = 커밋 메시지 (예: `003-장소-선택-버튼-UI-구현.md`)
-- 확인 받은 후 다음 TODO로 이동
-- BE API 미완성 항목은 mock data로 UI 먼저 완성 후 나중에 교체
-- **필드명은 BE snake_case 기준** — `docs/API_MAPPING.md` 참조
+- 진행률 애니메이션 (T4-01 결론에 따라)
+- F-05c Scaffolding 팝업 (AI 발화 어절 단위 한→영 해석)
+- F-HOME-C 페이드인 / 스트릭 마일스톤 토스트 / 스켈레톤 로딩
+- F-TUT 튜토리얼 재설계 (기존 스포트라이트 제거됨, 새 방식 미정)
+- 홈 재도전 카드 BE 엔드포인트 + 블러 해제 (현재 blur+🚧)
+- `/history` 업적 / SCK 수집 탭 (현재 placeholder)
+
+---
+
+## 🗑️ 구 TODO에서 삭제된 항목 (참고용)
+
+- 50-51 "3축" — 실제 5축
+- A-01~A-08 BE 연동 표 — 대부분 완료
+- F-06a 52~55 — 이미 완료
+- F-06b 62~64 — 이미 완료
+- F-PROFILE 68~70 — 탭 삭제 결정 (T3-04)
+- F-HOME-S 56 XP 진행 바 애니메이션 — 사용자 제외 결정
+- 09-1/09-2/57/59 "🚧 블러" 문구 — 현재 상태로 갱신됨
+
+---
+
+## 📝 작업 규칙
+
+- 트랙 단위로 묶음 작업 진행
+- 푸시 단위로 워크로그 작성 (`worklog/{푸시 한 문장}.md`)
+- 디벨롭 필요 항목은 작업 착수 시점에 메모(킵)된 초안을 다듬어 시작
+- main 머지 전 항상 `npm run build` 통과 확인 (CLAUDE.md 규칙)
+- BE 레포 수정 필요 시 사용자에게 확인 후 진행

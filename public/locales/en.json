@@ -21,13 +21,14 @@
     "timeNote": "Takes about 1 minute"
   },
   "setup": {
-    "step1Title": "Where are you from?",
-    "step2Title": "Choose a nickname",
-    "step3Title": "What Korean culture interests you?",
-    "step3Subtitle": "Pick as many as you like.",
-    "step4Title": "What's your Korean level?",
-    "step4Subtitle": "This sets the initial difficulty and number of conversation turns.",
-    "step5Title": "Where would you like to go?"
+    "step1Title": "Initial Settings",
+    "step1Subtitle": "Pick your language and theme.",
+    "step2Title": "Where are you from?",
+    "step3Title": "Choose a nickname",
+    "step4Title": "What Korean culture interests you?",
+    "step4Subtitle": "Pick as many as you like.",
+    "step5Title": "What's your Korean level?",
+    "step5Subtitle": "This sets the initial difficulty and number of conversation turns."
   },
   "nickname": {
     "placeholder": "Choose a nickname",
@@ -39,12 +40,16 @@
     "beginner": "Beginner",
     "intermediate": "Intermediate",
     "advanced": "Advanced",
-    "beginnerDesc": "Hello, Thank you level",
-    "intermediateDesc": "Can handle everyday conversations",
-    "advancedDesc": "Able to use natural expressions",
+    "beginnerTag": "[Basic Talk]",
+    "intermediateTag": "[Social Chat]",
+    "advancedTag": "[In-depth Discussion]",
+    "beginnerDesc": "Essentials like greetings, ordering, asking directions",
+    "intermediateDesc": "Hold a natural back-and-forth on everyday topics",
+    "advancedDesc": "Engage in deep conversations with opinions and reasoning",
     "beginnerTurns": "3 turns",
     "intermediateTurns": "5 turns",
-    "advancedTurns": "7 turns"
+    "advancedTurns": "7 turns",
+    "comingSoon": "Coming soon"
   },
   "culture": {
     "othersPlaceholder": "Enter your cultural interest",
@@ -69,10 +74,14 @@
     "noSessionTitle": "No active conversation",
     "noSessionDesc": "Would you like to start a new one?",
     "noSessionYes": "Yes, let's go!",
-    "noSessionNo": "No"
+    "noSessionNo": "No",
+    "emptyTitle": "Ready for your first conversation?",
+    "emptyDesc": "Pick a location and chat with AI in Korean.",
+    "emptyCta": "Start a conversation"
   },
   "tierCard": {
-    "welcome": ", welcome!",
+    "namePostfix": "",
+    "welcome": "Welcome!",
     "nextTier": "{{xp}} XP to next tier"
   },
   "weeklyStats": {
@@ -81,7 +90,7 @@
     "streak": "Streak",
     "countValue": "{{count}}",
     "scoreValue": "{{score}}",
-    "streakValue": "{{days}}d"
+    "streakValue": "{{days}}D"
   },
   "location": {
     "title": "Where would you like to talk?",
@@ -99,7 +108,14 @@
     "startBtn": "Start with this persona",
     "loading": "Setting up role...",
     "loadingScenario": "Loading scenario...",
-    "failedRole": "Failed to select role"
+    "failedRole": "Failed to select role",
+    "tapToView": "Tap for details",
+    "relationLabel": "Relationship",
+    "youAre": "You",
+    "partnerIs": "Partner",
+    "missionLabel": "Mission",
+    "infoLabel": "Profile",
+    "ageUnit": ""
   },
   "chat": {
     "leave": "Leave",
@@ -146,6 +162,8 @@
     "cardProgress": "{{current}} / {{total}}",
     "prevCard": "Prev",
     "nextCard": "Next",
+    "memorizeBtn": "Memorized",
+    "chosungInstruction": "Pick the word that matches these initial consonants",
     "reviewDone": "Review Complete!",
     "backToReview": "Back to Review"
   },
@@ -168,6 +186,9 @@
     "collapse": "Collapse",
     "xpEarned": "XP earned from this conversation",
     "feedbackBtn": "View Detailed Feedback",
+    "summaryBtn": "View Result Summary",
+    "missionLabel": "Mission",
+    "sceneLabel": "Scene",
     "reviewBtn": "Review Now",
     "analyzing": "Analyzing your conversation...",
     "loadFailed": "Could not load results",
@@ -194,8 +215,7 @@
   "tabs": {
     "home": "Home",
     "history": "History",
-    "review": "Review",
-    "profile": "Profile"
+    "review": "Review"
   },
   "history": {
     "title": "History",
@@ -203,6 +223,7 @@
     "tabAchievement": "Achievement",
     "tabSck": "SCK Collection",
     "empty": "No conversation history yet.\nComplete a conversation to see it here!",
+    "loadFailed": "Failed to load history",
     "score": "Score",
     "sortRecent": "Recent",
     "sortOldest": "Oldest",
@@ -217,5 +238,36 @@
   "language": {
     "ko": "한국어 - Korean",
     "en": "영어 - English"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "preview": "Preview"
+  },
+  "startConfirm": {
+    "title": "Start a conversation now?",
+    "subText": "You can pick a location and generate a scenario.",
+    "yes": "Yes, let's start",
+    "no": "Maybe later"
+  },
+  "loading": {
+    "scenario": [
+      "Building your scenario...",
+      "Setting the scene...",
+      "Almost ready..."
+    ],
+    "evaluation": [
+      "Analyzing your conversation...",
+      "Reviewing expressions...",
+      "Scoring..."
+    ],
+    "review": [
+      "Preparing review content...",
+      "Organizing words...",
+      "Almost ready..."
+    ]
   }
 }

@@ -1,18 +1,17 @@
 /* ──────────────────────────────────────────
    BE API 요청/응답 타입 정의
    - FE 내부 필드명: camelCase
-   - BE 실제 전송 필드명: snake_case (주석으로 표기)
-   - 연동 시 변환 레이어 필요: camelCase ↔ snake_case
+   - BE 실제 전송 필드명: snake_case (lib/api.ts에서 자동 변환)
    ────────────────────────────────────────── */
 
 /* ── POST /v1/sessions ── */
-// BE: { user_nickname, country, korean_level, cultural_interest, location }
 export interface CreateSessionRequest {
+  userId: string;             // BE: user_id (UUID)
   userNickname: string;       // BE: user_nickname
-  country: string;            // BE: country
+  country: string;
   koreanLevel: string;        // BE: korean_level
-  culturalInterest: string;   // BE: cultural_interest
-  location: string;           // BE: location
+  culturalInterest: string[]; // BE: cultural_interest
+  location: string;
 }
 
 // 페르소나 한 명의 데이터 (사용자가 맡을 역할/미션)
@@ -21,63 +20,48 @@ export interface Persona {
   name: string;
   age: number;
   gender: string;
-  genderEn?: string;     // BE: gender_en
-  role: string;          // 역할 (예: "대학생", "친구")
-  roleEn?: string;       // BE: role_en
-  mission: string;       // 사용자의 미션
-  missionEn?: string;    // BE: mission_en
-  avatarUrl?: string;    // BE: avatar_url
+  genderEn?: string;
+  role: string;
+  roleEn?: string;
+  mission: string;
+  missionEn?: string;
+  avatarUrl?: string;
 }
 
-// 응답: 시나리오 + 사용자가 선택할 역할 두 개
-// BE: { session_id, scenario_title, scene, personas, relationship_type, dialogue_function, turn_limit, location, user_profile }
+// POST /v1/sessions 응답 — 역할 선택 전 상태
 export interface CreateSessionResponse {
   sessionId: string;                       // BE: session_id
+  userProfile: Record<string, unknown>;    // BE: user_profile
+  koreanLevel: string;                     // BE: korean_level
+  location: string;
   scenarioTitle: string;                   // BE: scenario_title
-  scenarioTitleEn?: string;                // BE: scenario_title_en
+  scenarioTitleEn?: string;
   scene: string;
-  sceneEn?: string;                        // BE: scene_en
-  personas: Record<string, Persona>;       // { A: {...}, B: {...} }
+  sceneEn?: string;
+  personas: Record<string, Persona>;
   relationshipType: string;                // BE: relationship_type
   dialogueFunction: string;                // BE: dialogue_function
   turnLimit: number;                       // BE: turn_limit
-  location: string;
-  userProfile: Record<string, unknown>;    // BE: user_profile
 }
 
 /* ── POST /v1/sessions/{id}/role ── */
-// BE: { selected_role }
 export interface SelectRoleRequest {
   selectedRole: string;   // BE: selected_role — "A" or "B"
 }
 
 /* ── POST /v1/sessions/{id}/turns ── */
-// BE: { user_input }
 export interface CreateTurnRequest {
   userInput: string;   // BE: user_input
 }
 
 // 역할 선택 이후 세션 상태 응답 (role, turns, get 공통)
-// BE: { session_id, scenario_title, scene, personas, relationship_type, dialogue_function,
-//       turn_limit, location, user_profile, selected_role, conversation_log,
-//       turn_count, is_finished, latest_ai_response }
-export interface SessionStateResponse {
-  sessionId: string;                       // BE: session_id
-  scenarioTitle: string;                   // BE: scenario_title
-  scenarioTitleEn?: string;                // BE: scenario_title_en
-  scene: string;
-  sceneEn?: string;                        // BE: scene_en
-  personas: Record<string, Persona>;
-  relationshipType: string;                // BE: relationship_type
-  dialogueFunction: string;                // BE: dialogue_function
-  turnLimit: number;                       // BE: turn_limit
-  location: string;
-  userProfile: Record<string, unknown>;    // BE: user_profile
+export interface SessionStateResponse extends CreateSessionResponse {
   selectedRole: string;                    // BE: selected_role
   conversationLog: ConversationEntry[];    // BE: conversation_log
   turnCount: number;                       // BE: turn_count
   isFinished: boolean;                     // BE: is_finished
-  latestAiResponse: string;               // BE: latest_ai_response
+  latestAiResponse: string;                // BE: latest_ai_response
+  createdAt: string;                       // BE: created_at
 }
 
 // 대화 로그 한 건 (BE 형식)
@@ -94,14 +78,14 @@ export interface EvaluationResponse {
   conversationLog: ConversationEntry[];           // BE: conversation_log
   location: string;
   scenarioTitle: string;                          // BE: scenario_title
-  scene: string;                                  // BE: scene
-  highlightedLog: HighlightedEntry[];             // BE: highlighted_log
-  lengthScore: number;                              // BE: length_score — 발화 길이 점수
+  scene: string;
+  wrongWordPool: string[];                        // BE: wrong_word_pool — "틀린->교정" 형식
+  lengthScore: number;                            // BE: length_score — 발화 길이 점수
   vocabScore: number;                             // BE: vocab_score — 어휘 점수
-  contextScore: number;                           // BE: context_score — 맥락 점수 (레거시: 장면+관계 평균)
-  contextSceneMissionMatch: number;               // BE: context_scene_mission_match — 장면·미션 달성도 (0~3 하트)
-  contextRelationshipMatch: number;               // BE: context_relationship_match — 관계 반영도 (0~3 하트)
-  spellingScore: number;                          // BE: spelling_score — 맞춤법 점수
+  contextScore: number;                           // BE: context_score — 맥락 점수 (레거시)
+  contextSceneMissionMatch: number;               // BE: context_scene_mission_match (0~3 하트)
+  contextRelationshipMatch: number;               // BE: context_relationship_match (0~3 하트)
+  spellingScore: number;                          // BE: spelling_score
   totalScore10: number;                           // BE: total_score_10
   grade: string;                                  // BE: grade — "Beginner <B>" 형태
   feedback: string;
@@ -113,24 +97,17 @@ export interface EvaluationResponse {
   sckLevelWordCounts: Record<string, string[]>;   // BE: SCK_level_word_counts
 }
 
-// 하이라이트된 대화 로그 한 건
-export interface HighlightedEntry {
-  speaker: string;
-  text: string;
-  highlight: string;
-}
-
 /* ── GET /v1/users/{nickname}/review/count ── */
 export interface ReviewCountResponse {
-  userId: string;
-  userNickname: string;
-  chosungQuizCount: number;    // BE: chosungQuizCount
-  flashcardCount: number;      // BE: flashcardCount
+  userId: string;                // BE: user_id
+  userNickname: string;          // BE: user_nickname
+  chosungQuizCount: number;      // BE: chosung_quiz_count
+  flashcardCount: number;        // BE: flashcard_count
 }
 
 /* ── GET /v1/users/{nickname}/review/weekly ── */
 export interface ChosungQuizItem {
-  [key: string]: unknown;       // BE 스키마가 유동적 — 실제 필드에 맞춰 확장
+  [key: string]: unknown;
 }
 
 export interface FlashcardItem {
@@ -140,18 +117,54 @@ export interface FlashcardItem {
 }
 
 export interface WeeklyReviewResponse {
-  userProfile: Record<string, unknown>;
-  selectedWeakSessions: { sessionId: string; score: number; [key: string]: unknown }[];
-  chosungQuiz: ChosungQuizItem[];
+  userProfile: Record<string, unknown>;                                     // BE: user_profile
+  justBeforeSession: { sessionId: string; totalScore10: number; [key: string]: unknown }[]; // BE: just_before_session
+  wrongWordPool: string[];                                                  // BE: wrong_word_pool
+  chosungQuiz: ChosungQuizItem[];                                           // BE: chosung_quiz
   flashcards: FlashcardItem[];
 }
 
 /* ── GET /v1/users/{nickname}/weekly-stats ── */
 export interface WeeklyStatsResponse {
-  userId: string;
-  userNickname: string;
-  conversationCount: number;
-  averageScore: number;
-  latestGrade: string;
-  streakDays?: number; // BE 추가 예정 — 연속 학습 일수 (24시간 기준)
+  userId: string;                // BE: user_id
+  userNickname: string;          // BE: user_nickname
+  sessionsPerUserCount: number;  // BE: sessions_per_user_count
+  averageScore: number;          // BE: average_score
+  latestGrade: string;           // BE: latest_grade
+  streakDays: number;            // BE: streak_days
+}
+
+/* ── GET /v1/users/{nickname}/profile ── */
+export interface UserProfileResponse {
+  userId: string;                // BE: user_id
+  userNickname: string;          // BE: user_nickname
+  country: string;
+  koreanLevel: string;           // BE: korean_level
+  culturalInterest: string[];    // BE: cultural_interest
+  latestGrade: string;           // BE: latest_grade
+}
+
+/* ── GET /v1/users/{nickname}/sessions ── */
+export type UserSessionsSort =
+  | "recent"
+  | "oldest"
+  | "score_high"
+  | "score_low"
+  | "location";
+
+export interface UserSessionItem {
+  sessionId: string;             // BE: session_id
+  scenarioTitle: string;         // BE: scenario_title
+  location: string;
+  scene: string;
+  totalScore10: number;          // BE: total_score_10
+  grade: string;
+  turnCount: number;             // BE: turn_count
+  turnLimit: number;             // BE: turn_limit
+  createdAt: string;             // BE: created_at
+}
+
+export interface UserSessionsResponse {
+  sessions: UserSessionItem[];
+  totalCount: number;            // BE: total_count
 }

@@ -21,13 +21,14 @@
     "timeNote": "약 1분이면 완료됩니다"
   },
   "setup": {
-    "step1Title": "어느 나라에서 오셨나요?",
-    "step2Title": "닉네임을 정해주세요",
-    "step3Title": "관심 있는 한국 문화는?",
-    "step3Subtitle": "여러 개를 골라도 괜찮아요.",
-    "step4Title": "현재 한국어 실력은요?",
-    "step4Subtitle": "응답에 따라 난이도와 대화 턴수의 초기 설정이 정해집니다.",
-    "step5Title": "가장 가보고 싶은 곳은?"
+    "step1Title": "초기 설정",
+    "step1Subtitle": "언어와 테마를 선택해주세요.",
+    "step2Title": "어느 나라에서 오셨나요?",
+    "step3Title": "닉네임을 정해주세요",
+    "step4Title": "관심 있는 한국 문화는?",
+    "step4Subtitle": "여러 개를 골라도 괜찮아요.",
+    "step5Title": "현재 한국어 실력은요?",
+    "step5Subtitle": "응답에 따라 난이도와 대화 턴수의 초기 설정이 정해집니다."
   },
   "nickname": {
     "placeholder": "닉네임을 입력하세요",
@@ -39,12 +40,16 @@
     "beginner": "초급",
     "intermediate": "중급",
     "advanced": "고급",
-    "beginnerDesc": "안녕하세요, 감사합니다 정도",
-    "intermediateDesc": "일상 대화가 가능한 수준",
-    "advancedDesc": "자연스러운 표현 구사 가능",
+    "beginnerTag": "[기초 대화]",
+    "intermediateTag": "[사회적 소통]",
+    "advancedTag": "[전문적 토론]",
+    "beginnerDesc": "기본 인사·주문·길찾기 등 꼭 필요한 표현 위주",
+    "intermediateDesc": "일상 주제로 자연스럽게 말을 주고받을 수 있어요",
+    "advancedDesc": "의견·논거를 갖춘 깊이 있는 대화가 가능해요",
     "beginnerTurns": "대화 3회",
     "intermediateTurns": "대화 5회",
-    "advancedTurns": "대화 7회"
+    "advancedTurns": "대화 7회",
+    "comingSoon": "준비 중"
   },
   "culture": {
     "othersPlaceholder": "관심 있는 문화를 입력해주세요",
@@ -69,10 +74,14 @@
     "noSessionTitle": "진행 중인 대화가 없어요",
     "noSessionDesc": "새로운 대화를 시작할까요?",
     "noSessionYes": "네, 시작할게요",
-    "noSessionNo": "아니오"
+    "noSessionNo": "아니오",
+    "emptyTitle": "첫 대화를 시작해볼까요?",
+    "emptyDesc": "장소를 골라 AI와 한국어로 대화해보세요.",
+    "emptyCta": "대화 시작하기"
   },
   "tierCard": {
-    "welcome": "님, 환영해요!",
+    "namePostfix": "님",
+    "welcome": "환영해요!",
     "nextTier": "다음 티어까지 {{xp}} XP"
   },
   "weeklyStats": {
@@ -99,7 +108,14 @@
     "startBtn": "이 페르소나로 대화 시작",
     "loading": "역할 설정 중...",
     "loadingScenario": "시나리오 불러오는 중...",
-    "failedRole": "역할 선택에 실패했습니다"
+    "failedRole": "역할 선택에 실패했습니다",
+    "tapToView": "탭하여 자세히 보기",
+    "relationLabel": "관계",
+    "youAre": "내 역할",
+    "partnerIs": "상대 역할",
+    "missionLabel": "미션",
+    "infoLabel": "정보",
+    "ageUnit": "세"
   },
   "chat": {
     "leave": "나가기",
@@ -146,6 +162,8 @@
     "cardProgress": "{{current}} / {{total}}",
     "prevCard": "이전",
     "nextCard": "다음",
+    "memorizeBtn": "암기 완료",
+    "chosungInstruction": "초성을 보고 알맞은 단어를 골라보세요",
     "reviewDone": "복습 완료!",
     "backToReview": "복습 목록으로"
   },
@@ -168,6 +186,9 @@
     "collapse": "접기",
     "xpEarned": "이번 대화에서 획득한 경험치",
     "feedbackBtn": "상세 피드백 보기",
+    "summaryBtn": "결과 요약 보기",
+    "missionLabel": "미션",
+    "sceneLabel": "장면",
     "reviewBtn": "복습하기",
     "analyzing": "대화를 분석하고 있어요...",
     "loadFailed": "결과를 불러올 수 없어요",
@@ -194,8 +215,7 @@
   "tabs": {
     "home": "홈",
     "history": "기록",
-    "review": "복습",
-    "profile": "내정보"
+    "review": "복습"
   },
   "history": {
     "title": "기록",
@@ -203,6 +223,7 @@
     "tabAchievement": "업적",
     "tabSck": "SCK 수집",
     "empty": "아직 대화 기록이 없어요.\n대화를 완료하면 여기에 기록됩니다!",
+    "loadFailed": "기록을 불러오지 못했어요",
     "score": "총점",
     "sortRecent": "최근 순",
     "sortOldest": "오래된 순",
@@ -217,5 +238,36 @@
   "language": {
     "ko": "한국어 - Korean",
     "en": "영어 - English"
+  },
+  "settings": {
+    "title": "설정",
+    "language": "언어",
+    "theme": "테마",
+    "themeLight": "라이트",
+    "themeDark": "다크",
+    "preview": "미리보기"
+  },
+  "startConfirm": {
+    "title": "지금 바로 대화를 시작할까요?",
+    "subText": "장소를 골라 시나리오를 만들 수 있어요.",
+    "yes": "네, 시작할게요",
+    "no": "나중에 할게요"
+  },
+  "loading": {
+    "scenario": [
+      "시나리오를 만들고 있어요...",
+      "장면을 그리는 중...",
+      "거의 다 됐어요..."
+    ],
+    "evaluation": [
+      "대화를 분석하고 있어요...",
+      "표현을 살펴보는 중...",
+      "점수를 매기는 중..."
+    ],
+    "review": [
+      "복습 자료를 준비하고 있어요...",
+      "단어를 정리하는 중...",
+      "거의 다 됐어요..."
+    ]
   }
 }

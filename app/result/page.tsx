@@ -16,10 +16,11 @@ import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { EvaluationResponse } from "@/types/api";
 import { evaluateSession } from "@/lib/api";
-import { addHistory, getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
+import { getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
 import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpSystem";
 import { getUserId } from "@/hooks/useSetup";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
+import LoadingScreen from "@/components/common/LoadingScreen";
 
 /* ── 점수에 따른 등급 텍스트 키 ── */
 function getGradeTextKey(score: number): string {
@@ -31,7 +32,7 @@ function getGradeTextKey(score: number): string {
 
 export default function ResultPage() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [evalData, setEvalData] = useState<EvaluationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -39,6 +40,19 @@ export default function ResultPage() {
   const [xpPopup, setXpPopup] = useState<Omit<XpGainPopupProps, "onClose"> | null>(null);
   const [xpGained, setXpGained] = useState<number>(0);
   const [showFullLog, setShowFullLog] = useState(false);
+  const [mission, setMission] = useState("");
+  const [scene, setScene] = useState("");
+
+  /* 미션/장면 — i18n에 맞춰 한/영 분기 */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isEn = (localStorage.getItem("i18nextLng") || "ko").startsWith("en");
+    try {
+      const persona = JSON.parse(localStorage.getItem("myPersona") || "null");
+      if (persona) setMission((isEn && persona.missionEn) || persona.mission || "");
+    } catch {}
+    setScene((isEn ? localStorage.getItem("sceneEn") : localStorage.getItem("scene")) || localStorage.getItem("scene") || "");
+  }, []);
 
   /* XP 지급 (중복 방지 포함) */
   const awardConversationXp = (sessionId: string, totalScore10: number) => {
@@ -68,23 +82,12 @@ export default function ResultPage() {
       return;
     }
 
-    evaluateSession(sessionId)
+    const lang = i18n.language?.startsWith("en") ? "en" : "ko";
+    evaluateSession(sessionId, lang)
       .then((res) => {
         setEvalData(res);
         localStorage.setItem("evaluationData", JSON.stringify(res));
         saveEvaluationCache(sessionId, res);
-        addHistory({
-          sessionId: res.sessionId,
-          scenarioTitle: res.scenarioTitle,
-          location: res.location,
-          scene: res.scene ?? "",
-          totalScore10: res.totalScore10,
-          grade: res.grade,
-          feedback: res.feedback,
-          llmSummary: res.llmSummary,
-          turnCount: res.conversationLog.filter((e) => e.role === "user").length,
-          createdAt: new Date().toISOString(),
-        });
         awardConversationXp(sessionId, res.totalScore10);
       })
       .catch((e) => {
@@ -100,12 +103,7 @@ export default function ResultPage() {
   }, [router]);
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
-        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <p className="text-tab-inactive text-sm">{t("result.analyzing")}</p>
-      </div>
-    );
+    return <LoadingScreen active variant="evaluation" />;
   }
 
   if (error || !evalData) {
@@ -218,6 +216,23 @@ export default function ResultPage() {
           <BookOpen size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
           <p className="text-sm font-medium text-foreground">{t("result.logTitle")}</p>
         </div>
+        {(mission || scene) && (
+          <div className="mb-3 p-3 rounded-xl text-[12px] leading-relaxed space-y-1"
+            style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)" }}>
+            {mission && (
+              <div>
+                <span className="font-bold" style={{ color: "var(--color-accent)" }}>{t("result.missionLabel")}: </span>
+                <span style={{ color: "var(--color-foreground)" }}>{mission}</span>
+              </div>
+            )}
+            {scene && (
+              <div>
+                <span className="font-bold" style={{ color: "var(--color-accent)" }}>{t("result.sceneLabel")}: </span>
+                <span style={{ color: "var(--color-foreground)" }}>{scene}</span>
+              </div>
+            )}
+          </div>
+        )}
         {visibleMessages.map((msg, i) => {
           const isUser = msg.speaker === "user";
           return (

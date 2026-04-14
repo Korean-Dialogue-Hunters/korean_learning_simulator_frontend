@@ -28,9 +28,9 @@ export interface UserProfile {
 }
 
 // 주간 통계 데이터 구조
-// BE: { conversation_count, average_score, latest_grade }
+// BE: { sessions_per_user_count, average_score, latest_grade, streak_days }
 export interface WeeklyStats {
-  conversationCount: number;  // BE: conversation_count
-  averageScore: number;       // BE: average_score
-  streakDays: number;         // FE 전용 (BE 미제공) — BE: streak_days
+  sessionsPerUserCount: number;  // BE: sessions_per_user_count
+  averageScore: number;          // BE: average_score
+  streakDays: number;            // BE: streak_days
 }

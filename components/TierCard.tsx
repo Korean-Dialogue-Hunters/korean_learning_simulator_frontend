@@ -18,7 +18,10 @@ export default function TierCard({ user }: TierCardProps) {
       style={{ border: `2px solid ${gradeColor}`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <span className="text-lg font-bold text-foreground block leading-tight">{user.userNickname}</span>
+          <div className="leading-tight">
+            <span className="text-lg font-bold text-foreground">{user.userNickname}</span>
+            <span className="text-[11px] text-tab-inactive ml-1">{t("tierCard.namePostfix")}</span>
+          </div>
           <span className="text-[11px] text-tab-inactive">{t("tierCard.welcome")}</span>
         </div>
         <div className="flex items-center gap-2">

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, RotateCcw, Plus, Play, X } from "lucide-react";
+import { ChevronRight, Plus, Play, X, Sparkles } from "lucide-react";
 import HomeHeader from "@/components/HomeHeader";
 import TierCard from "@/components/TierCard";
 import WeeklyStats from "@/components/WeeklyStats";
@@ -12,7 +12,6 @@ import { UserProfile, WeeklyStats as WeeklyStatsType, Grade } from "@/types/user
 import { isSetupDone, getSavedProfile, getUserId } from "@/hooks/useSetup";
 import { getReviewCount, getWeeklyStats } from "@/lib/api";
 import { getXpData, getXpBarInfo } from "@/lib/xpSystem";
-import { getHistory } from "@/lib/historyStorage";
 
 /* grade 문자열("초급 <B>")에서 Grade 타입으로 매핑 */
 function parseGrade(raw: string): Grade {
@@ -28,7 +27,7 @@ export default function HomePage() {
   const [quizCount, setQuizCount] = useState(0);
   const [flashCount, setFlashCount] = useState(0);
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [weeklyStats, setWeeklyStats] = useState<WeeklyStatsType>({ conversationCount: 0, averageScore: 0, streakDays: 0 });
+  const [weeklyStats, setWeeklyStats] = useState<WeeklyStatsType>({ sessionsPerUserCount: 0, averageScore: 0, streakDays: 0 });
   const [showNoSessionModal, setShowNoSessionModal] = useState(false);
   const [hasActiveSession, setHasActiveSession] = useState(false);
 
@@ -73,23 +72,12 @@ export default function HomePage() {
           grade: parseGrade(res.latestGrade || ""),
         } : prev);
         setWeeklyStats({
-          conversationCount: res.conversationCount,
+          sessionsPerUserCount: res.sessionsPerUserCount,
           averageScore: res.averageScore,
           streakDays: res.streakDays ?? 0,
         });
       })
-      .catch(() => {
-        /* BE 실패 시 localStorage historyStorage에서 fallback */
-        const history = getHistory();
-        if (history.length > 0) {
-          const avg = history.reduce((sum, r) => sum + r.totalScore10, 0) / history.length;
-          setWeeklyStats({
-            conversationCount: history.length,
-            averageScore: Math.round(avg * 10) / 10,
-            streakDays: 0,
-          });
-        }
-      });
+      .catch(() => {});
   }, [router]);
 
   return (
@@ -142,24 +130,30 @@ export default function HomePage() {
         {user && <TierCard user={user} />}
         <WeeklyStats stats={weeklyStats} />
 
-        {/* 재도전 카드 */}
-        <div className="mx-5 rounded-2xl bg-card-bg border border-card-border p-4">
-          <p className="text-[13px] text-tab-inactive mb-2">{t("home.retryTitle")}</p>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-foreground truncate">{t("home.retrySubTitle")}</p>
-              <p className="text-[12px] text-tab-inactive mt-1">
-                {t("home.retryScoreLabel")}{" "}
-                <span className="font-bold" style={{ color: "var(--color-accent)" }}>4.2</span> / 10
-              </p>
+        {/* 빈 상태 CTA 카드 — 재도전 카드 BE 연동 전까지 대화 시작 유도 (T3-06) */}
+        {!hasActiveSession && (
+          <button
+            type="button"
+            onClick={() => router.push("/location")}
+            className="mx-5 rounded-2xl p-5 text-left active:scale-[0.98] transition-all relative overflow-hidden"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--color-accent) 10%, var(--color-card-bg))",
+              border: "1.5px solid color-mix(in srgb, var(--color-accent) 35%, transparent)",
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 18%, transparent)", color: "var(--color-accent)" }}>
+                <Sparkles size={22} strokeWidth={2} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground">{t("home.emptyTitle")}</p>
+                <p className="text-[12px] text-tab-inactive mt-0.5 leading-relaxed">{t("home.emptyDesc")}</p>
+              </div>
+              <ChevronRight size={20} className="text-accent shrink-0" />
             </div>
-            <div className="flex items-center gap-1 px-4 py-2 rounded-xl text-[13px] font-bold shrink-0"
-              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}>
-              <RotateCcw size={14} strokeWidth={2.5} />
-              {t("home.retryBtn")}
-            </div>
-          </div>
-        </div>
+          </button>
+        )}
 
         {/* 주간 복습 배너 */}
         <Link href="/review">
@@ -178,7 +172,7 @@ export default function HomePage() {
         <div className="mx-5 mt-2 flex gap-3">
           <button
             onClick={() => router.push("/location")}
-            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] active:scale-[0.97] transition-transform duration-100"
+            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[17px] active:scale-[0.97] transition-transform duration-100"
             style={{
               backgroundColor: "var(--color-accent)",
               color: "var(--color-btn-primary-text)",
@@ -197,7 +191,7 @@ export default function HomePage() {
               const hasPersona = !!localStorage.getItem("myPersona");
               router.push(hasPersona ? "/chat" : "/persona");
             }}
-            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] active:scale-[0.97] transition-all duration-100 border-2"
+            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[17px] active:scale-[0.97] transition-all duration-100 border-2"
             style={hasActiveSession ? {
               backgroundColor: "var(--color-accent)",
               borderColor: "var(--color-accent)",

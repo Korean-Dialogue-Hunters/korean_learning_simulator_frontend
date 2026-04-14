@@ -1,21 +1,27 @@
 "use client";
 
+/* ──────────────────────────────────────────
+   맞춤 학습 설정 (/setup)
+   - 5단계: 1) 초기설정(언어/테마) 2) 국적 3) 닉네임 4) 관심문화 5) 한국어 수준
+   - 마지막 완료 → "지금 바로 대화 시작?" 모달
+     · 네: /location 으로 이동 (장소 선택)
+     · 아니오: / (홈)
+   - 장소 선택 단계 + 셋업에서의 createSession 호출 제거 (T3-05)
+   ────────────────────────────────────────── */
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Globe, User, BookOpen, Heart, MapPin } from "lucide-react";
-import { useSetup, isSetupDone, getSavedProfile } from "@/hooks/useSetup";
-import { LOCATION_OPTIONS } from "@/types/setup";
-import { createSession } from "@/lib/api";
+import { Settings as SettingsIcon, Globe, User, BookOpen, Heart } from "lucide-react";
+import { useSetup, isSetupDone } from "@/hooks/useSetup";
 import { WARM_THEME, warmPageStyle, warmCtaStyle, COMMON_CLASSES } from "@/lib/designSystem";
 import WelcomeScreen from "@/components/setup/WelcomeScreen";
 import NationalitySelect from "@/components/setup/NationalitySelect";
 import LevelSelect from "@/components/setup/LevelSelect";
 import CultureSelect from "@/components/setup/CultureSelect";
 import NicknameInput from "@/components/setup/NicknameInput";
-import LocationSelect from "@/components/setup/LocationSelect";
-import QuickStartModal from "@/components/setup/QuickStartModal";
-import ScenarioLoading from "@/components/common/ScenarioLoading";
+import InitialSettingsStep from "@/components/setup/InitialSettingsStep";
+import StartConfirmModal from "@/components/setup/StartConfirmModal";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -26,7 +32,6 @@ export default function SetupPage() {
     userNickname, setUserNickname,
     koreanLevel, setKoreanLevel,
     culturalInterest, setCulturalInterest,
-    location, setLocation,
     showModal,
     canProceed,
     goNext,
@@ -35,8 +40,6 @@ export default function SetupPage() {
   } = useSetup();
 
   const [showWelcome, setShowWelcome] = useState(true);
-  const [isCreating, setIsCreating] = useState(false);
-  const [createError, setCreateError] = useState("");
 
   useEffect(() => {
     if (isSetupDone()) {
@@ -45,44 +48,16 @@ export default function SetupPage() {
   }, [router]);
 
   const STEP_CONFIG: Record<number, { title: string; subtitle: string; icon: React.ReactNode }> = {
-    1: { title: t("setup.step1Title"), subtitle: "", icon: <Globe size={24} strokeWidth={1.8} /> },
-    2: { title: t("setup.step2Title"), subtitle: "", icon: <User size={24} strokeWidth={1.8} /> },
-    3: { title: t("setup.step3Title"), subtitle: t("setup.step3Subtitle"), icon: <Heart size={24} strokeWidth={1.8} /> },
-    4: { title: t("setup.step4Title"), subtitle: t("setup.step4Subtitle"), icon: <BookOpen size={24} strokeWidth={1.8} /> },
-    5: { title: t("setup.step5Title"), subtitle: "", icon: <MapPin size={24} strokeWidth={1.8} /> },
+    1: { title: t("setup.step1Title"), subtitle: t("setup.step1Subtitle"), icon: <SettingsIcon size={24} strokeWidth={1.8} /> },
+    2: { title: t("setup.step2Title"), subtitle: "", icon: <Globe size={24} strokeWidth={1.8} /> },
+    3: { title: t("setup.step3Title"), subtitle: "", icon: <User size={24} strokeWidth={1.8} /> },
+    4: { title: t("setup.step4Title"), subtitle: t("setup.step4Subtitle"), icon: <Heart size={24} strokeWidth={1.8} /> },
+    5: { title: t("setup.step5Title"), subtitle: t("setup.step5Subtitle"), icon: <BookOpen size={24} strokeWidth={1.8} /> },
   };
 
-  const handleYes = async () => {
-    saveProfile();
-    const profile = getSavedProfile();
-    if (!profile) {
-      router.push("/location");
-      return;
-    }
-    setIsCreating(true);
-    setCreateError("");
-    try {
-      /* POST /v1/sessions — 선택된 장소로 바로 세션 생성 */
-      const res = await createSession({
-        userId: profile.userId,
-        userNickname: profile.userNickname,
-        country: profile.country,
-        koreanLevel: profile.koreanLevel,
-        culturalInterest: profile.culturalInterest,
-        location: profile.location,
-      });
-      localStorage.setItem("sessionId", res.sessionId);
-      localStorage.setItem("scenarioData", JSON.stringify(res));
-      router.push("/persona");
-    } catch (e) {
-      setCreateError(e instanceof Error ? e.message : "세션 생성에 실패했습니다");
-      setIsCreating(false);
-    }
-  };
+  /* 모달 응답: 네 → /location, 아니오 → / */
+  const handleYes = () => { saveProfile(); router.push("/location"); };
   const handleNo  = () => { saveProfile(); router.push("/"); };
-
-  const selectedLocationLabel =
-    LOCATION_OPTIONS.find((l) => l.id === location)?.label ?? "";
 
   const currentConfig = STEP_CONFIG[step];
 
@@ -140,7 +115,7 @@ export default function SetupPage() {
         <h1 className="text-xl font-bold" style={{ color: WARM_THEME.text }}>
           {currentConfig.title}
         </h1>
-        {(step === 3 || step === 4) && (
+        {currentConfig.subtitle && (
           <p className="text-sm mt-1" style={{ color: "var(--color-setup-text-sub)" }}>
             {currentConfig.subtitle}
           </p>
@@ -149,11 +124,11 @@ export default function SetupPage() {
 
       {/* 단계별 컴포넌트 */}
       <div className="flex-1">
-        {step === 1 && <NationalitySelect value={country} onChange={setCountry} />}
-        {step === 2 && <NicknameInput value={userNickname} onChange={setUserNickname} />}
-        {step === 3 && <CultureSelect value={culturalInterest} onChange={setCulturalInterest} />}
-        {step === 4 && <LevelSelect value={koreanLevel} onChange={setKoreanLevel} />}
-        {step === 5 && <LocationSelect value={location} onChange={setLocation} />}
+        {step === 1 && <InitialSettingsStep />}
+        {step === 2 && <NationalitySelect value={country} onChange={setCountry} />}
+        {step === 3 && <NicknameInput value={userNickname} onChange={setUserNickname} />}
+        {step === 4 && <CultureSelect value={culturalInterest} onChange={setCulturalInterest} />}
+        {step === 5 && <LevelSelect value={koreanLevel} onChange={setKoreanLevel} />}
       </div>
 
       {/* 다음 버튼 */}
@@ -163,28 +138,7 @@ export default function SetupPage() {
         {step < 5 ? t("common.next") : t("common.complete")}
       </button>
 
-      {showModal && !isCreating && (
-        <QuickStartModal
-          locationLabel={selectedLocationLabel}
-          onYes={handleYes}
-          onNo={handleNo}
-        />
-      )}
-
-      {isCreating && <ScenarioLoading />}
-
-      {createError && !isCreating && (
-        <div
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-[440px] px-4 py-3 rounded-xl text-sm text-center z-[210]"
-          style={{
-            backgroundColor: "var(--color-card-bg)",
-            border: "1px solid #DC3C3C",
-            color: "#DC3C3C",
-          }}
-        >
-          {createError}
-        </div>
-      )}
+      {showModal && <StartConfirmModal onYes={handleYes} onNo={handleNo} />}
     </div>
   );
 }

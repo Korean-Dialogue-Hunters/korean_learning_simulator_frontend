@@ -2,19 +2,27 @@
 
 /* ──────────────────────────────────────────
    상세 피드백 페이지 (/feedback)
-   - 세부평가: 5축 레이더 차트
-   - 역량분석: 5축 점수 바
-   - 점수산출근거: feedback 텍스트
+   - 대화 종료 직후 진입하는 "기본" 결과 화면
+   - evaluateSession() 호출 + XP 지급 + 캐시 저장
+   - 총점/등급 + 5축 레이더 + 5축 점수 바 + SCK 어휘 + 점수 산출 근거
+   - "결과 요약 보기" 버튼 → /result (대화 다시보기 화면)
    ────────────────────────────────────────── */
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Home, Layers, BarChart3, FileText, Heart, BookOpen } from "lucide-react";
+import { Home, Layers, BarChart3, FileText, Heart, BookOpen, AlertCircle, Trophy, ArrowRight, Sparkles } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
+import { GRADE_COLORS } from "@/types/user";
 import { EvaluationScores } from "@/types/result";
 import { EvaluationResponse } from "@/types/api";
+import { evaluateSession } from "@/lib/api";
+import { getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
+import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpSystem";
+import { getUserId } from "@/hooks/useSetup";
+import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import RadarChart from "@/components/result/RadarChart";
+import LoadingScreen from "@/components/common/LoadingScreen";
 
 /* ── BE 응답 → 5축 점수 변환 ── */
 function extractScores(data: EvaluationResponse): EvaluationScores {
@@ -64,57 +72,156 @@ function ScoreBar({ label, score, maxScore = 10, hearts }: {
 
 export default function FeedbackPage() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [evalData, setEvalData] = useState<EvaluationResponse | null>(null);
   const [scores, setScores] = useState<EvaluationScores | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [errorKind, setErrorKind] = useState<"sessionLost" | "generic" | null>(null);
+  const [xpPopup, setXpPopup] = useState<Omit<XpGainPopupProps, "onClose"> | null>(null);
+  const [xpGained, setXpGained] = useState<number>(0);
+
+  /* XP 지급 (중복 방지) */
+  const awardConversationXp = (sessionId: string, totalScore10: number) => {
+    const userId = getUserId();
+    if (!userId) return;
+    const xp = calcConversationXp(totalScore10);
+    setXpGained(xp);
+    if (isXpAwarded(userId, `conv_${sessionId}`)) return;
+    const result = addXp(userId, xp);
+    markXpAwarded(userId, `conv_${sessionId}`);
+    setXpPopup(result);
+  };
 
   useEffect(() => {
-    const raw = localStorage.getItem("evaluationData");
-    if (!raw) {
-      router.replace("/result");
+    const sessionId = localStorage.getItem("sessionId");
+    if (!sessionId) {
+      router.replace("/");
       return;
     }
-    try {
-      const data = JSON.parse(raw) as EvaluationResponse;
-      setEvalData(data);
-      setScores(extractScores(data));
-    } catch {
-      router.replace("/result");
-    } finally {
+
+    /* 캐시 우선 (히스토리 카드 클릭 등) */
+    const cached = getEvaluationCache(sessionId) as EvaluationResponse | null;
+    if (cached) {
+      setEvalData(cached);
+      setScores(extractScores(cached));
+      localStorage.setItem("evaluationData", JSON.stringify(cached));
+      awardConversationXp(sessionId, cached.totalScore10);
       setLoading(false);
+      return;
     }
+
+    const lang = i18n.language?.startsWith("en") ? "en" : "ko";
+    evaluateSession(sessionId, lang)
+      .then((res) => {
+        setEvalData(res);
+        setScores(extractScores(res));
+        localStorage.setItem("evaluationData", JSON.stringify(res));
+        saveEvaluationCache(sessionId, res);
+        awardConversationXp(sessionId, res.totalScore10);
+      })
+      .catch((e) => {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (/session not found/i.test(msg) || /\b400\b/.test(msg)) {
+          setErrorKind("sessionLost");
+        } else {
+          setErrorKind("generic");
+        }
+        setError(msg);
+      })
+      .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   if (loading) {
+    return <LoadingScreen active variant="evaluation" />;
+  }
+
+  if (error || !evalData || !scores) {
+    const isSessionLost = errorKind === "sessionLost";
+    const title = isSessionLost ? t("result.sessionLostTitle") : t("feedback.loadFailed");
+    const desc = isSessionLost ? t("result.sessionLostDesc") : null;
+
+    const handleRetry = () => {
+      ["sessionId", "scenarioData", "myPersona", "counterpart", "turnLimit", "firstAiMessage", "chatMessages", "scene", "sceneEn", "evaluationData"]
+        .forEach((k) => localStorage.removeItem(k));
+      router.push("/location");
+    };
+
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
-        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <p className="text-tab-inactive text-sm">{t("feedback.loading")}</p>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-5 px-6 text-center">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center"
+          style={{ backgroundColor: "color-mix(in srgb, #DC3C3C 12%, transparent)", color: "#DC3C3C" }}>
+          <AlertCircle size={32} strokeWidth={1.8} />
+        </div>
+        <div className="space-y-2 max-w-[320px]">
+          <p className="text-base font-bold" style={{ color: "var(--color-foreground)" }}>{title}</p>
+          {desc && <p className="text-sm leading-relaxed" style={{ color: "var(--color-tab-inactive)" }}>{desc}</p>}
+        </div>
+        <div className="flex flex-col gap-2 w-full max-w-[260px] mt-2">
+          {isSessionLost && (
+            <button type="button" onClick={handleRetry}
+              className="w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-95"
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}>
+              {t("result.sessionLostRetry")}
+            </button>
+          )}
+          <button type="button" onClick={() => router.push("/")}
+            className="w-full py-3 rounded-2xl text-sm font-medium transition-all active:scale-95"
+            style={{ backgroundColor: "var(--color-card-bg)", color: "var(--color-foreground)", border: "1px solid var(--color-card-border)" }}>
+            {t("common.home")}
+          </button>
+        </div>
       </div>
     );
   }
 
-  if (!evalData || !scores) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
-        <p className="text-sm" style={{ color: "#DC3C3C" }}>{t("feedback.loadFailed")}</p>
-        <button onClick={() => router.push("/")} className="text-sm text-accent underline">{t("common.home")}</button>
-      </div>
-    );
-  }
+  /* 등급 코드 추출 */
+  const gradeMatch = evalData.grade.match(/<(\w+)>/);
+  const gradeCode = gradeMatch ? gradeMatch[1] : evalData.grade;
+  const gradeLabel = evalData.grade.replace(/<\w+>/, "").trim();
+  const gradeColor = GRADE_COLORS[gradeCode as keyof typeof GRADE_COLORS] ?? "var(--color-accent)";
 
   return (
     <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
-      {/* ── 뒤로가기 ── */}
-      <button type="button" onClick={() => router.back()}
-        className="flex items-center gap-1 text-sm text-tab-inactive mb-6 self-start hover:opacity-70">
-        <ArrowLeft size={16} strokeWidth={2} />
-        <span>{t("feedback.backBtn")}</span>
-      </button>
+      {xpPopup && <XpGainPopup {...xpPopup} onClose={() => setXpPopup(null)} />}
 
-      {/* ── 헤더 ── */}
-      <h1 className="text-xl font-bold text-foreground mb-6">{t("feedback.title")}</h1>
+      {/* ── 상단: 대화 완료 + XP ── */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+            style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)", color: "var(--color-accent)" }}>
+            <Trophy size={24} strokeWidth={1.5} />
+          </div>
+          <h1 className="text-xl font-bold text-foreground">{t("result.title")}</h1>
+        </div>
+        {xpGained > 0 && (
+          <div className="flex items-center gap-1.5 px-4 py-2 rounded-2xl"
+            style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)" }}>
+            <Sparkles size={18} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
+            <span className="text-lg font-black" style={{ color: "var(--color-accent)" }}>+{xpGained}</span>
+            <span className="text-xs font-bold text-tab-inactive">XP</span>
+          </div>
+        )}
+      </div>
+
+      {/* ── 총점 + 등급 도장 카드 ── */}
+      <div className={`${COMMON_CLASSES.cardRounded} p-6 mb-4 flex items-center justify-between`}
+        style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
+        <div>
+          <p className="text-xs text-tab-inactive mb-1">{t("result.totalScore")}</p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-bold text-foreground">{evalData.totalScore10.toFixed(1)}</span>
+            <span className="text-sm text-tab-inactive">/ 10</span>
+          </div>
+        </div>
+        <div className="flex flex-col items-end">
+          <p className="text-[11px] text-tab-inactive mb-1">{gradeLabel}</p>
+          <span className="text-4xl font-black leading-none" style={{ color: gradeColor }}>
+            {gradeCode}
+          </span>
+        </div>
+      </div>
 
       {/* ── 1. 세부평가 (5축 레이더) ── */}
       <div className={`${COMMON_CLASSES.cardRounded} p-4 mb-4`}
@@ -133,11 +240,6 @@ export default function FeedbackPage() {
           <div className="flex items-center gap-2">
             <Layers size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
             <p className="text-sm font-bold text-foreground">{t("feedback.analysisTitle")}</p>
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-xs text-tab-inactive">{t("feedback.totalScoreLabel")}:</span>
-            <span className="text-lg font-bold text-foreground">{evalData.totalScore10.toFixed(1)}</span>
-            <span className="text-xs text-tab-inactive">/ 10</span>
           </div>
         </div>
         <ScoreBar label={t("eval.length")} score={scores.length} />
@@ -216,9 +318,15 @@ export default function FeedbackPage() {
 
       {/* ── 하단 버튼 ── */}
       <div className="mt-auto space-y-3">
-        <button type="button" onClick={() => router.push("/review")}
+        <button type="button" onClick={() => router.push("/result")}
           className={`${COMMON_CLASSES.fullWidthBtn} flex items-center justify-center gap-2`}
           style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}>
+          <span>{t("result.summaryBtn")}</span>
+          <ArrowRight size={18} strokeWidth={2} />
+        </button>
+        <button type="button" onClick={() => router.push("/review")}
+          className={`${COMMON_CLASSES.fullWidthBtn} flex items-center justify-center gap-2`}
+          style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, var(--color-card-bg))", color: "var(--color-accent)", border: "1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)" }}>
           <Layers size={18} strokeWidth={2} />
           <span>{t("feedback.reviewBtn")}</span>
         </button>

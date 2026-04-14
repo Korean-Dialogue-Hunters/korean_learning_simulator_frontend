@@ -1,18 +1,21 @@
 "use client";
 
 /* ──────────────────────────────────────────
-   페르소나(미션) 선택 페이지 (/persona) — TODO 30~32
-   - localStorage에서 세션 데이터(personas) 읽기
-   - 사용자가 맡을 역할(페르소나) A / B 카드 표시
-   - 선택 후 POST /v1/sessions/{id}/role → /chat 이동
+   페르소나(미션) 선택 페이지 (/persona) — T4-03 리디자인
+   - 세로 스택 큰 카드 2개 (배경 이미지 + 이름/나이만)
+   - 카드 탭 → PersonaDetailModal 전체 표시
+   - 모달 CTA "이 페르소나로 시작" → POST role → /chat
    ────────────────────────────────────────── */
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { ArrowLeft } from "lucide-react";
 import { Persona, CreateSessionResponse } from "@/types/api";
 import { selectRole } from "@/lib/api";
 import { getSavedProfile } from "@/hooks/useSetup";
+import { getPersonaImage } from "@/lib/personaImage";
+import PersonaDetailModal from "@/components/persona/PersonaDetailModal";
 
 /* 레벨 → 턴 수 매핑 (BE turnLimit 폴백용) */
 const LEVEL_TURN_MAP: Record<string, number> = { "초급": 3, "중급": 5, "고급": 7 };
@@ -21,14 +24,14 @@ export default function PersonaPage() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === "en";
-  const [selected, setSelected] = useState<"A" | "B" | null>(null);
+  const [openId, setOpenId] = useState<"A" | "B" | null>(null);
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [scene, setScene] = useState("");
   const [sceneEn, setSceneEn] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  /* localStorage에서 세션 데이터(장소 선택에서 저장한 것) 읽기 */
+  /* localStorage에서 세션 데이터(장소 선택에서 저장) 읽기 */
   useEffect(() => {
     const raw = localStorage.getItem("scenarioData");
     if (!raw) {
@@ -37,13 +40,11 @@ export default function PersonaPage() {
     }
     try {
       const data = JSON.parse(raw) as CreateSessionResponse;
-      /* BE personas는 { A: {...}, B: {...} } dict 형태 */
       const personaList: Persona[] = Object.entries(data.personas).map(
         ([id, p]) => ({ ...p, id: id as "A" | "B" })
       );
       setPersonas(personaList);
       setScene(data.scene || "");
-      /* BE는 top-level scene_en을 보내지 않으므로, persona 안의 scene_en에서 추출 */
       const firstPersona = Object.values(data.personas)[0] as unknown as Record<string, unknown>;
       setSceneEn((data.sceneEn || (firstPersona?.sceneEn as string)) || "");
     } catch {
@@ -52,7 +53,7 @@ export default function PersonaPage() {
   }, [router]);
 
   const handleConfirm = async () => {
-    if (!selected || isLoading) return;
+    if (!openId || isLoading) return;
     setIsLoading(true);
     setError("");
 
@@ -63,12 +64,11 @@ export default function PersonaPage() {
         return;
       }
 
-      /* POST /v1/sessions/{id}/role — 역할 선택 + AI 첫 발화 수신 */
-      const res = await selectRole(sessionId, selected);
+      /* POST /v1/sessions/{id}/role */
+      const res = await selectRole(sessionId, openId);
 
-      /* 내 역할 + 상대방 정보 저장 */
-      const myPersona = personas.find((p) => p.id === selected)!;
-      const counterpart = personas.find((p) => p.id !== selected)!;
+      const myPersona = personas.find((p) => p.id === openId)!;
+      const counterpart = personas.find((p) => p.id !== openId)!;
       localStorage.setItem("myPersona", JSON.stringify(myPersona));
       localStorage.setItem("counterpart", JSON.stringify({
         name: counterpart.name,
@@ -78,25 +78,21 @@ export default function PersonaPage() {
         role: counterpart.role,
         roleEn: counterpart.roleEn,
       }));
-      /* scene: BE 역할 선택 응답에서 확정된 scene 우선, 없으면 시나리오 데이터의 scene */
       localStorage.setItem("scene", res.scene || scene);
-      /* sceneEn: top-level 없으면 선택된 persona의 sceneEn 사용 */
-      const selectedPersonaData = res.personas?.[selected] as unknown as Record<string, unknown> | undefined;
+      const selectedPersonaData = res.personas?.[openId] as unknown as Record<string, unknown> | undefined;
       localStorage.setItem("sceneEn", res.sceneEn || (selectedPersonaData?.sceneEn as string) || sceneEn);
-      /* turnLimit: BE 응답 우선, 없으면 레벨 기반 폴백 */
       const profile = getSavedProfile();
       const fallbackTurns = profile ? (LEVEL_TURN_MAP[profile.koreanLevel] ?? 7) : 7;
       const turnLimit = res.turnLimit > 0 ? res.turnLimit : fallbackTurns;
       localStorage.setItem("turnLimit", String(turnLimit));
 
-      /* AI 첫 발화가 있으면 저장 */
       if (res.latestAiResponse) {
         localStorage.setItem("firstAiMessage", res.latestAiResponse);
       }
 
       router.push("/chat");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "역할 선택에 실패했습니다");
+      setError(e instanceof Error ? e.message : t("persona.failedRole"));
       setIsLoading(false);
     }
   };
@@ -109,139 +105,119 @@ export default function PersonaPage() {
     );
   }
 
+  const openPersona = personas.find((p) => p.id === openId) || null;
+  const counterpartPersona = openPersona ? personas.find((p) => p.id !== openId) || null : null;
+
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-16 pb-28">
-      {/* 뒤로가기 */}
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="text-tab-inactive text-sm mb-6 self-start"
-      >
-        ← 뒤로
-      </button>
+    <div className="flex flex-col min-h-screen pt-14" style={{ backgroundColor: "var(--color-background)" }}>
+      {/* 헤더 (뒤로가기 + 타이틀) */}
+      <div className="px-5 mb-3">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex items-center gap-1 text-sm text-tab-inactive mb-3 self-start hover:opacity-70 transition-opacity"
+        >
+          <ArrowLeft size={16} strokeWidth={2} />
+          <span>{t("common.back")}</span>
+        </button>
+        <h1 className="text-xl font-extrabold text-foreground mb-0.5">
+          {t("persona.title")}
+        </h1>
+        <p className="text-xs text-tab-inactive">
+          {t("persona.subtitle")}
+        </p>
+      </div>
 
-      <h1 className="text-xl font-bold text-foreground mb-1">
-        {t("persona.title")}
-      </h1>
-      <p className="text-xs text-tab-inactive mb-8">
-        {t("persona.subtitle")}
-      </p>
-
-      {/* 시나리오 설명 */}
-      {scene && (
-        <div className="rounded-2xl p-4 mb-6 bg-card-bg border border-card-border">
-          <p className="text-xs text-tab-inactive mb-1">{t("persona.scenario")}</p>
-          <p className="text-sm text-foreground leading-relaxed">
-            {(isEn && sceneEn) || scene}
-          </p>
-        </div>
-      )}
-
-      {/* 페르소나 A / B 카드 */}
-      <div className="flex flex-col gap-4">
+      {/* 가로 평행 카드 2개 (상하 스택, 남은 화면 꽉 채움) */}
+      <div className="flex-1 flex flex-col gap-3 px-3 pb-3 min-h-0">
         {personas.map((persona) => (
-          <PersonaCard
+          <PersonaBigCard
             key={persona.id}
             persona={persona}
-            isSelected={selected === persona.id}
-            onSelect={() => setSelected(persona.id)}
             isEn={isEn}
+            onTap={() => setOpenId(persona.id)}
           />
         ))}
       </div>
 
-      {/* 에러 메시지 */}
       {error && (
-        <p className="text-sm text-center mt-4" style={{ color: "#DC3C3C" }}>{error}</p>
+        <p className="text-sm text-center mb-3 px-5" style={{ color: "#DC3C3C" }}>{error}</p>
       )}
 
-      {/* 선택 완료 버튼 */}
-      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-5">
-        <button
-          type="button"
-          onClick={handleConfirm}
-          disabled={!selected || isLoading}
-          className={`
-            w-full py-4 rounded-2xl font-bold text-sm transition-all
-            ${
-              selected && !isLoading
-                ? "bg-accent text-btn-primary-text active:scale-95 shadow-lg shadow-accent/20"
-                : "bg-surface border border-surface-border text-tab-inactive cursor-not-allowed"
-            }
-          `}
-        >
-          {isLoading ? t("persona.loading") : t("persona.startBtn")}
-        </button>
-      </div>
+      {/* 디테일 모달 */}
+      {openPersona && counterpartPersona && (
+        <PersonaDetailModal
+          persona={openPersona}
+          counterpart={counterpartPersona}
+          scene={scene}
+          sceneEn={sceneEn}
+          isEn={isEn}
+          isLoading={isLoading}
+          onClose={() => { if (!isLoading) setOpenId(null); }}
+          onConfirm={handleConfirm}
+        />
+      )}
     </div>
   );
 }
 
-/* ── 페르소나 카드 컴포넌트 ── */
-function PersonaCard({
+/* ── 세로 빅 카드 (배경 이미지 + 이름/나이만) ── */
+function PersonaBigCard({
   persona,
-  isSelected,
-  onSelect,
   isEn,
+  onTap,
 }: {
   persona: Persona;
-  isSelected: boolean;
-  onSelect: () => void;
   isEn: boolean;
+  onTap: () => void;
 }) {
   const { t } = useTranslation();
-  const initial = persona.name.charAt(0);
-  const role = ((isEn && persona.roleEn) || persona.role).replace(/^./, (c: string) => c.toUpperCase());
-  const gender = (isEn && persona.genderEn) || persona.gender;
-  const mission = (isEn && persona.missionEn) || persona.mission;
-  const missionLabel = isEn ? "Mission" : "미션";
+  const img = getPersonaImage(persona);
+  const ageUnit = t("persona.ageUnit");
+  const role = ((isEn && persona.roleEn) || persona.role).replace(/^./, (c) => c.toUpperCase());
 
   return (
     <button
       type="button"
-      onClick={onSelect}
-      className={`
-        w-full rounded-2xl px-4 py-4 text-left border transition-all
-        ${
-          isSelected
-            ? "bg-accent/10 border-accent"
-            : "bg-surface border-surface-border hover:bg-card-bg active:scale-[0.98]"
-        }
-      `}
+      onClick={onTap}
+      className="relative w-full flex-1 min-h-0 rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
+      style={{ border: "1px solid var(--color-card-border)" }}
     >
-      <div className="flex items-start gap-3">
-        {/* 아바타 원형 */}
-        <div
-          className={`
-            w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-lg font-bold
-            ${isSelected ? "bg-accent/20 text-accent" : "bg-surface-border text-foreground"}
-          `}
-        >
-          {persona.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={persona.avatarUrl} alt={persona.name} className="w-full h-full object-cover rounded-full" />
-          ) : (
-            initial
-          )}
-        </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={img} alt={persona.name} className="absolute inset-0 w-full h-full object-cover" />
 
-        {/* 정보 텍스트 */}
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-bold text-base text-foreground">{persona.name}</span>
-            <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
-              isSelected ? "border-accent text-accent" : "border-surface-border text-tab-inactive"
-            }`}>
-              {persona.id}
-            </span>
-          </div>
-          <p className="text-xs text-tab-inactive mb-2">
-            {persona.age} · {gender} · {role}
-          </p>
-          <p className="text-xs text-foreground/80 leading-relaxed">
-            🚩 {missionLabel}: {mission}
-          </p>
+      {/* 하단 글래스 그라데이션 */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none"
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)" }}
+      />
+
+      {/* 우상단 A/B 배지 */}
+      <div className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center text-[14px] font-extrabold backdrop-blur-md"
+        style={{ backgroundColor: "rgba(255,255,255,0.88)", color: "#1A1A1A" }}>
+        {persona.id}
+      </div>
+
+      {/* 좌하단 텍스트 */}
+      <div className="absolute bottom-4 left-5 right-16 text-left">
+        <div className="flex items-end gap-2 mb-1 flex-wrap">
+          <span className="text-[26px] font-extrabold leading-none"
+            style={{ color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.7)" }}>
+            {persona.name}
+          </span>
+          <span className="text-[14px] font-bold"
+            style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>
+            {persona.age}{ageUnit}
+          </span>
         </div>
+        <p className="text-[12px] font-medium line-clamp-1 mb-1"
+          style={{ color: "rgba(255,255,255,0.88)", textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}>
+          {role}
+        </p>
+        <p className="text-[11px] font-medium"
+          style={{ color: "rgba(255,255,255,0.7)", textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}>
+          {t("persona.tapToView")}
+        </p>
       </div>
     </button>
   );

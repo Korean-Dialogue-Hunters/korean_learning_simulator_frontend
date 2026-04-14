@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="hg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FB8E8"/>
+      <stop offset="0.55" stop-color="#3A6FA8"/>
+      <stop offset="1" stop-color="#1E3A5F"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="270" fill="url(#hg)"/>
+  <!-- 물결 -->
+  <g fill="rgba(255,255,255,0.18)">
+    <path d="M0 175 Q60 160 120 175 T240 175 T360 175 T480 175 L480 270 L0 270 Z"/>
+    <path d="M0 200 Q60 185 120 200 T240 200 T360 200 T480 200 L480 270 L0 270 Z" opacity="0.6"/>
+    <path d="M0 225 Q60 210 120 225 T240 225 T360 225 T480 225 L480 270 L0 270 Z" opacity="0.4"/>
+  </g>
+  <!-- 멀리 보이는 빌딩 실루엣 -->
+  <g fill="rgba(0,0,0,0.25)">
+    <rect x="40" y="120" width="20" height="50"/>
+    <rect x="65" y="100" width="14" height="70"/>
+    <rect x="85" y="130" width="18" height="40"/>
+    <rect x="380" y="115" width="16" height="55"/>
+    <rect x="400" y="105" width="22" height="65"/>
+    <rect x="425" y="125" width="14" height="45"/>
+  </g>
+  <!-- 해/달 -->
+  <circle cx="370" cy="70" r="28" fill="rgba(255,220,150,0.85)"/>
+</svg>

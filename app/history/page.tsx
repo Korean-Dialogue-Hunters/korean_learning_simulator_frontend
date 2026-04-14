@@ -3,7 +3,7 @@
 /* ──────────────────────────────────────────
    기록 페이지 (/history)
    - 3개 서브탭: 대화 기록 / 업적 / SCK 수집
-   - 대화 기록: localStorage 기반 (추후 BE API 전환)
+   - 대화 기록: BE GET /v1/users/{nickname}/sessions
    - 업적, SCK 수집: 준비중
    ────────────────────────────────────────── */
 
@@ -13,15 +13,17 @@ import { useTranslation } from "react-i18next";
 import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
-import { getHistory, sortHistory, type DialogueRecord, type SortKey } from "@/lib/historyStorage";
+import { getSavedProfile } from "@/hooks/useSetup";
+import { getUserSessions } from "@/lib/api";
+import type { UserSessionItem, UserSessionsSort } from "@/types/api";
 
 type SubTab = "dialogue" | "achievement" | "sck";
 
-const SORT_OPTIONS: { key: SortKey; labelKey: string }[] = [
+const SORT_OPTIONS: { key: UserSessionsSort; labelKey: string }[] = [
   { key: "recent", labelKey: "history.sortRecent" },
   { key: "oldest", labelKey: "history.sortOldest" },
-  { key: "scoreHigh", labelKey: "history.sortScoreHigh" },
-  { key: "scoreLow", labelKey: "history.sortScoreLow" },
+  { key: "score_high", labelKey: "history.sortScoreHigh" },
+  { key: "score_low", labelKey: "history.sortScoreLow" },
   { key: "location", labelKey: "history.sortLocation" },
 ];
 
@@ -29,21 +31,41 @@ export default function HistoryPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const [tab, setTab] = useState<SubTab>("dialogue");
-  const [records, setRecords] = useState<DialogueRecord[]>([]);
-  const [sortKey, setSortKey] = useState<SortKey>("recent");
+  const [records, setRecords] = useState<UserSessionItem[]>([]);
+  const [sortKey, setSortKey] = useState<UserSessionsSort>("recent");
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setRecords(sortHistory(getHistory(), sortKey));
-  }, [sortKey]);
+    const profile = typeof window !== "undefined" ? getSavedProfile() : null;
+    if (!profile) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError("");
+    getUserSessions(profile.userNickname, sortKey)
+      .then((res) => setRecords(res.sessions))
+      .catch((e) => {
+        const msg = e instanceof Error ? e.message : "";
+        /* 신규 유저는 BE에 프로필이 없어 404가 정상 → 빈 상태로 처리 */
+        if (/\b404\b/.test(msg) || /user profile not found/i.test(msg)) {
+          setRecords([]);
+          return;
+        }
+        setError(msg || t("history.loadFailed"));
+      })
+      .finally(() => setLoading(false));
+  }, [sortKey, t]);
 
-  const handleSort = (key: SortKey) => {
+  const handleSort = (key: UserSessionsSort) => {
     setSortKey(key);
     setShowSortMenu(false);
   };
 
-  /* 카드 클릭 → evaluationData 복원 후 feedback 페이지로 이동 */
-  const handleCardClick = (record: DialogueRecord) => {
+  /* 카드 클릭 → /result로 이동 (sessionId 저장 후 평가 재조회) */
+  const handleCardClick = (record: UserSessionItem) => {
     localStorage.setItem("sessionId", record.sessionId);
     router.push("/result");
   };
@@ -124,8 +146,16 @@ export default function HistoryPage() {
             )}
           </div>
 
-          {/* 기록 목록 */}
-          {records.length === 0 ? (
+          {/* 로딩/에러/목록 */}
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="w-7 h-7 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : error ? (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-sm text-center" style={{ color: "#DC3C3C" }}>{error}</p>
+            </div>
+          ) : records.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
               <p className="text-sm text-tab-inactive text-center">{t("history.empty")}</p>
             </div>
@@ -164,7 +194,7 @@ function DialogueCard({
   onClick,
   t,
 }: {
-  record: DialogueRecord;
+  record: UserSessionItem;
   onClick: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {

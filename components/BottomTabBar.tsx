@@ -12,7 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Home, ClipboardList, BookOpen, User } from "lucide-react";
+import { Home, ClipboardList, BookOpen } from "lucide-react";
 import { SETUP_DONE_KEY } from "@/hooks/useSetup";
 
 /* 탭 정의 */
@@ -25,16 +25,15 @@ interface Tab {
 const ICON_SIZE = 20;
 const ICON_STROKE = 1.8;
 
-/* 4개 탭 목록 (대화 탭 제거 — 홈에서 새로하기/이어하기로 진입) */
+/* 3개 탭 목록 (대화/내정보 탭 제거 — 홈에서 새로하기/이어하기로 진입, 내정보는 /settings 통합) */
 const TABS: Tab[] = [
   { href: "/",        labelKey: "tabs.home",    icon: <Home size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { href: "/history", labelKey: "tabs.history", icon: <ClipboardList size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { href: "/review",  labelKey: "tabs.review",  icon: <BookOpen size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
-  { href: "/profile", labelKey: "tabs.profile", icon: <User size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
 ];
 
 // 탭바를 숨기는 경로 목록
-const HIDDEN_PATHS = ["/setup", "/location", "/persona"];
+const HIDDEN_PATHS = ["/setup", "/location", "/persona", "/settings"];
 
 export default function BottomTabBar() {
   const pathname = usePathname();

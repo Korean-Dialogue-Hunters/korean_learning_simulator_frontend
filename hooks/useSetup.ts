@@ -43,7 +43,7 @@ export function getSavedProfile(): SetupProfile | null {
 }
 
 export function useSetup() {
-  // 현재 단계 (1: 국적, 2: 닉네임, 3: 수준, 4: 문화, 5: 장소)
+  // 현재 단계 (1: 초기설정[언어/테마], 2: 국적, 3: 닉네임, 4: 관심문화, 5: 한국어 수준)
   const [step, setStep] = useState<SetupStep>(1);
 
   // 각 단계 입력값
@@ -58,11 +58,11 @@ export function useSetup() {
 
   // 현재 단계에서 다음으로 넘어갈 수 있는지 확인
   const canProceed = (): boolean => {
-    if (step === 1) return country.trim() !== "";
-    if (step === 2) return validateNickname(userNickname).valid;
-    if (step === 3) return culturalInterest.length > 0;
-    if (step === 4) return koreanLevel !== "";
-    if (step === 5) return location !== "";
+    if (step === 1) return true; // 초기설정은 토글이라 항상 진행 가능
+    if (step === 2) return country.trim() !== "";
+    if (step === 3) return validateNickname(userNickname).valid;
+    if (step === 4) return culturalInterest.length > 0;
+    if (step === 5) return koreanLevel !== "";
     return false;
   };
 

@@ -3,11 +3,12 @@
 /* ──────────────────────────────────────────
    HomeHeader 컴포넌트
    - 좌측: 앱 이름 "코대헌" + 영문 서브타이틀
-   - 우측: 언어 선택 + 다크/라이트 전환 (홈에서만 표시)
+   - 우측: 톱니바퀴(설정) — 언어/테마 토글은 /settings로 이동
    ────────────────────────────────────────── */
 
-import LanguageSelector from "@/components/LanguageSelector";
-import ThemeToggle from "@/components/ThemeToggle";
+import Link from "next/link";
+import { Settings } from "lucide-react";
+import { WARM_THEME } from "@/lib/designSystem";
 
 export default function HomeHeader() {
   return (
@@ -19,11 +20,19 @@ export default function HomeHeader() {
           Korean Dialogue Hunters
         </p>
       </div>
-      {/* 우측: 언어 + 테마 토글 */}
-      <div className="flex items-center gap-2">
-        <LanguageSelector />
-        <ThemeToggle />
-      </div>
+      {/* 우측: 설정 진입 */}
+      <Link
+        href="/settings"
+        aria-label="settings"
+        className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
+        style={{
+          backgroundColor: WARM_THEME.accentLight,
+          color: WARM_THEME.accent,
+          border: `1.5px solid ${WARM_THEME.accent}`,
+        }}
+      >
+        <Settings size={20} strokeWidth={1.8} />
+      </Link>
     </header>
   );
 }

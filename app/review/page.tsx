@@ -15,6 +15,7 @@ import { getSavedProfile, getUserId } from "@/hooks/useSetup";
 import { getReviewCount, getWeeklyReview } from "@/lib/api";
 import { addXp } from "@/lib/xpSystem";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
+import LoadingScreen from "@/components/common/LoadingScreen";
 import type { ReviewCountResponse, WeeklyReviewResponse, ChosungQuizItem, FlashcardItem } from "@/types/api";
 
 type Mode = "list" | "quiz" | "flashcard";
@@ -58,12 +59,7 @@ export default function ReviewPage() {
 
   /* 로딩 중 (모드 진입 후 데이터 대기) */
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
-        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <p className="text-tab-inactive text-sm">{t("review.loading")}</p>
-      </div>
-    );
+    return <LoadingScreen active variant="review" />;
   }
 
   const handleXpGain = (amount: number) => {
@@ -196,11 +192,9 @@ function ChosungQuizView({ items, onBack, onXpGain }: { items: ChosungQuizItem[]
   /* 데이터 없으면 생성 중 로딩 */
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
-        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <p className="text-tab-inactive text-sm">{t("review.loading")}</p>
+      <LoadingScreen active variant="review">
         <button onClick={onBack} className="text-sm text-accent underline mt-4">{t("review.backToList")}</button>
-      </div>
+      </LoadingScreen>
     );
   }
 
@@ -283,11 +277,16 @@ function ChosungQuizView({ items, onBack, onXpGain }: { items: ChosungQuizItem[]
       {/* 문제 카드 */}
       <div className={`${COMMON_CLASSES.cardRounded} p-6 mb-6`}
         style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
+        <p className="text-[11px] font-semibold uppercase tracking-wider mb-3 text-center" style={{ color: "var(--color-accent)" }}>
+          {t("review.chosungInstruction")}
+        </p>
         {sentence && (
-          <p className="text-sm text-foreground leading-relaxed mb-4">{sentence}</p>
+          <p className="text-sm text-foreground leading-relaxed mb-5 text-center">{sentence}</p>
         )}
-        <p className="text-3xl font-black text-center tracking-[0.3em] text-foreground">{chosung}</p>
-        {meaning && <p className="text-xs text-tab-inactive text-center mt-2">{meaning}</p>}
+        <div className="py-4 rounded-xl mb-2" style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 8%, transparent)" }}>
+          <p className="text-5xl font-black text-center tracking-[0.4em] text-foreground">{chosung}</p>
+        </div>
+        {meaning && <p className="text-xs text-tab-inactive text-center mt-3">{meaning}</p>}
       </div>
 
       {/* 4지선다 */}
@@ -374,11 +373,9 @@ function FlashcardView({ items, onBack, onXpGain }: { items: FlashcardItem[]; on
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
-        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <p className="text-tab-inactive text-sm">{t("review.loading")}</p>
+      <LoadingScreen active variant="review">
         <button onClick={onBack} className="text-sm text-accent underline mt-4">{t("review.backToList")}</button>
-      </div>
+      </LoadingScreen>
     );
   }
 
@@ -468,7 +465,7 @@ function FlashcardView({ items, onBack, onXpGain }: { items: FlashcardItem[]; on
             className="flex-1 flex items-center justify-center gap-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
             style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}
           >
-            {t("review.nextCard")}
+            {t("review.memorizeBtn")}
             <ChevronRight size={16} />
           </button>
         )}
