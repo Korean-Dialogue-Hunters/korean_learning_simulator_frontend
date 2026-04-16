@@ -331,7 +331,7 @@ export default function ChatPage() {
             </p>
             <button
               type="button"
-              onClick={() => router.push("/feedback")}
+              onClick={() => router.push("/result")}
               className="px-6 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95"
               style={{
                 backgroundColor: "var(--color-accent)",
