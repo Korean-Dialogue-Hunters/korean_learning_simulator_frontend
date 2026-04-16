@@ -22,6 +22,7 @@ import PersonaProfileCard, { CounterpartInfo } from "@/components/chat/PersonaPr
 import ChatBubble from "@/components/chat/ChatBubble";
 import StreamingBubble, { TypingIndicator } from "@/components/chat/StreamingBubble";
 import ChatInput from "@/components/chat/ChatInput";
+import { clearSessionState } from "@/lib/sessionStorage";
 
 /* ── 나가기 확인 팝업 ── */
 function LeaveConfirmModal({
@@ -190,9 +191,10 @@ export default function ChatPage() {
     }
   }, [isFinished, messages]);
 
-  /* 나가기 확인 — "네": 세션 유지한 채 홈으로 (이어하기 가능) */
+  /* 나가기 확인 — "네": 세션 정리 후 홈으로 (이어하기 제거됨, BE 세션은 고아로 둠) */
   const handleLeaveConfirm = () => {
     setShowLeaveModal(false);
+    clearSessionState();
     router.push("/");
   };
 

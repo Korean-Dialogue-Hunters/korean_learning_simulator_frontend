@@ -7,6 +7,34 @@
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
+/* ──────────────────────────────────────────
+   personas 내부 snake_case _en 필드 → camelCase 정규화
+   - BE Pydantic은 top-level 필드에만 camelCase alias를 적용함.
+   - `personas: dict[str, dict[str, Any]]`는 내부 키에 alias 미적용 →
+     LLM이 만든 `role_en`/`mission_en`/`gender_en`/`scene_en`이 snake_case로 그대로 전달됨.
+   - 여기서 camelCase로 복사해 FE의 Persona 타입과 맞춤. (원본 키도 유지)
+   ────────────────────────────────────────── */
+function normalizePersonas<T>(res: T): T {
+  const anyRes = res as unknown as { personas?: Record<string, Record<string, unknown>> };
+  if (!anyRes || !anyRes.personas) return res;
+  const SNAKE_TO_CAMEL: Record<string, string> = {
+    role_en: "roleEn",
+    mission_en: "missionEn",
+    gender_en: "genderEn",
+    scene_en: "sceneEn",
+  };
+  for (const key of Object.keys(anyRes.personas)) {
+    const p = anyRes.personas[key];
+    if (!p || typeof p !== "object") continue;
+    for (const [sk, ck] of Object.entries(SNAKE_TO_CAMEL)) {
+      if (p[sk] !== undefined && p[ck] === undefined) {
+        p[ck] = p[sk];
+      }
+    }
+  }
+  return res;
+}
+
 /* ── 공통 fetch 래퍼 ── */
 async function apiFetch<T>(
   path: string,
@@ -86,7 +114,7 @@ export async function createSession(params: {
   culturalInterest: string[];
   location: string;
 }): Promise<CreateSessionResponse> {
-  return apiFetch<CreateSessionResponse>("/sessions", {
+  const res = await apiFetch<CreateSessionResponse>("/sessions", {
     method: "POST",
     body: {
       userId: params.userId,
@@ -97,6 +125,7 @@ export async function createSession(params: {
       location: params.location,
     },
   });
+  return normalizePersonas(res);
 }
 
 /* 2. 역할 선택 */
@@ -104,10 +133,11 @@ export async function selectRole(
   sessionId: string,
   selectedRole: string
 ): Promise<SessionStateResponse> {
-  return apiFetch<SessionStateResponse>(`/sessions/${sessionId}/role`, {
+  const res = await apiFetch<SessionStateResponse>(`/sessions/${sessionId}/role`, {
     method: "POST",
     body: { selectedRole },
   });
+  return normalizePersonas(res);
 }
 
 /* 3. 턴 진행 — 사용자 발화 전송 */
@@ -115,10 +145,11 @@ export async function createTurn(
   sessionId: string,
   userInput: string
 ): Promise<SessionStateResponse> {
-  return apiFetch<SessionStateResponse>(`/sessions/${sessionId}/turns`, {
+  const res = await apiFetch<SessionStateResponse>(`/sessions/${sessionId}/turns`, {
     method: "POST",
     body: { userInput },
   });
+  return normalizePersonas(res);
 }
 
 /* 4. 평가 요청 — 대화 종료 후 호출 (lang: LLM 피드백 언어 ko/en) */
@@ -136,7 +167,8 @@ export async function evaluateSession(
 export async function getSession(
   sessionId: string
 ): Promise<SessionStateResponse> {
-  return apiFetch<SessionStateResponse>(`/sessions/${sessionId}`);
+  const res = await apiFetch<SessionStateResponse>(`/sessions/${sessionId}`);
+  return normalizePersonas(res);
 }
 
 /* 6. 복습 콘텐츠 개수 조회 */

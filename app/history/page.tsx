@@ -64,9 +64,11 @@ export default function HistoryPage() {
     setShowSortMenu(false);
   };
 
-  /* 카드 클릭 → /result로 이동 (sessionId 저장 후 평가 재조회) */
+  /* 카드 클릭 → /result로 이동
+     - viewSessionId(읽기 전용 키)에만 저장해서 진행 중인 세션 상태를 건드리지 않음
+     - result 페이지가 viewSessionId를 우선 소비하고 즉시 제거 */
   const handleCardClick = (record: UserSessionItem) => {
-    localStorage.setItem("sessionId", record.sessionId);
+    localStorage.setItem("viewSessionId", record.sessionId);
     router.push("/result");
   };
 

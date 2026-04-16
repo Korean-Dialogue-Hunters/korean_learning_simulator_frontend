@@ -69,15 +69,7 @@
     "retryBtn": "재도전",
     "weeklyReviewTitle": "주간 복습 준비됐어요!",
     "weeklyReviewContent": "초성퀴즈 {{quiz}}개, 플래시카드 {{flash}}개",
-    "newBtn": "새로 하기",
-    "continueBtn": "이어 하기",
-    "noSessionTitle": "진행 중인 대화가 없어요",
-    "noSessionDesc": "새로운 대화를 시작할까요?",
-    "noSessionYes": "네, 시작할게요",
-    "noSessionNo": "아니오",
-    "emptyTitle": "첫 대화를 시작해볼까요?",
-    "emptyDesc": "장소를 골라 AI와 한국어로 대화해보세요.",
-    "emptyCta": "대화 시작하기"
+    "newBtn": "새로 하기"
   },
   "tierCard": {
     "namePostfix": "님",
@@ -120,7 +112,7 @@
   "chat": {
     "leave": "나가기",
     "leaveConfirmTitle": "대화를 그만할까요?",
-    "leaveConfirmDesc": "\"이어하기\"로 나중에 다시 대화할 수 있어요.",
+    "leaveConfirmDesc": "나가면 이 대화는 저장되지 않아요.",
     "leaveYes": "네, 나갈게요",
     "leaveNo": "아니오",
     "missionHint": "미션을 해결해보세요! 💬",
@@ -133,7 +125,7 @@
     "me": "나",
     "partner": "상대",
     "missionLabel": "미션",
-    "sceneLabel": "장면 상세",
+    "sceneLabel": "시나리오",
     "leftTurns": "남은 턴",
     "placeholder": "메시지를 입력하세요...",
     "finishedPlaceholder": "대화가 종료되었습니다"
@@ -188,7 +180,7 @@
     "feedbackBtn": "상세 피드백 보기",
     "summaryBtn": "결과 요약 보기",
     "missionLabel": "미션",
-    "sceneLabel": "장면",
+    "sceneLabel": "시나리오",
     "reviewBtn": "복습하기",
     "analyzing": "대화를 분석하고 있어요...",
     "loadFailed": "결과를 불러올 수 없어요",

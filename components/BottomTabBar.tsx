@@ -25,7 +25,7 @@ interface Tab {
 const ICON_SIZE = 20;
 const ICON_STROKE = 1.8;
 
-/* 3개 탭 목록 (대화/내정보 탭 제거 — 홈에서 새로하기/이어하기로 진입, 내정보는 /settings 통합) */
+/* 3개 탭 목록 (대화/내정보 탭 제거 — 홈에서 새로하기로 진입, 내정보는 /settings 통합) */
 const TABS: Tab[] = [
   { href: "/",        labelKey: "tabs.home",    icon: <Home size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { href: "/history", labelKey: "tabs.history", icon: <ClipboardList size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },

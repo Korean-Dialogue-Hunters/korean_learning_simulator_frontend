@@ -83,13 +83,15 @@ export interface EvaluationResponse {
   lengthScore: number;                            // BE: length_score — 발화 길이 점수
   vocabScore: number;                             // BE: vocab_score — 어휘 점수
   contextScore: number;                           // BE: context_score — 맥락 점수 (레거시)
-  contextSceneMissionMatch: number;               // BE: context_scene_mission_match (0~3 하트)
-  contextRelationshipMatch: number;               // BE: context_relationship_match (0~3 하트)
+  contextSceneMissionMatch: number;               // BE: context_scene_mission_match (0/2/4/6/8/10)
+  contextRelationshipMatch: number;               // BE: context_relationship_match (0/2/4/6/8/10)
   spellingScore: number;                          // BE: spelling_score
   totalScore10: number;                           // BE: total_score_10
   grade: string;                                  // BE: grade — "Beginner <B>" 형태
   feedback: string;
+  feedbackEn?: string;                            // BE: feedback_en
   llmSummary: string;                             // BE: llm_summary
+  llmSummaryEn?: string;                          // BE: llm_summary_en
   sckMatchCount: number;                          // BE: SCK_match_count
   sckTotalTokens: number;                         // BE: SCK_total_tokens
   sckMatchRate: number;                           // BE: SCK_match_rate

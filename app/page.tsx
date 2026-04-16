@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, Plus, Play, X, Sparkles } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import HomeHeader from "@/components/HomeHeader";
 import TierCard from "@/components/TierCard";
 import WeeklyStats from "@/components/WeeklyStats";
 import { UserProfile, WeeklyStats as WeeklyStatsType, Grade } from "@/types/user";
 import { isSetupDone, getSavedProfile, getUserId } from "@/hooks/useSetup";
-import { getReviewCount, getWeeklyStats } from "@/lib/api";
+import { getReviewCount, getWeeklyStats, getUserSessions } from "@/lib/api";
 import { getXpData, getXpBarInfo } from "@/lib/xpSystem";
 
 /* grade 문자열("초급 <B>")에서 Grade 타입으로 매핑 */
@@ -28,13 +28,6 @@ export default function HomePage() {
   const [flashCount, setFlashCount] = useState(0);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [weeklyStats, setWeeklyStats] = useState<WeeklyStatsType>({ sessionsPerUserCount: 0, averageScore: 0, streakDays: 0 });
-  const [showNoSessionModal, setShowNoSessionModal] = useState(false);
-  const [hasActiveSession, setHasActiveSession] = useState(false);
-
-  /* 세션 유무 감지 (팝업 닫힐 때도 재확인) */
-  useEffect(() => {
-    setHasActiveSession(!!localStorage.getItem("sessionId"));
-  }, [showNoSessionModal]);
 
   useEffect(() => {
     if (!isSetupDone()) {
@@ -71,142 +64,55 @@ export default function HomePage() {
           ...prev,
           grade: parseGrade(res.latestGrade || ""),
         } : prev);
-        setWeeklyStats({
-          sessionsPerUserCount: res.sessionsPerUserCount,
+        setWeeklyStats((prev) => ({
+          ...prev,
           averageScore: res.averageScore,
           streakDays: res.streakDays ?? 0,
-        });
+        }));
+      })
+      .catch(() => {});
+
+    // 누적대화횟수는 완료된 세션만 카운트 (weekly-stats는 고아 세션까지 포함해서 불일치)
+    getUserSessions(profile.userNickname)
+      .then((res) => {
+        setWeeklyStats((prev) => ({ ...prev, sessionsPerUserCount: res.totalCount }));
       })
       .catch(() => {});
   }, [router]);
 
   return (
-    <>
-      {/* 진행 중 세션 없을 때 팝업 */}
-      {showNoSessionModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowNoSessionModal(false)} />
-          <div
-            className="relative w-full max-w-[320px] rounded-2xl p-6 text-center"
-            style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}
-          >
-            <button
-              type="button"
-              onClick={() => setShowNoSessionModal(false)}
-              className="absolute top-3 right-3 text-tab-inactive hover:opacity-70"
-            >
-              <X size={18} />
-            </button>
-            <p className="text-base font-bold text-foreground mb-2">
-              {t("home.noSessionTitle")}
+    <div className="flex flex-col gap-4 pb-24">
+      <HomeHeader />
+      {user && <TierCard user={user} />}
+      <WeeklyStats stats={weeklyStats} />
+
+      {/* 주간 복습 배너 */}
+      <Link href="/review">
+        <div className="mx-5 rounded-2xl bg-card-bg border border-card-border p-4 flex items-center justify-between active:scale-[0.98] transition-transform">
+          <div>
+            <p className="text-sm font-bold text-foreground">{t("home.weeklyReviewTitle")}</p>
+            <p className="text-[12px] text-tab-inactive mt-1">
+              {t("home.weeklyReviewContent", { quiz: quizCount, flash: flashCount })}
             </p>
-            <p className="text-sm text-tab-inactive mb-6">
-              {t("home.noSessionDesc")}
-            </p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowNoSessionModal(false)}
-                className="flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
-                style={{ backgroundColor: "var(--color-surface)", color: "var(--color-foreground)" }}
-              >
-                {t("home.noSessionNo")}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setShowNoSessionModal(false); router.push("/location"); }}
-                className="flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
-                style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}
-              >
-                {t("home.noSessionYes")}
-              </button>
-            </div>
           </div>
+          <ChevronRight size={20} className="text-tab-inactive shrink-0" />
         </div>
-      )}
+      </Link>
 
-      <div className="flex flex-col gap-4 pb-24">
-        <HomeHeader />
-        {user && <TierCard user={user} />}
-        <WeeklyStats stats={weeklyStats} />
-
-        {/* 빈 상태 CTA 카드 — 재도전 카드 BE 연동 전까지 대화 시작 유도 (T3-06) */}
-        {!hasActiveSession && (
-          <button
-            type="button"
-            onClick={() => router.push("/location")}
-            className="mx-5 rounded-2xl p-5 text-left active:scale-[0.98] transition-all relative overflow-hidden"
-            style={{
-              backgroundColor: "color-mix(in srgb, var(--color-accent) 10%, var(--color-card-bg))",
-              border: "1.5px solid color-mix(in srgb, var(--color-accent) 35%, transparent)",
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 18%, transparent)", color: "var(--color-accent)" }}>
-                <Sparkles size={22} strokeWidth={2} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-foreground">{t("home.emptyTitle")}</p>
-                <p className="text-[12px] text-tab-inactive mt-0.5 leading-relaxed">{t("home.emptyDesc")}</p>
-              </div>
-              <ChevronRight size={20} className="text-accent shrink-0" />
-            </div>
-          </button>
-        )}
-
-        {/* 주간 복습 배너 */}
-        <Link href="/review">
-          <div className="mx-5 rounded-2xl bg-card-bg border border-card-border p-4 flex items-center justify-between active:scale-[0.98] transition-transform">
-            <div>
-              <p className="text-sm font-bold text-foreground">{t("home.weeklyReviewTitle")}</p>
-              <p className="text-[12px] text-tab-inactive mt-1">
-                {t("home.weeklyReviewContent", { quiz: quizCount, flash: flashCount })}
-              </p>
-            </div>
-            <ChevronRight size={20} className="text-tab-inactive shrink-0" />
-          </div>
-        </Link>
-
-        {/* 대화 버튼 2개: 새로 하기 (filled) + 이어 하기 (세션 유무에 따라 변화) */}
-        <div className="mx-5 mt-2 flex gap-3">
-          <button
-            onClick={() => router.push("/location")}
-            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[17px] active:scale-[0.97] transition-transform duration-100"
-            style={{
-              backgroundColor: "var(--color-accent)",
-              color: "var(--color-btn-primary-text)",
-            }}
-          >
-            <Plus size={18} strokeWidth={2.5} />
-            {t("home.newBtn")}
-          </button>
-          <button
-            onClick={() => {
-              if (!hasActiveSession) {
-                setShowNoSessionModal(true);
-                return;
-              }
-              /* 떠났던 단계로 복원: 페르소나 미선택이면 /persona, 아니면 /chat */
-              const hasPersona = !!localStorage.getItem("myPersona");
-              router.push(hasPersona ? "/chat" : "/persona");
-            }}
-            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[17px] active:scale-[0.97] transition-all duration-100 border-2"
-            style={hasActiveSession ? {
-              backgroundColor: "var(--color-accent)",
-              borderColor: "var(--color-accent)",
-              color: "var(--color-btn-primary-text)",
-            } : {
-              backgroundColor: "transparent",
-              borderColor: "var(--color-card-border)",
-              color: "var(--color-tab-inactive)",
-            }}
-          >
-            <Play size={18} strokeWidth={2.5} />
-            {t("home.continueBtn")}
-          </button>
-        </div>
+      {/* 대화 시작 버튼 (단일) */}
+      <div className="mx-5 mt-2">
+        <button
+          onClick={() => router.push("/location")}
+          className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[17px] active:scale-[0.97] transition-transform duration-100"
+          style={{
+            backgroundColor: "var(--color-accent)",
+            color: "var(--color-btn-primary-text)",
+          }}
+        >
+          <Plus size={18} strokeWidth={2.5} />
+          {t("home.newBtn")}
+        </button>
       </div>
-    </>
+    </div>
   );
 }

@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { X, Target, User2, MapPin, ArrowRight } from "lucide-react";
 import { Persona } from "@/types/api";
 import { getPersonaImage } from "@/lib/personaImage";
+import { titleCase } from "@/lib/textCase";
 
 interface PersonaDetailModalProps {
   persona: Persona;
@@ -50,8 +51,8 @@ export default function PersonaDetailModal({
     };
   }, [onClose]);
 
-  const myRole = ((isEn && persona.roleEn) || persona.role).replace(/^./, (c) => c.toUpperCase());
-  const partnerRole = ((isEn && counterpart.roleEn) || counterpart.role).replace(/^./, (c) => c.toUpperCase());
+  const myRole = titleCase((isEn && persona.roleEn) || persona.role);
+  const partnerRole = titleCase((isEn && counterpart.roleEn) || counterpart.role);
   const gender = (isEn && persona.genderEn) || persona.gender;
   const mission = (isEn && persona.missionEn) || persona.mission;
   const sceneText = (isEn && sceneEn) || scene;
@@ -97,11 +98,17 @@ export default function PersonaDetailModal({
             </span>
             <div className="flex items-center gap-1.5 text-[13px] font-bold flex-wrap"
               style={{ color: "#fff", textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>
-              <span className="px-2 py-0.5 rounded-md" style={{ backgroundColor: "rgba(255,255,255,0.22)" }}>
+              <span className="px-2.5 py-1 rounded-md text-[14px] font-extrabold shadow-md"
+                style={{
+                  backgroundColor: "var(--color-accent)",
+                  color: "var(--color-btn-primary-text)",
+                  textShadow: "none",
+                }}>
                 {myRole}
               </span>
-              <ArrowRight size={14} strokeWidth={2.5} />
-              <span className="px-2 py-0.5 rounded-md" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
+              <ArrowRight size={14} strokeWidth={2.5} style={{ opacity: 0.85 }} />
+              <span className="px-2 py-0.5 rounded-md"
+                style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }}>
                 {partnerRole}
               </span>
             </div>

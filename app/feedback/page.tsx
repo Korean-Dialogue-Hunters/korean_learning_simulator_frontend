@@ -11,7 +11,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Home, Layers, BarChart3, FileText, Heart, BookOpen, AlertCircle, Trophy, ArrowRight, Sparkles } from "lucide-react";
+import { Home, Layers, BarChart3, FileText, BookOpen, AlertCircle, Trophy, ArrowRight, Sparkles } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { EvaluationScores } from "@/types/result";
@@ -23,44 +23,29 @@ import { getUserId } from "@/hooks/useSetup";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import RadarChart from "@/components/result/RadarChart";
 import LoadingScreen from "@/components/common/LoadingScreen";
+import { clearSessionState } from "@/lib/sessionStorage";
 
-/* ── BE 응답 → 5축 점수 변환 ── */
+/* ── BE 응답 → 5축 점수 변환 (모두 0~10 스케일) ── */
 function extractScores(data: EvaluationResponse): EvaluationScores {
   return {
     length: data.lengthScore ?? 5,
     vocabulary: data.vocabScore ?? 5,
-    sceneMission: ((data.contextSceneMissionMatch ?? 1.5) / 3) * 10,
-    relationship: ((data.contextRelationshipMatch ?? 1.5) / 3) * 10,
+    sceneMission: data.contextSceneMissionMatch ?? 5,
+    relationship: data.contextRelationshipMatch ?? 5,
     spelling: data.spellingScore ?? 5,
   };
 }
 
-/* ── 하트 표시 (0~3) ── */
-function Hearts({ count, max = 3 }: { count: number; max?: number }) {
-  return (
-    <div className="flex gap-1">
-      {[...Array(max)].map((_, i) => (
-        <Heart key={i} size={16} strokeWidth={1.5}
-          fill={i < count ? "var(--color-accent)" : "none"}
-          color={i < count ? "var(--color-accent)" : "var(--color-card-border)"} />
-      ))}
-    </div>
-  );
-}
-
 /* ── 점수 바 ── */
-function ScoreBar({ label, score, maxScore = 10, hearts }: {
-  label: string; score: number; maxScore?: number; hearts?: number;
+function ScoreBar({ label, score, maxScore = 10 }: {
+  label: string; score: number; maxScore?: number;
 }) {
   const percent = Math.min((score / maxScore) * 100, 100);
   return (
     <div className="mb-4 last:mb-0">
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-[13px] font-medium text-foreground">{label}</span>
-        <div className="flex items-center gap-2">
-          {hearts !== undefined && <Hearts count={hearts} />}
-          <span className="text-[13px] font-bold text-foreground">{score.toFixed(1)}</span>
-        </div>
+        <span className="text-[13px] font-bold text-foreground">{score.toFixed(1)}</span>
       </div>
       <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--color-surface)" }}>
         <div className="h-full rounded-full transition-all duration-700"
@@ -94,7 +79,10 @@ export default function FeedbackPage() {
   };
 
   useEffect(() => {
-    const sessionId = localStorage.getItem("sessionId");
+    /* 히스토리 카드에서 /result → /feedback으로 넘어온 경우 viewSessionId를 우선 사용.
+       제거하지 않고 clearSessionState에 위임 (Strict Mode 재실행 대응). */
+    const viewSessionId = localStorage.getItem("viewSessionId");
+    const sessionId = viewSessionId || localStorage.getItem("sessionId");
     if (!sessionId) {
       router.replace("/");
       return;
@@ -143,8 +131,7 @@ export default function FeedbackPage() {
     const desc = isSessionLost ? t("result.sessionLostDesc") : null;
 
     const handleRetry = () => {
-      ["sessionId", "scenarioData", "myPersona", "counterpart", "turnLimit", "firstAiMessage", "chatMessages", "scene", "sceneEn", "evaluationData"]
-        .forEach((k) => localStorage.removeItem(k));
+      clearSessionState();
       router.push("/location");
     };
 
@@ -244,10 +231,8 @@ export default function FeedbackPage() {
         </div>
         <ScoreBar label={t("eval.length")} score={scores.length} />
         <ScoreBar label={t("eval.vocab")} score={scores.vocabulary} />
-        <ScoreBar label={t("eval.sceneMission")} score={scores.sceneMission}
-          hearts={evalData.contextSceneMissionMatch} />
-        <ScoreBar label={t("eval.relationship")} score={scores.relationship}
-          hearts={evalData.contextRelationshipMatch} />
+        <ScoreBar label={t("eval.sceneMission")} score={scores.sceneMission} />
+        <ScoreBar label={t("eval.relationship")} score={scores.relationship} />
         <ScoreBar label={t("eval.spelling")} score={scores.spelling} />
       </div>
 
@@ -312,7 +297,7 @@ export default function FeedbackPage() {
           <p className="text-sm font-bold" style={{ color: "var(--color-foreground)" }}>{t("feedback.basisTitle")}</p>
         </div>
         <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: "var(--color-foreground)" }}>
-          {evalData.feedback}
+          {(i18n.language?.startsWith("en") && evalData.feedbackEn) || evalData.feedback}
         </p>
       </div>
 

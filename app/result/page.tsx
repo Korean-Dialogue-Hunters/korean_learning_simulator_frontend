@@ -21,6 +21,7 @@ import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpS
 import { getUserId } from "@/hooks/useSetup";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import LoadingScreen from "@/components/common/LoadingScreen";
+import { clearSessionState } from "@/lib/sessionStorage";
 
 /* ── 점수에 따른 등급 텍스트 키 ── */
 function getGradeTextKey(score: number): string {
@@ -41,18 +42,20 @@ export default function ResultPage() {
   const [xpGained, setXpGained] = useState<number>(0);
   const [showFullLog, setShowFullLog] = useState(false);
   const [mission, setMission] = useState("");
-  const [scene, setScene] = useState("");
 
-  /* 미션/장면 — i18n에 맞춰 한/영 분기 */
+  /* 미션 — 히스토리 뷰에선 localStorage myPersona가 다른 세션 것이므로 숨김 */
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (localStorage.getItem("viewSessionId")) return;
     const isEn = (localStorage.getItem("i18nextLng") || "ko").startsWith("en");
     try {
       const persona = JSON.parse(localStorage.getItem("myPersona") || "null");
       if (persona) setMission((isEn && persona.missionEn) || persona.mission || "");
     } catch {}
-    setScene((isEn ? localStorage.getItem("sceneEn") : localStorage.getItem("scene")) || localStorage.getItem("scene") || "");
   }, []);
+
+  /* 장면 — BE 평가 응답의 scene을 우선 사용 (해당 세션 정보) */
+  const scene = evalData?.scene || "";
 
   /* XP 지급 (중복 방지 포함) */
   const awardConversationXp = (sessionId: string, totalScore10: number) => {
@@ -66,7 +69,11 @@ export default function ResultPage() {
   };
 
   useEffect(() => {
-    const sessionId = localStorage.getItem("sessionId");
+    /* 히스토리 카드에서 온 경우 viewSessionId를 우선 사용. 제거는 clearSessionState에 위임
+       (여기서 즉시 removeItem하면 Strict Mode의 두 번째 effect 실행에서 null이 되어
+        현재 활성 sessionId로 fallback되는 버그가 있었음) */
+    const viewSessionId = localStorage.getItem("viewSessionId");
+    const sessionId = viewSessionId || localStorage.getItem("sessionId");
     if (!sessionId) {
       router.replace("/");
       return;
@@ -112,16 +119,7 @@ export default function ResultPage() {
     const desc = isSessionLost ? t("result.sessionLostDesc") : null;
 
     const handleRetry = () => {
-      localStorage.removeItem("sessionId");
-      localStorage.removeItem("scenarioData");
-      localStorage.removeItem("myPersona");
-      localStorage.removeItem("counterpart");
-      localStorage.removeItem("turnLimit");
-      localStorage.removeItem("firstAiMessage");
-      localStorage.removeItem("chatMessages");
-      localStorage.removeItem("scene");
-      localStorage.removeItem("sceneEn");
-      localStorage.removeItem("evaluationData");
+      clearSessionState();
       router.push("/location");
     };
 
@@ -262,7 +260,7 @@ export default function ResultPage() {
       <div className={`${COMMON_CLASSES.cardRounded} p-4 mb-4`}
         style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)" }}>
         <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "var(--color-foreground)" }}>
-          {evalData.llmSummary}
+          {(i18n.language?.startsWith("en") && evalData.llmSummaryEn) || evalData.llmSummary}
         </p>
       </div>
 

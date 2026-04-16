@@ -15,6 +15,7 @@ import { Persona, CreateSessionResponse } from "@/types/api";
 import { selectRole } from "@/lib/api";
 import { getSavedProfile } from "@/hooks/useSetup";
 import { getPersonaImage } from "@/lib/personaImage";
+import { titleCase } from "@/lib/textCase";
 import PersonaDetailModal from "@/components/persona/PersonaDetailModal";
 
 /* 레벨 → 턴 수 매핑 (BE turnLimit 폴백용) */
@@ -40,13 +41,25 @@ export default function PersonaPage() {
     }
     try {
       const data = JSON.parse(raw) as CreateSessionResponse;
+      /* BE personas 내부 _en 필드가 snake_case로 올 수 있어 camelCase로 보정 */
       const personaList: Persona[] = Object.entries(data.personas).map(
-        ([id, p]) => ({ ...p, id: id as "A" | "B" })
+        ([id, p]) => {
+          const raw = p as unknown as Record<string, unknown>;
+          return {
+            ...(p as Persona),
+            id: id as "A" | "B",
+            roleEn: (p.roleEn ?? (raw.role_en as string | undefined)) || undefined,
+            missionEn: (p.missionEn ?? (raw.mission_en as string | undefined)) || undefined,
+            genderEn: (p.genderEn ?? (raw.gender_en as string | undefined)) || undefined,
+          };
+        }
       );
       setPersonas(personaList);
-      setScene(data.scene || "");
-      const firstPersona = Object.values(data.personas)[0] as unknown as Record<string, unknown>;
-      setSceneEn((data.sceneEn || (firstPersona?.sceneEn as string)) || "");
+      const firstPersonaRaw = Object.values(data.personas)[0] as unknown as Record<string, unknown>;
+      const firstScene = (firstPersonaRaw?.scene as string) || "";
+      const firstSceneEn = (firstPersonaRaw?.sceneEn as string) || (firstPersonaRaw?.scene_en as string) || "";
+      setScene(data.scene || firstScene);
+      setSceneEn(data.sceneEn || firstSceneEn);
     } catch {
       router.replace("/location");
     }
@@ -129,7 +142,7 @@ export default function PersonaPage() {
       </div>
 
       {/* 가로 평행 카드 2개 (상하 스택, 남은 화면 꽉 채움) */}
-      <div className="flex-1 flex flex-col gap-3 px-3 pb-3 min-h-0">
+      <div className="flex-1 grid grid-rows-2 gap-3 px-3 pb-[10vh] min-h-0">
         {personas.map((persona) => (
           <PersonaBigCard
             key={persona.id}
@@ -174,13 +187,13 @@ function PersonaBigCard({
   const { t } = useTranslation();
   const img = getPersonaImage(persona);
   const ageUnit = t("persona.ageUnit");
-  const role = ((isEn && persona.roleEn) || persona.role).replace(/^./, (c) => c.toUpperCase());
+  const role = titleCase((isEn && persona.roleEn) || persona.role);
 
   return (
     <button
       type="button"
       onClick={onTap}
-      className="relative w-full flex-1 min-h-0 rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
+      className="relative w-full h-full min-h-0 rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
       style={{ border: "1px solid var(--color-card-border)" }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -192,26 +205,24 @@ function PersonaBigCard({
         style={{ background: "linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)" }}
       />
 
-      {/* 우상단 A/B 배지 */}
-      <div className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center text-[14px] font-extrabold backdrop-blur-md"
-        style={{ backgroundColor: "rgba(255,255,255,0.88)", color: "#1A1A1A" }}>
+      {/* 우상단 A/B 라벨 */}
+      <div className="absolute top-3 right-4 text-[26px] font-extrabold leading-none"
+        style={{ color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.7)" }}>
         {persona.id}
       </div>
 
       {/* 좌하단 텍스트 */}
       <div className="absolute bottom-4 left-5 right-16 text-left">
-        <div className="flex items-end gap-2 mb-1 flex-wrap">
+        <div className="mb-1">
           <span className="text-[26px] font-extrabold leading-none"
             style={{ color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.7)" }}>
             {persona.name}
           </span>
-          <span className="text-[14px] font-bold"
-            style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>
-            {persona.age}{ageUnit}
-          </span>
         </div>
-        <p className="text-[12px] font-medium line-clamp-1 mb-1"
+        <p className="text-[14px] font-medium line-clamp-1 mb-1"
           style={{ color: "rgba(255,255,255,0.88)", textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}>
+          {persona.age}{ageUnit}
+          <span className="mx-1.5 opacity-60">·</span>
           {role}
         </p>
         <p className="text-[11px] font-medium"

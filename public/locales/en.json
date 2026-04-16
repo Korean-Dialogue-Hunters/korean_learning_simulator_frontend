@@ -69,15 +69,7 @@
     "retryBtn": "Retry",
     "weeklyReviewTitle": "Weekly review is ready!",
     "weeklyReviewContent": "{{quiz}} consonant quiz, {{flash}} flashcards",
-    "newBtn": "New Chat",
-    "continueBtn": "Continue",
-    "noSessionTitle": "No active conversation",
-    "noSessionDesc": "Would you like to start a new one?",
-    "noSessionYes": "Yes, let's go!",
-    "noSessionNo": "No",
-    "emptyTitle": "Ready for your first conversation?",
-    "emptyDesc": "Pick a location and chat with AI in Korean.",
-    "emptyCta": "Start a conversation"
+    "newBtn": "New Chat"
   },
   "tierCard": {
     "namePostfix": "",
@@ -120,7 +112,7 @@
   "chat": {
     "leave": "Leave",
     "leaveConfirmTitle": "End this conversation?",
-    "leaveConfirmDesc": "You can resume later with \"Continue\".",
+    "leaveConfirmDesc": "Leaving will discard this conversation.",
     "leaveYes": "Yes, leave",
     "leaveNo": "No",
     "missionHint": "Try to complete your mission! 💬",
@@ -133,7 +125,7 @@
     "me": "Me",
     "partner": "Partner",
     "missionLabel": "Mission",
-    "sceneLabel": "Scene Details",
+    "sceneLabel": "Scenario",
     "leftTurns": "Turns Left",
     "placeholder": "Type a message...",
     "finishedPlaceholder": "Conversation ended"
@@ -141,7 +133,7 @@
   "review": {
     "title": "Weekly Review",
     "subtitle": "Review expressions from your conversations",
-    "chosungTitle": "Consonant Quiz",
+    "chosungTitle": "Chosung Quiz",
     "chosungDesc": "Guess the word from its initial consonants",
     "chosungCount": "{{count}} questions",
     "flashcardTitle": "Flashcards",
@@ -188,7 +180,7 @@
     "feedbackBtn": "View Detailed Feedback",
     "summaryBtn": "View Result Summary",
     "missionLabel": "Mission",
-    "sceneLabel": "Scene",
+    "sceneLabel": "Scenario",
     "reviewBtn": "Review Now",
     "analyzing": "Analyzing your conversation...",
     "loadFailed": "Could not load results",

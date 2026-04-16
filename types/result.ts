@@ -10,8 +10,8 @@ import { Grade } from "@/types/user";
 export interface EvaluationScores {
   length: number;             // BE: length_score — 발화 길이 (0~10)
   vocabulary: number;         // BE: vocab_score — 어휘 다양성 (0~10)
-  sceneMission: number;       // BE: context_scene_mission_match → (hearts/3)*10
-  relationship: number;       // BE: context_relationship_match → (hearts/3)*10
+  sceneMission: number;       // BE: context_scene_mission_match (0/2/4/6/8/10)
+  relationship: number;       // BE: context_relationship_match (0/2/4/6/8/10)
   spelling: number;           // BE: spelling_score — 맞춤법 (0~10)
 }
 

@@ -10,6 +10,7 @@
 import { useTranslation } from "react-i18next";
 import { Flag } from "lucide-react";
 import { Persona } from "@/types/api";
+import { titleCase } from "@/lib/textCase";
 
 
 /** 상대 페르소나 정보 (BE 연동 시 메타데이터에서 받음) */
@@ -28,10 +29,6 @@ interface PersonaProfileCardProps {
   counterpart: CounterpartInfo;
 }
 
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
 export default function PersonaProfileCard({
   persona,
   counterpart,
@@ -39,10 +36,10 @@ export default function PersonaProfileCard({
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === "en";
 
-  const myRole = capitalize((isEn && persona.roleEn) || persona.role);
+  const myRole = titleCase((isEn && persona.roleEn) || persona.role);
   const myGender = (isEn && persona.genderEn) || persona.gender;
   const myMission = (isEn && persona.missionEn) || persona.mission;
-  const cpRole = capitalize((isEn && counterpart.roleEn) || counterpart.role);
+  const cpRole = titleCase((isEn && counterpart.roleEn) || counterpart.role);
   const cpGender = (isEn && counterpart.genderEn) || counterpart.gender;
 
   return (

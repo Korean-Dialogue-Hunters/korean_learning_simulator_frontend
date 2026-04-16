@@ -19,6 +19,7 @@ import { getSavedProfile } from "@/hooks/useSetup";
 import { createSession } from "@/lib/api";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import { getLocationImage } from "@/lib/locationImage";
+import { clearSessionState } from "@/lib/sessionStorage";
 
 export default function LocationPage() {
   const router = useRouter();
@@ -44,6 +45,9 @@ export default function LocationPage() {
         router.replace("/setup");
         return;
       }
+
+      /* 이전 in-flow 세션 키 초기화 (새 세션 시작 전 스테이트 청소) */
+      clearSessionState();
 
       /* POST /v1/sessions — 세션 생성 */
       const res = await createSession({
