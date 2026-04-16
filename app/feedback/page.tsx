@@ -2,51 +2,49 @@
 
 /* ──────────────────────────────────────────
    상세 피드백 페이지 (/feedback)
-   - 대화 종료 직후 진입하는 "기본" 결과 화면
-   - evaluateSession() 호출 + XP 지급 + 캐시 저장
-   - 총점/등급 + 5축 레이더 + 점수 산출 근거 + SCK 어휘
-   - "결과 요약 보기" 버튼 → /result (대화 다시보기 화면)
+   - /result에서 진입하는 "상세" 결과 화면
+   - 대화 다시보기 + SCK 어휘 + LLM 요약
+   - "결과로 돌아가기" 버튼 → /result
    ────────────────────────────────────────── */
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Home, Layers, BarChart3, FileText, BookOpen, AlertCircle, Trophy, ArrowRight, Sparkles } from "lucide-react";
+import { Home, Layers, BookOpen, AlertCircle, Trophy, ArrowRight, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
-import { EvaluationScores } from "@/types/result";
 import { EvaluationResponse } from "@/types/api";
 import { evaluateSession, normalizeSckFields } from "@/lib/api";
 import { getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
 import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpSystem";
 import { getUserId } from "@/hooks/useSetup";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
-import RadarChart from "@/components/result/RadarChart";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import { clearSessionState } from "@/lib/sessionStorage";
-
-/* ── BE 응답 → 5축 점수 변환 (모두 0~10 스케일) ── */
-function extractScores(data: EvaluationResponse): EvaluationScores {
-  return {
-    length: data.lengthScore ?? 5,
-    vocabulary: data.vocabScore ?? 5,
-    sceneMission: data.contextSceneMissionMatch ?? 5,
-    relationship: data.contextRelationshipMatch ?? 5,
-    spelling: data.spellingScore ?? 5,
-  };
-}
 
 
 export default function FeedbackPage() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const [evalData, setEvalData] = useState<EvaluationResponse | null>(null);
-  const [scores, setScores] = useState<EvaluationScores | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [errorKind, setErrorKind] = useState<"sessionLost" | "generic" | null>(null);
   const [xpPopup, setXpPopup] = useState<Omit<XpGainPopupProps, "onClose"> | null>(null);
   const [xpGained, setXpGained] = useState<number>(0);
+  const [showFullLog, setShowFullLog] = useState(false);
+  const [mission, setMission] = useState("");
+
+  /* 미션 — 히스토리 뷰에선 localStorage myPersona가 다른 세션 것이므로 숨김 */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem("viewSessionId")) return;
+    const isEn = (localStorage.getItem("i18nextLng") || "ko").startsWith("en");
+    try {
+      const persona = JSON.parse(localStorage.getItem("myPersona") || "null");
+      if (persona) setMission((isEn && persona.missionEn) || persona.mission || "");
+    } catch {}
+  }, []);
 
   /* XP 지급 (중복 방지) */
   const awardConversationXp = (sessionId: string, totalScore10: number) => {
@@ -75,7 +73,6 @@ export default function FeedbackPage() {
     if (rawCached) {
       const cached = normalizeSckFields(rawCached);
       setEvalData(cached);
-      setScores(extractScores(cached));
       localStorage.setItem("evaluationData", JSON.stringify(cached));
       awardConversationXp(sessionId, cached.totalScore10);
       setLoading(false);
@@ -86,7 +83,6 @@ export default function FeedbackPage() {
     evaluateSession(sessionId, lang)
       .then((res) => {
         setEvalData(res);
-        setScores(extractScores(res));
         localStorage.setItem("evaluationData", JSON.stringify(res));
         saveEvaluationCache(sessionId, res);
         awardConversationXp(sessionId, res.totalScore10);
@@ -108,7 +104,7 @@ export default function FeedbackPage() {
     return <LoadingScreen active variant="evaluation" />;
   }
 
-  if (error || !evalData || !scores) {
+  if (error || !evalData) {
     const isSessionLost = errorKind === "sessionLost";
     const title = isSessionLost ? t("result.sessionLostTitle") : t("feedback.loadFailed");
     const desc = isSessionLost ? t("result.sessionLostDesc") : null;
@@ -152,6 +148,13 @@ export default function FeedbackPage() {
   const gradeLabel = evalData.grade.replace(/<\w+>/, "").trim();
   const gradeColor = GRADE_COLORS[gradeCode as keyof typeof GRADE_COLORS] ?? "var(--color-accent)";
 
+  /* 장면 — BE 평가 응답의 scene을 우선 사용 */
+  const scene = evalData?.scene || "";
+
+  /* 대화 로그: 기본 4개, 토글로 전체 */
+  const messages = evalData.conversationLog;
+  const visibleMessages = showFullLog ? messages : messages.slice(0, 4);
+
   return (
     <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       {xpPopup && <XpGainPopup {...xpPopup} onClose={() => setXpPopup(null)} />}
@@ -193,30 +196,57 @@ export default function FeedbackPage() {
         </div>
       </div>
 
-      {/* ── 1. 세부평가 (5축 레이더) ── */}
+      {/* ── 대화 다시보기 ── */}
       <div className={`${COMMON_CLASSES.cardRounded} p-4 mb-4`}
         style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
-        <div className="flex items-center gap-2 mb-2">
-          <BarChart3 size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
-          <p className="text-sm font-bold text-foreground">{t("feedback.radarTitle")}</p>
-        </div>
-        <RadarChart scores={scores} />
-      </div>
-
-      {/* ── 2. 점수 산출 근거 ── */}
-      <div className={`${COMMON_CLASSES.cardRounded} p-4 mb-4`}
-        style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)" }}>
         <div className="flex items-center gap-2 mb-3">
-          <FileText size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--color-foreground)" }}>{t("feedback.basisTitle")}</p>
+          <BookOpen size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
+          <p className="text-sm font-medium text-foreground">{t("result.logTitle")}</p>
         </div>
-        <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: "var(--color-foreground)" }}>
-          {(i18n.language?.startsWith("en") && evalData.feedbackEn) || evalData.feedback}
-        </p>
+        {(mission || scene) && (
+          <div className="mb-3 p-3 rounded-xl text-[12px] leading-relaxed space-y-1"
+            style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)" }}>
+            {mission && (
+              <div>
+                <span className="font-bold" style={{ color: "var(--color-accent)" }}>{t("result.missionLabel")}: </span>
+                <span style={{ color: "var(--color-foreground)" }}>{mission}</span>
+              </div>
+            )}
+            {scene && (
+              <div>
+                <span className="font-bold" style={{ color: "var(--color-accent)" }}>{t("result.sceneLabel")}: </span>
+                <span style={{ color: "var(--color-foreground)" }}>{scene}</span>
+              </div>
+            )}
+          </div>
+        )}
+        {visibleMessages.map((msg, i) => {
+          const isUser = msg.speaker === "user";
+          return (
+            <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"} mb-2`}>
+              <div className="max-w-[80%] px-3.5 py-2 text-[13px] leading-relaxed"
+                style={{
+                  borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                  backgroundColor: isUser ? "var(--color-accent)" : "var(--color-surface)",
+                  color: isUser ? "var(--color-btn-primary-text)" : "var(--color-foreground)",
+                }}>
+                {msg.utterance}
+              </div>
+            </div>
+          );
+        })}
+        {messages.length > 4 && (
+          <button type="button" onClick={() => setShowFullLog(!showFullLog)}
+            className="w-full flex items-center justify-center gap-1 text-xs font-medium py-2 mt-1 rounded-xl"
+            style={{ color: "var(--color-accent)" }}>
+            <span>{showFullLog ? t("result.collapse") : t("result.viewAll", { count: messages.length })}</span>
+            {showFullLog ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+        )}
       </div>
 
-      {/* ── 3. SCK 어휘 사용 ── */}
-      <div className={`${COMMON_CLASSES.cardRounded} p-5 mb-6`}
+      {/* ── SCK 어휘 사용 ── */}
+      <div className={`${COMMON_CLASSES.cardRounded} p-5 mb-4`}
         style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
         <div className="flex items-center gap-2 mb-3">
           <BookOpen size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
@@ -229,7 +259,6 @@ export default function FeedbackPage() {
             {Object.entries(evalData.sckLevelCounts)
               .sort(([a], [b]) => Number(a) - Number(b))
               .map(([level, count]) => {
-                /* BE가 string[] 또는 Record<string, number> 로 보낼 수 있음 */
                 const rawWords = evalData.sckLevelWordCounts?.[level];
                 const words: string[] = Array.isArray(rawWords)
                   ? rawWords
@@ -263,6 +292,14 @@ export default function FeedbackPage() {
               })}
           </div>
         )}
+      </div>
+
+      {/* ── LLM 요약 ── */}
+      <div className={`${COMMON_CLASSES.cardRounded} p-4 mb-6`}
+        style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)" }}>
+        <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "var(--color-foreground)" }}>
+          {(i18n.language?.startsWith("en") && evalData.llmSummaryEn) || evalData.llmSummary}
+        </p>
       </div>
 
       {/* ── 하단 버튼 ── */}
