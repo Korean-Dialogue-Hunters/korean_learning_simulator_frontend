@@ -10,7 +10,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star } from "lucide-react";
+import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star, Layers } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { getSavedProfile } from "@/hooks/useSetup";
@@ -203,11 +203,15 @@ export default function HistoryPage() {
   );
 }
 
-/* ── 진척도 별 3개 정의 ── */
-const STAR_KEYS: { key: keyof SessionProgress; labelKey: string }[] = [
-  { key: "gradeA", labelKey: "history.starGradeA" },
-  { key: "chosungQuizPassed", labelKey: "history.starChosung" },
-  { key: "flashcardDone", labelKey: "history.starFlashcard" },
+/* ── 진척도 3항목 정의: 별 안에 표시할 내용 ── */
+const PROGRESS_ITEMS: {
+  key: keyof SessionProgress;
+  inner: "text" | "icon";
+  text?: string;
+}[] = [
+  { key: "gradeA", inner: "text", text: "A⬆" },
+  { key: "chosungQuizPassed", inner: "text", text: "Q" },
+  { key: "flashcardDone", inner: "icon" },
 ];
 
 /* ── 대화 기록 카드 ── */
@@ -222,8 +226,6 @@ function DialogueCard({
   onClick: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
-  const [showTooltip, setShowTooltip] = useState(false);
-
   /* grade 문자열에서 등급 코드만 추출: "Beginner <B>" → "B" */
   const gradeMatch = record.grade.match(/<(\w+)>/);
   const gradeCode = gradeMatch ? gradeMatch[1] : record.grade;
@@ -234,9 +236,6 @@ function DialogueCard({
     month: "short",
     day: "numeric",
   });
-
-  /* 달성한 별 개수 */
-  const earnedCount = STAR_KEYS.filter((s) => progress[s.key]).length;
 
   return (
     <button
@@ -258,77 +257,61 @@ function DialogueCard({
       </div>
 
       {/* 시나리오 제목 */}
-      <p className="text-[13px] font-bold text-foreground mb-2 leading-snug">{record.scenarioTitle}</p>
+      <p className="text-[12.4px] font-bold text-foreground mb-2 leading-snug">{record.scenarioTitle}</p>
 
-      {/* 하단: 점수 + 별 진척도 + 등급 */}
+      {/* 하단: 점수 + 진척도 별 + 등급 */}
       <div className="flex items-center justify-between">
         {/* 좌: 점수 */}
         <div className="flex items-center gap-2">
-          <span className="text-[12px] text-tab-inactive">{t("history.score")}</span>
-          <span className="text-[13px] font-bold text-foreground">{record.totalScore10.toFixed(1)}</span>
-          <span className="text-[11px] text-tab-inactive">/ 10</span>
+          <span className="text-[11.4px] text-tab-inactive">{t("history.score")}</span>
+          <span className="text-[12.4px] font-bold text-foreground">{record.totalScore10.toFixed(1)}</span>
+          <span className="text-[10.5px] text-tab-inactive">/ 10</span>
         </div>
 
-        {/* 우: 별 3개 + 등급 배지 */}
-        <div className="flex items-center gap-2">
-          {/* 별 진척도 — 탭하면 툴팁 */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowTooltip(!showTooltip);
-              }}
-              className="flex items-center gap-0.5"
-              aria-label={t("history.progress")}
-            >
-              {STAR_KEYS.map((star) => (
+        {/* 우: 진척도 별 3개 + 등급 배지 */}
+        <div className="flex items-center gap-1">
+          {PROGRESS_ITEMS.map((item) => {
+            const done = progress[item.key];
+            return (
+              <div key={item.key} className="relative flex items-center justify-center" style={{ width: 35, height: 35 }}>
                 <Star
-                  key={star.key}
-                  size={13}
-                  strokeWidth={1.8}
-                  fill={progress[star.key] ? "var(--color-accent)" : "none"}
-                  stroke={progress[star.key] ? "var(--color-accent)" : "var(--color-tab-inactive)"}
+                  size={35}
+                  strokeWidth={1.3}
+                  fill={done ? "var(--color-accent)" : "none"}
+                  stroke={done ? "var(--color-accent)" : "var(--color-tab-inactive)"}
                 />
-              ))}
-            </button>
-
-            {/* 툴팁: 각 별이 무엇인지 표시 */}
-            {showTooltip && (
-              <div
-                className="absolute bottom-7 right-0 z-30 rounded-lg px-3 py-2 shadow-lg min-w-[150px]"
-                style={{
-                  backgroundColor: "var(--color-card-bg)",
-                  border: "1px solid var(--color-card-border)",
-                }}
-              >
-                <p className="text-[10px] font-bold text-foreground mb-1.5">
-                  {t("history.progress")} {earnedCount}/3
-                </p>
-                {STAR_KEYS.map((star) => (
-                  <div key={star.key} className="flex items-center gap-1.5 mb-1">
-                    <Star
-                      size={10}
-                      strokeWidth={2}
-                      fill={progress[star.key] ? "var(--color-accent)" : "none"}
-                      stroke={progress[star.key] ? "var(--color-accent)" : "var(--color-tab-inactive)"}
-                    />
+                <div className="absolute inset-0 flex items-center justify-center" style={{ paddingTop: 2 }}>
+                  {item.inner === "text" ? (
                     <span
-                      className="text-[10px]"
-                      style={{ color: progress[star.key] ? "var(--color-foreground)" : "var(--color-tab-inactive)" }}
+                      className="font-bold text-center"
+                      style={{
+                        fontSize: item.text === "Q" ? "12px" : "8px",
+                        lineHeight: 1,
+                        letterSpacing: item.text !== "Q" ? "-0.5px" : undefined,
+                        marginTop: item.text === "Q" ? "-2px" : undefined,
+                        color: done ? "var(--color-btn-primary-text)" : "var(--color-tab-inactive)",
+                      }}
                     >
-                      {t(star.labelKey)}
+                      {item.text}
                     </span>
-                  </div>
-                ))}
+                  ) : (
+                    <Layers
+                      size={13}
+                      strokeWidth={2.2}
+                      style={{ color: done ? "var(--color-btn-primary-text)" : "var(--color-tab-inactive)" }}
+                    />
+                  )}
+                </div>
               </div>
-            )}
-          </div>
+            );
+          })}
 
           {/* 등급 배지 */}
           <div
-            className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+            className="ml-3 text-[14px] font-bold rounded-full flex items-center justify-center"
             style={{
+              width: 35,
+              height: 35,
               border: `1.5px solid ${gradeColor}`,
               color: gradeColor,
             }}

@@ -224,9 +224,9 @@
     "sortScoreHigh": "Highest score",
     "sortScoreLow": "Lowest score",
     "sortLocation": "By location",
-    "starGradeA": "Grade A achieved",
-    "starChosung": "Chosung Quiz 4/5+",
-    "starFlashcard": "Flashcards done",
+    "starGradeA": "Conv A⬆",
+    "starChosung": "Quiz done",
+    "starFlashcard": "Cards done",
     "progress": "Progress"
   },
   "xp": {

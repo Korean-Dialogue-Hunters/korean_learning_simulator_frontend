@@ -20,6 +20,7 @@ export const GRADE_COLORS: Record<string, string> = {
 export interface UserProfile {
   userNickname: string;   // BE: user_nickname
   grade: Grade;           // BE: latest_grade
+  koreanLevel: number;    // BE: korean_level (1~6, 태권도 벨트 매핑)
   level: number;          // XP 시스템 레벨
   xp: number;             // 현재 레벨 내 누적 XP
   xpMax: number;          // 현재 레벨 → 다음 레벨 필요 XP

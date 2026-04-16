@@ -13,6 +13,13 @@ import { isSetupDone, getSavedProfile, getUserId } from "@/hooks/useSetup";
 import { getReviewCount, getWeeklyStats, getUserSessions } from "@/lib/api";
 import { getXpData, getXpBarInfo } from "@/lib/xpSystem";
 
+/* 셋업 한국어 수준 문자열 → korean_level 숫자 매핑 */
+function mapKoreanLevel(level: string): number {
+  if (level === "중급") return 3;
+  if (level === "고급") return 5;
+  return 1; // 초급 또는 기본값
+}
+
 /* grade 문자열("초급 <B>")에서 Grade 타입으로 매핑 */
 function parseGrade(raw: string): Grade {
   const m = raw.match(/<(\w+)>/);
@@ -44,6 +51,7 @@ export default function HomePage() {
     setUser({
       userNickname: profile.userNickname,
       grade: "C",
+      koreanLevel: mapKoreanLevel(profile.koreanLevel),
       level: bar.level,
       xp: bar.currentLevelXp,
       xpMax: bar.requiredLevelXp,

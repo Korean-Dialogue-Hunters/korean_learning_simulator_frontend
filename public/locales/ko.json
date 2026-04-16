@@ -224,9 +224,9 @@
     "sortScoreHigh": "점수 높은 순",
     "sortScoreLow": "점수 낮은 순",
     "sortLocation": "장소 기준",
-    "starGradeA": "Grade A 획득",
-    "starChosung": "초성퀴즈 4/5+",
-    "starFlashcard": "플래시카드 완료",
+    "starGradeA": "대화 A⬆",
+    "starChosung": "퀴즈완료",
+    "starFlashcard": "암기완료",
     "progress": "진척도"
   },
   "xp": {

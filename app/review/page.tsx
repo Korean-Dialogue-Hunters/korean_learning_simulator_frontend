@@ -436,14 +436,25 @@ function FlashcardView({ items, onBack, onXpGain }: { items: FlashcardItem[]; on
   }
 
   const raw = items[current] as Record<string, unknown>;
-  if (process.env.NODE_ENV !== "production") {
-    console.log("[Flashcard] item keys:", Object.keys(raw), "item:", raw);
-  }
-  /* BE 필드 대응: front/back 또는 word/meaning */
-  const front = (raw.front as string) ?? (raw.word as string) ?? "";
-  const back = (raw.back as string) ?? (raw.meaning as string) ?? "";
-  const example = (raw.example as string) ?? (raw.sentence as string) ?? "";
+  const word = (raw.word as string) ?? "";
+  const meaning = (raw.meaning as string) ?? "";
+  const example = (raw.example as string) ?? "";
+  const exampleTranslation = (raw.exampleTranslation as string) ?? (raw.example_translation as string) ?? "";
   const isLast = current === items.length - 1;
+
+  /* example 문장 내 word를 <mark>로 하이라이트 */
+  const highlightWord = (text: string, target: string) => {
+    if (!text || !target) return <span>{text}</span>;
+    const idx = text.toLowerCase().indexOf(target.toLowerCase());
+    if (idx === -1) return <span>{text}</span>;
+    return (
+      <>
+        {text.slice(0, idx)}
+        <span className="font-bold" style={{ color: "var(--color-accent)" }}>{text.slice(idx, idx + target.length)}</span>
+        {text.slice(idx + target.length)}
+      </>
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
@@ -478,12 +489,17 @@ function FlashcardView({ items, onBack, onXpGain }: { items: FlashcardItem[]; on
       >
         {flipped ? (
           <>
-            <p className="text-sm text-tab-inactive mb-2">{front}</p>
-            <p className="text-2xl font-bold text-accent">{back}</p>
+            <p className="text-2xl font-bold" style={{ color: "var(--color-accent)" }}>{meaning}</p>
+            {exampleTranslation && (
+              <p className="text-sm text-tab-inactive leading-relaxed mt-4">{highlightWord(exampleTranslation, meaning)}</p>
+            )}
           </>
         ) : (
           <>
-            <p className="text-3xl font-bold text-foreground">{front}</p>
+            <p className="text-3xl font-bold" style={{ color: "var(--color-accent)" }}>{word}</p>
+            {example && (
+              <p className="text-sm text-tab-inactive leading-relaxed mt-4">{highlightWord(example, word)}</p>
+            )}
             <p className="text-[13px] text-tab-inactive mt-6">{t("review.flipCard")}</p>
           </>
         )}
