@@ -4,7 +4,7 @@
    상세 피드백 페이지 (/feedback)
    - 대화 종료 직후 진입하는 "기본" 결과 화면
    - evaluateSession() 호출 + XP 지급 + 캐시 저장
-   - 총점/등급 + 5축 레이더 + 5축 점수 바 + SCK 어휘 + 점수 산출 근거
+   - 총점/등급 + 5축 레이더 + 점수 산출 근거 + SCK 어휘
    - "결과 요약 보기" 버튼 → /result (대화 다시보기 화면)
    ────────────────────────────────────────── */
 
@@ -16,7 +16,7 @@ import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { EvaluationScores } from "@/types/result";
 import { EvaluationResponse } from "@/types/api";
-import { evaluateSession } from "@/lib/api";
+import { evaluateSession, normalizeSckFields } from "@/lib/api";
 import { getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
 import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpSystem";
 import { getUserId } from "@/hooks/useSetup";
@@ -36,24 +36,6 @@ function extractScores(data: EvaluationResponse): EvaluationScores {
   };
 }
 
-/* ── 점수 바 ── */
-function ScoreBar({ label, score, maxScore = 10 }: {
-  label: string; score: number; maxScore?: number;
-}) {
-  const percent = Math.min((score / maxScore) * 100, 100);
-  return (
-    <div className="mb-4 last:mb-0">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[13px] font-medium text-foreground">{label}</span>
-        <span className="text-[13px] font-bold text-foreground">{score.toFixed(1)}</span>
-      </div>
-      <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--color-surface)" }}>
-        <div className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${percent}%`, backgroundColor: "var(--color-accent)" }} />
-      </div>
-    </div>
-  );
-}
 
 export default function FeedbackPage() {
   const router = useRouter();
@@ -88,9 +70,10 @@ export default function FeedbackPage() {
       return;
     }
 
-    /* 캐시 우선 (히스토리 카드 클릭 등) */
-    const cached = getEvaluationCache(sessionId) as EvaluationResponse | null;
-    if (cached) {
+    /* 캐시 우선 (히스토리 카드 클릭 등) — SCK 필드 정규화 재적용 */
+    const rawCached = getEvaluationCache(sessionId) as EvaluationResponse | null;
+    if (rawCached) {
+      const cached = normalizeSckFields(rawCached);
       setEvalData(cached);
       setScores(extractScores(cached));
       localStorage.setItem("evaluationData", JSON.stringify(cached));
@@ -220,37 +203,24 @@ export default function FeedbackPage() {
         <RadarChart scores={scores} />
       </div>
 
-      {/* ── 2. 역량분석 (5축 바) ── */}
-      <div className={`${COMMON_CLASSES.cardRounded} p-5 mb-4`}
-        style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Layers size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
-            <p className="text-sm font-bold text-foreground">{t("feedback.analysisTitle")}</p>
-          </div>
+      {/* ── 2. 점수 산출 근거 ── */}
+      <div className={`${COMMON_CLASSES.cardRounded} p-4 mb-4`}
+        style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)" }}>
+        <div className="flex items-center gap-2 mb-3">
+          <FileText size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--color-foreground)" }}>{t("feedback.basisTitle")}</p>
         </div>
-        <ScoreBar label={t("eval.length")} score={scores.length} />
-        <ScoreBar label={t("eval.vocab")} score={scores.vocabulary} />
-        <ScoreBar label={t("eval.sceneMission")} score={scores.sceneMission} />
-        <ScoreBar label={t("eval.relationship")} score={scores.relationship} />
-        <ScoreBar label={t("eval.spelling")} score={scores.spelling} />
+        <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: "var(--color-foreground)" }}>
+          {(i18n.language?.startsWith("en") && evalData.feedbackEn) || evalData.feedback}
+        </p>
       </div>
 
-      {/* ── 2-1. SCK 어휘 사용 ── */}
-      <div className={`${COMMON_CLASSES.cardRounded} p-5 mb-4`}
+      {/* ── 3. SCK 어휘 사용 ── */}
+      <div className={`${COMMON_CLASSES.cardRounded} p-5 mb-6`}
         style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <BookOpen size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
-            <p className="text-sm font-bold text-foreground">{t("feedback.sckTitle")}</p>
-          </div>
-          <span className="text-[11px] text-tab-inactive">
-            {t("feedback.sckSummary", {
-              match: evalData.sckMatchCount,
-              total: evalData.sckTotalTokens,
-              rate: Math.round((evalData.sckMatchRate ?? 0) * 100),
-            })}
-          </span>
+        <div className="flex items-center gap-2 mb-3">
+          <BookOpen size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
+          <p className="text-sm font-bold text-foreground">{t("feedback.sckTitle")}</p>
         </div>
         {Object.keys(evalData.sckLevelCounts ?? {}).length === 0 ? (
           <p className="text-[12px] text-tab-inactive text-center py-2">{t("feedback.sckEmpty")}</p>
@@ -259,7 +229,13 @@ export default function FeedbackPage() {
             {Object.entries(evalData.sckLevelCounts)
               .sort(([a], [b]) => Number(a) - Number(b))
               .map(([level, count]) => {
-                const words = evalData.sckLevelWordCounts?.[level] ?? [];
+                /* BE가 string[] 또는 Record<string, number> 로 보낼 수 있음 */
+                const rawWords = evalData.sckLevelWordCounts?.[level];
+                const words: string[] = Array.isArray(rawWords)
+                  ? rawWords
+                  : rawWords && typeof rawWords === "object"
+                    ? Object.keys(rawWords)
+                    : [];
                 return (
                   <div key={level}>
                     <div className="flex items-center gap-2 mb-1.5">
@@ -287,18 +263,6 @@ export default function FeedbackPage() {
               })}
           </div>
         )}
-      </div>
-
-      {/* ── 3. 점수 산출 근거 ── */}
-      <div className={`${COMMON_CLASSES.cardRounded} p-4 mb-6`}
-        style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)" }}>
-        <div className="flex items-center gap-2 mb-3">
-          <FileText size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--color-foreground)" }}>{t("feedback.basisTitle")}</p>
-        </div>
-        <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: "var(--color-foreground)" }}>
-          {(i18n.language?.startsWith("en") && evalData.feedbackEn) || evalData.feedback}
-        </p>
       </div>
 
       {/* ── 하단 버튼 ── */}

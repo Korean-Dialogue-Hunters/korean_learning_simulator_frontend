@@ -69,7 +69,7 @@
     "retryBtn": "재도전",
     "weeklyReviewTitle": "주간 복습 준비됐어요!",
     "weeklyReviewContent": "초성퀴즈 {{quiz}}개, 플래시카드 {{flash}}개",
-    "newBtn": "새로 하기"
+    "newBtn": "대화 시작하기"
   },
   "tierCard": {
     "namePostfix": "님",
@@ -79,7 +79,7 @@
   "weeklyStats": {
     "conversationCount": "누적 대화 횟수",
     "averageScore": "평균 점수",
-    "streak": "스트릭",
+    "streak": "연속학습일수",
     "countValue": "{{count}}회",
     "scoreValue": "{{score}}점",
     "streakValue": "{{days}}일"
@@ -96,7 +96,7 @@
   "persona": {
     "title": "어떤 역할을 맡아볼까요?",
     "subtitle": "선택한 페르소나가 되어 AI와 대화 연습을 해보세요",
-    "scenario": "시나리오",
+    "scenario": "장면 상세",
     "startBtn": "이 페르소나로 대화 시작",
     "loading": "역할 설정 중...",
     "loadingScenario": "시나리오 불러오는 중...",
@@ -125,7 +125,7 @@
     "me": "나",
     "partner": "상대",
     "missionLabel": "미션",
-    "sceneLabel": "시나리오",
+    "sceneLabel": "장면 상세",
     "leftTurns": "남은 턴",
     "placeholder": "메시지를 입력하세요...",
     "finishedPlaceholder": "대화가 종료되었습니다"
@@ -180,7 +180,7 @@
     "feedbackBtn": "상세 피드백 보기",
     "summaryBtn": "결과 요약 보기",
     "missionLabel": "미션",
-    "sceneLabel": "시나리오",
+    "sceneLabel": "장면 상세",
     "reviewBtn": "복습하기",
     "analyzing": "대화를 분석하고 있어요...",
     "loadFailed": "결과를 불러올 수 없어요",

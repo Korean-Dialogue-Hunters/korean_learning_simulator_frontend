@@ -158,9 +158,33 @@ export async function evaluateSession(
   lang?: "ko" | "en"
 ): Promise<EvaluationResponse> {
   const qs = lang ? `?lang=${lang}` : "";
-  return apiFetch<EvaluationResponse>(`/sessions/${sessionId}/evaluation${qs}`, {
+  const raw = await apiFetch<EvaluationResponse>(`/sessions/${sessionId}/evaluation${qs}`, {
     method: "POST",
   });
+  return normalizeSckFields(raw);
+}
+
+/* BE가 SCK 필드만 대문자 snake_case로 반환 → camelCase 정규화 */
+export function normalizeSckFields(res: EvaluationResponse): EvaluationResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const r = res as any;
+  const SCK_MAP: [string, keyof EvaluationResponse][] = [
+    ["SCKMatchCount", "sckMatchCount"],
+    ["SCKTotalTokens", "sckTotalTokens"],
+    ["SCKMatchRate", "sckMatchRate"],
+    ["SCKLevelCounts", "sckLevelCounts"],
+    ["SCKLevelWordCounts", "sckLevelWordCounts"],
+  ];
+  if (process.env.NODE_ENV !== "production") {
+    const sckKeys = Object.keys(r).filter((k) => /sck|SCK/i.test(k));
+    console.log("[SCK debug] keys found:", sckKeys, "values:", Object.fromEntries(sckKeys.map((k) => [k, r[k]])));
+  }
+  for (const [snake, camel] of SCK_MAP) {
+    if (r[snake] !== undefined && r[camel] === undefined) {
+      r[camel] = r[snake];
+    }
+  }
+  return r;
 }
 
 /* 5. 세션 조회 */

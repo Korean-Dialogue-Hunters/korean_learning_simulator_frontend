@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, MessageCircle } from "lucide-react";
 import HomeHeader from "@/components/HomeHeader";
 import TierCard from "@/components/TierCard";
 import WeeklyStats from "@/components/WeeklyStats";
@@ -109,7 +109,7 @@ export default function HomePage() {
             color: "var(--color-btn-primary-text)",
           }}
         >
-          <Plus size={18} strokeWidth={2.5} />
+          <MessageCircle size={18} strokeWidth={2.5} />
           {t("home.newBtn")}
         </button>
       </div>

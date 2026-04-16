@@ -69,7 +69,7 @@
     "retryBtn": "Retry",
     "weeklyReviewTitle": "Weekly review is ready!",
     "weeklyReviewContent": "{{quiz}} consonant quiz, {{flash}} flashcards",
-    "newBtn": "New Chat"
+    "newBtn": "Start Conversation"
   },
   "tierCard": {
     "namePostfix": "",
@@ -82,7 +82,7 @@
     "streak": "Streak",
     "countValue": "{{count}}",
     "scoreValue": "{{score}}",
-    "streakValue": "{{days}}D"
+    "streakValue": "{{days}} Days"
   },
   "location": {
     "title": "Where would you like to talk?",
@@ -96,7 +96,7 @@
   "persona": {
     "title": "Which role would you like?",
     "subtitle": "Take on the chosen persona and practice with AI",
-    "scenario": "Scenario",
+    "scenario": "Scene Detail",
     "startBtn": "Start with this persona",
     "loading": "Setting up role...",
     "loadingScenario": "Loading scenario...",
@@ -125,7 +125,7 @@
     "me": "Me",
     "partner": "Partner",
     "missionLabel": "Mission",
-    "sceneLabel": "Scenario",
+    "sceneLabel": "Scene Detail",
     "leftTurns": "Turns Left",
     "placeholder": "Type a message...",
     "finishedPlaceholder": "Conversation ended"
@@ -180,7 +180,7 @@
     "feedbackBtn": "View Detailed Feedback",
     "summaryBtn": "View Result Summary",
     "missionLabel": "Mission",
-    "sceneLabel": "Scenario",
+    "sceneLabel": "Scene Detail",
     "reviewBtn": "Review Now",
     "analyzing": "Analyzing your conversation...",
     "loadFailed": "Could not load results",

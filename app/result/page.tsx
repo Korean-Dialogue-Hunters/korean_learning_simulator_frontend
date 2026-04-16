@@ -15,7 +15,7 @@ import { Trophy, ArrowRight, Home, BookOpen, AlertCircle, ChevronDown, ChevronUp
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { EvaluationResponse } from "@/types/api";
-import { evaluateSession } from "@/lib/api";
+import { evaluateSession, normalizeSckFields } from "@/lib/api";
 import { getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
 import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpSystem";
 import { getUserId } from "@/hooks/useSetup";
@@ -79,8 +79,9 @@ export default function ResultPage() {
       return;
     }
 
-    const cached = getEvaluationCache(sessionId) as EvaluationResponse | null;
-    if (cached) {
+    const rawCached = getEvaluationCache(sessionId) as EvaluationResponse | null;
+    if (rawCached) {
+      const cached = normalizeSckFields(rawCached);
       setEvalData(cached);
       localStorage.setItem("evaluationData", JSON.stringify(cached));
       setXpGained(calcConversationXp(cached.totalScore10));
@@ -255,6 +256,53 @@ export default function ResultPage() {
           </button>
         )}
       </div>
+
+      {/* ── SCK 어휘 사용 ── */}
+      {Object.keys(evalData.sckLevelCounts ?? {}).length > 0 && (
+        <div className={`${COMMON_CLASSES.cardRounded} p-5 mb-4`}
+          style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
+            <p className="text-sm font-bold text-foreground">{t("feedback.sckTitle")}</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            {Object.entries(evalData.sckLevelCounts)
+              .sort(([a], [b]) => Number(a) - Number(b))
+              .map(([level, count]) => {
+                const rawWords = evalData.sckLevelWordCounts?.[level];
+                const words: string[] = Array.isArray(rawWords)
+                  ? rawWords
+                  : rawWords && typeof rawWords === "object"
+                    ? Object.keys(rawWords)
+                    : [];
+                return (
+                  <div key={level}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold"
+                        style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>
+                        {t("feedback.sckLevelLabel", { level })}
+                      </span>
+                      <span className="text-[11px] text-tab-inactive">
+                        {t("feedback.sckCount", { count })}
+                      </span>
+                    </div>
+                    {words.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {words.map((word, i) => (
+                          <span key={`${level}-${i}`}
+                            className="inline-block px-2 py-0.5 rounded-md text-[11px]"
+                            style={{ backgroundColor: "var(--color-surface)", color: "var(--color-foreground)", border: "1px solid var(--color-card-border)" }}>
+                            {word}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
 
       {/* ── LLM 요약 ── */}
       <div className={`${COMMON_CLASSES.cardRounded} p-4 mb-4`}

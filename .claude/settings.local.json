@@ -57,7 +57,19 @@
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['components']['schemas']['EvaluationResponse']['properties'].get\\('total_score_10', 'NOT FOUND'\\), indent=2\\)\\)\")",
       "Bash(python3 -c \" import sys,json d=json.load\\(sys.stdin\\) props = d['components']['schemas']['EvaluationResponse']['properties'] for k in props: print\\(k\\) \")",
       "Read(//tmp/**)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(xargs grep:*)",
+      "Bash(tasklist)",
+      "Bash(grep:*)",
+      "Bash(ToolSearch needed:*)",
+      "Bash(wmic process:*)",
+      "Bash(.venv/Scripts/uvicorn.exe app.main:app --reload)",
+      "Bash(jobs -l)",
+      "Bash(kill 7054 7062 7103 7101 465 473)",
+      "Bash(kill 222 220)",
+      "Bash(rm:*)",
+      "Bash(awk '{print $2}')",
+      "Bash(xargs kill *)"
     ],
     "defaultMode": "auto"
   },

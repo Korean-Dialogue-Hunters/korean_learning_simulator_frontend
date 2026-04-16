@@ -87,6 +87,7 @@ export function useChat(persona: Persona) {
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, userMsg]);
+      setTurnsLeft((prev) => Math.max(prev - 1, 0));
       setIsAiTyping(true);
 
       try {
@@ -96,7 +97,7 @@ export function useChat(persona: Persona) {
         /* AI 응답을 스트리밍 텍스트에 세팅 (StreamingBubble이 처리) */
         setStreamingText(res.latestAiResponse);
 
-        /* 턴 카운트 업데이트 */
+        /* BE 턴 카운트로 보정 (BE가 정확한 값) */
         const newTurnsLeft = totalTurns - res.turnCount;
         setTurnsLeft(newTurnsLeft);
 

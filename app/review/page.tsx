@@ -199,9 +199,19 @@ function ChosungQuizView({ items, onBack, onXpGain }: { items: ChosungQuizItem[]
   }
 
   const item = items[current] as Record<string, unknown>;
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[ChosungQuiz] item keys:", Object.keys(item), "item:", item);
+  }
   /* BE 필드 추출 — 문장형 문제 + 4지선다 */
-  const sentence = (item.sentence as string) ?? (item.question as string) ?? "";
-  const chosung = (item.chosung as string) ?? (item.quizId as string) ?? "?";
+  const rawSentence = (item.sentence as string) ?? (item.question as string) ?? "";
+  /* BE가 지문 안내 문구를 sentence에 포함시킬 수 있으므로 제거 — 예문만 남김 */
+  const sentence = rawSentence
+    .replace(/다음은 앞에서 나온 대화 문장입니다\.?\s*/g, "")
+    .replace(/초성으로 바뀐 부분에 들어갈 원래 단어는 무엇인가요\??\s*/g, "")
+    .trim();
+  /* 초성: BE 필드 or 예문에서 자모만 추출 (ㄱ-ㅎ 연속) */
+  const rawChosung = (item.chosung as string) ?? (item.quiz_id as string) ?? (item.quizId as string) ?? "";
+  const chosung = rawChosung || (sentence.match(/[ㄱ-ㅎ]{2,}/)?.[0] ?? "");
   const answer = (item.answer as string) ?? (item.word as string) ?? "";
   const choices = (item.choices as string[]) ?? [];
   const meaning = (item.meaning as string) ?? "";
@@ -274,19 +284,31 @@ function ChosungQuizView({ items, onBack, onXpGain }: { items: ChosungQuizItem[]
           style={{ width: `${((current + 1) / items.length) * 100}%`, backgroundColor: "var(--color-accent)" }} />
       </div>
 
-      {/* 문제 카드 */}
-      <div className={`${COMMON_CLASSES.cardRounded} p-6 mb-6`}
-        style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-3 text-center" style={{ color: "var(--color-accent)" }}>
-          {t("review.chosungInstruction")}
+      {/* 문제 지문 */}
+      <div className="mb-4 px-1">
+        <p className="text-sm font-medium text-foreground leading-relaxed">
+          다음은 앞에서 나온 대화 문장입니다.
+          <br />
+          초성으로 바뀐 부분에 들어갈 원래 단어는 무엇인가요?
         </p>
+      </div>
+
+      {/* 출제 문장 + 초성 */}
+      <div className={`${COMMON_CLASSES.cardRounded} p-6 mb-6 flex flex-col items-center justify-center`}
+        style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}>
         {sentence && (
-          <p className="text-sm text-foreground leading-relaxed mb-5 text-center">{sentence}</p>
+          <p className="text-base font-medium leading-relaxed text-center text-foreground">
+            &ldquo;{sentence}&rdquo;
+          </p>
         )}
-        <div className="py-4 rounded-xl mb-2" style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 8%, transparent)" }}>
-          <p className="text-5xl font-black text-center tracking-[0.4em] text-foreground">{chosung}</p>
+        <div className="mt-4 pt-4 border-t w-full flex items-center justify-center min-h-[80px]" style={{ borderColor: "var(--color-card-border)" }}>
+          {selected !== null ? (
+            <p className="text-4xl font-black text-center" style={{ color: "var(--color-accent)" }}>{answer}</p>
+          ) : (
+            <p className="text-4xl font-black text-center text-foreground">{chosung}</p>
+          )}
         </div>
-        {meaning && <p className="text-xs text-tab-inactive text-center mt-3">{meaning}</p>}
+        {meaning && <p className="text-xs text-tab-inactive text-center">{meaning}</p>}
       </div>
 
       {/* 4지선다 */}

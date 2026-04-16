@@ -77,7 +77,7 @@ export default function RadarChartInner({ scores }: RadarChartInnerProps) {
             dataKey="axis"
             tick={{ fontSize: 10, fill: "var(--color-tab-inactive)", style: { cursor: "default" } }}
           />
-          <PolarRadiusAxis domain={[0, 10]} ticks={[3.33, 6.67, 10]} tick={false} axisLine={false} />
+          <PolarRadiusAxis domain={[0, 10]} ticks={[2, 4, 6, 8, 10]} tick={false} axisLine={false} />
           {/* 기본 Tooltip 완전 비활성화 — 검정 박스 제거 */}
           <Tooltip content={() => null} />
           <Radar
