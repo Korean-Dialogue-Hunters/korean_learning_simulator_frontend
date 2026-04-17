@@ -48,14 +48,17 @@
 > FE에서 "tier" 용어/UI 전부 제거, "Korean Level" 또는 "한국어 레벨"로 교체.
 
 ### 데이터 모델
-- [ ] **T5-01** BE: `users.korean_level` 필드 (1~6, 정수)
+- [ ] **T5-01** BE: `users.korean_level` 필드 (1~6, 정수) — 상세: `docs/TRACK5_BE_REQUESTS.md` BE-T5-01
   - BE에서 관리하는 단일 레벨 필드. FE의 기존 tier 관련 코드 제거
-- [ ] **T5-02** FE: 셋업 한국어 수준 → `korean_level` 값 매핑
-  - Beginner → 1 / Intermediate → 3 / Advanced → 5
-  - `useSetup` + `createUser` 호출 시 해당 값 전달
-- [ ] **T5-03** FE: 기존 tier UI 제거 + korean level 표시로 교체
-  - `TierCard` 등에서 tier 참조 → korean_level 참조로 변경
-  - 레벨 표시: 1~6급 (또는 Level 1~6)
+- [x] **T5-02** FE: 셋업 한국어 수준 → `korean_level` 값 매핑 ✅ 2026-04-17
+  - `lib/koreanLevel.ts` 신설 — `KOREAN_LEVEL_MAP`, `mapKoreanLevel`, `normalizeKoreanLevel`
+  - `UserProfileResponse.koreanLevel` 타입을 `string | number`로 확장 (BE 정수 전환 대비)
+  - `app/page.tsx`에서 해당 유틸 사용
+  - **남은 숙제**: BE-T5-06 이후 createSession 페이로드 정수로 전환
+- [x] **T5-03** FE: 기존 tier UI 제거 + korean level 표시로 교체 ✅ 2026-04-17
+  - TierCard는 이미 `lib/belt.ts`(태권도 벨트 1~6급) 기반으로 동작 중
+  - Dead i18n 키 `tierCard.nextTier` ("다음 티어까지") 제거
+  - 컴포넌트/파일명 `TierCard`, 튜토리얼 타겟 `tutorial-tier-card`는 내부 식별자라 유지
 
 ### 승급 시스템
 - [ ] **T5-04** BE: 승급 자격 판정 API

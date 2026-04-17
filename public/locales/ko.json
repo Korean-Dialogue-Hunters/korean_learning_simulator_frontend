@@ -69,8 +69,7 @@
   },
   "tierCard": {
     "namePostfix": "님",
-    "welcome": "환영해요!",
-    "nextTier": "다음 티어까지 {{xp}} XP"
+    "welcome": "환영해요!"
   },
   "weeklyStats": {
     "conversationCount": "누적 대화 횟수",

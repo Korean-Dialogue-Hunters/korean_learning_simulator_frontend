@@ -141,7 +141,7 @@ export interface UserProfileResponse {
   userId: string;                // BE: user_id
   userNickname: string;          // BE: user_nickname
   country: string;
-  koreanLevel: string;           // BE: korean_level
+  koreanLevel: string | number;  // BE: korean_level (문자열 레거시 or 정수 1~6)
   culturalInterest: string[];    // BE: cultural_interest
   latestGrade: string;           // BE: latest_grade
 }
