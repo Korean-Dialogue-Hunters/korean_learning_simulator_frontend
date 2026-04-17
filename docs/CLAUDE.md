@@ -199,11 +199,20 @@ korean_learning_simulator_frontend/     ← 이 레포 전체 = FE 전권
 
 ## 🌿 Git 컨벤션
 
+**⚠️ main 배포 정책 (2026-04-17부터)**
+- `main`은 **배포 브랜치** — 절대 직접 작업/커밋/푸시 금지
+- 모든 작업은 `dev`에서 분기한 작업 브랜치(`feat/*`, `fix/*`, `docs/*`)에서 진행
+- 작업 완료 → 작업 브랜치 → **PR base: `dev`** 로 머지
+- 일정 주기로 `dev` → `main` 일괄 머지(=배포)
+- Claude가 바로 `main`에 머지하면 안 됨. PR 타겟은 항상 `dev`.
+
 **브랜치 구조**
 ```
-main
-└── dev
-    └── feat/이성준  ← 내 작업 브랜치 (담당: platform + ui.py 전권)
+main  (배포 전용 — 손대지 말 것)
+└── dev  (통합 브랜치 — 여기가 기본 base)
+    ├── feat/<기능명>   (신규 기능)
+    ├── fix/<이슈명>    (버그 수정)
+    └── docs/<주제>     (문서 변경)
 ```
 
 **커밋 메시지 규칙**
@@ -213,10 +222,10 @@ main
 
 **PR 방법**
 ```
-1. feat/이성준 브랜치에서 작업
-2. git push origin feat/이성준
-3. GitHub에서 PR 생성 → base: dev / compare: feat/이성준
-4. merge 버튼 눌러야 반영됨 (자동 아님)
+1. dev에서 분기 → feat|fix|docs/<이름> 브랜치에서 작업
+2. git push origin <브랜치명>
+3. gh pr create --base dev (또는 GitHub UI에서 base: dev)
+4. 리뷰/머지 후 dev에 반영 → main 배포는 별도 타이밍에 dev→main 머지
 ```
 
 ---
