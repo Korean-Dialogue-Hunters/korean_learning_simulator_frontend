@@ -69,8 +69,8 @@ export default function PersonaDetailModal({
         className="relative w-full max-w-[480px] flex flex-col"
         style={{ backgroundColor: "var(--color-background)" }}
       >
-        {/* 큰 인물 이미지 (상단 ~55vh) */}
-        <div className="relative w-full" style={{ height: "55vh", minHeight: 320 }}>
+        {/* 큰 인물 이미지 (상단 ~38vh) */}
+        <div className="relative w-full" style={{ height: "38vh", minHeight: 224 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={img} alt={persona.name} className="absolute inset-0 w-full h-full object-cover" />
           {/* 아래쪽 페이드 */}
