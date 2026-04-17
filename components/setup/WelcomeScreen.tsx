@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Globe, MessageCircle, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { WARM_THEME, COMMON_CLASSES } from "@/lib/designSystem";
@@ -13,18 +14,17 @@ export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen px-8 text-center">
-      <div className="mb-4">
-        <div
-          className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5"
-          style={{ backgroundColor: WARM_THEME.accentLight }}
-        >
-          <MessageCircle size={36} strokeWidth={1.8} style={{ color: WARM_THEME.accent }} />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight" style={{ color: WARM_THEME.text }}>
+      <div className="mb-4 flex flex-col items-center">
+        <Image
+          src="/brand/kdh_logo.png"
+          alt="Korean Dialogue Hunters"
+          width={280}
+          height={186}
+          priority
+          className="mb-2 h-auto w-[240px]"
+        />
+        <p className="text-sm font-semibold tracking-tight" style={{ color: WARM_THEME.text }}>
           코대헌
-        </h1>
-        <p className="text-sm mt-1" style={{ color: WARM_THEME.textSub }}>
-          {t("welcome.subtitle")}
         </p>
       </div>
 
