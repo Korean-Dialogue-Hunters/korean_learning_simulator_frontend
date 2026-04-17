@@ -206,7 +206,22 @@
   "tabs": {
     "home": "홈",
     "history": "기록",
-    "review": "복습"
+    "review": "복습",
+    "levelUp": "승급"
+  },
+  "levelUp": {
+    "title": "승급",
+    "subtitle": "다음 레벨로 올라갈 준비가 됐는지 확인해 보세요",
+    "currentLevel": "현재",
+    "nextLevel": "다음",
+    "maxLevel": "최고 레벨",
+    "maxLevelNote": "이미 최고 레벨에 도달했어요",
+    "requirementsTitle": "승급 조건",
+    "reqSessions": "현재 레벨에서 대화 5회 이상 완료",
+    "reqScore": "최근 5회 평균 8점 이상",
+    "reqExam": "다음 레벨 승급 시험에서 A 등급 이상",
+    "comingSoon": "승급 시험 준비 중",
+    "systemNote": "승급 시스템 연동은 준비 중이에요. 대화를 쌓아두면 오픈될 때 바로 응시할 수 있어요."
   },
   "history": {
     "title": "기록",

@@ -206,7 +206,22 @@
   "tabs": {
     "home": "Home",
     "history": "History",
-    "review": "Review"
+    "review": "Review",
+    "levelUp": "Level Up"
+  },
+  "levelUp": {
+    "title": "Level Up",
+    "subtitle": "Check if you're ready to reach the next level",
+    "currentLevel": "Current",
+    "nextLevel": "Next",
+    "maxLevel": "Max Level",
+    "maxLevelNote": "You've already reached the top level",
+    "requirementsTitle": "Requirements",
+    "reqSessions": "Complete 5+ conversations at your current level",
+    "reqScore": "Average score 8+ over the last 5 conversations",
+    "reqExam": "Score Grade A or higher on the level-up exam",
+    "comingSoon": "Exam Coming Soon",
+    "systemNote": "The level-up system is still being wired up. Keep practicing — you'll be ready when it opens."
   },
   "history": {
     "title": "History",
