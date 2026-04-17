@@ -7,7 +7,7 @@
    - GET /v1/users/{nickname}/review/count 로 개수 표시
    ────────────────────────────────────────── */
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { BookOpen, Zap, Layers, ArrowLeft, Check, X, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
@@ -53,16 +53,16 @@ function ReviewPageInner() {
   const autoStarted = useRef(false);
   const fromResult = useRef(false);
 
-  /* 리뷰 대상 세션 (별 미완료 중 최저점) */
-  const [targetSession, setTargetSession] = useState<UserSessionItem | null>(null);
+  /* 점수 오름차순 정렬된 전체 세션 목록 (최저점 → 최고점) */
+  const [sortedSessions, setSortedSessions] = useState<UserSessionItem[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  /* 이번 진입에서 방금 완료한 항목 (UI 즉시 반영) */
+  /* 이번 진입에서 방금 완료한 항목 (UI 즉시 반영 + targetSession 재계산 트리거) */
   const [justPassedQuiz, setJustPassedQuiz] = useState(false);
   const [justDoneFlashcard, setJustDoneFlashcard] = useState(false);
 
   const profile = typeof window !== "undefined" ? getSavedProfile() : null;
 
-  /* 1) 진입 시: 세션 목록 → 별 미완료 최저점 세션 찾기 */
+  /* 1) 진입 시: 세션 목록 로드 (점수 낮은 순) */
   useEffect(() => {
     if (!profile) { setInitLoading(false); return; }
 
@@ -74,25 +74,36 @@ function ReviewPageInner() {
     }
 
     getUserSessions(profile.userId, "score_low")
-      .then((res) => {
-        /* 퀴즈 또는 카드가 미완료인 세션만
-           - BE 필드가 비어 있을 수 있어 localStorage 폴백까지 OR로 병합
-             (history 카드와 동일 규칙 → 별 3개 다 찬 세션은 리뷰 대상에서 제외) */
-        const incomplete = res.sessions.filter((s) => {
-          const local = getStarProgress(s.sessionId);
-          const quizDone = s.chosungQuizPassed ?? local.quizPassed ?? false;
-          const flashDone = s.flashcardDone ?? local.flashcardDone ?? false;
-          return !(quizDone && flashDone);
-        });
-        if (incomplete.length > 0) {
-          setTargetSession(incomplete[0]);
-          if (!qsSessionId) setSessionId(incomplete[0].sessionId);
-        }
-      })
+      .then((res) => setSortedSessions(res.sessions))
       .catch(() => { /* 404: 신규 유저 → 세션 없음 */ })
       .finally(() => setInitLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* 매 렌더마다 정렬 리스트에서 첫 번째 미완료 세션을 선택 → 완료 시 자동으로 다음 최저점으로 이동
+     justPassedQuiz/justDoneFlashcard가 바뀌면 재계산되어 방금 완료된 세션이 스킵됨. */
+  const targetSession = useMemo<UserSessionItem | null>(() => {
+    for (const s of sortedSessions) {
+      const local = getStarProgress(s.sessionId);
+      const q = s.chosungQuizPassed ?? local.quizPassed ?? false;
+      const f = s.flashcardDone ?? local.flashcardDone ?? false;
+      if (!(q && f)) return s;
+    }
+    return null;
+  // justPassed*가 deps에 있어야 markQuiz/FlashcardDone 직후 재계산됨
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortedSessions, justPassedQuiz, justDoneFlashcard]);
+
+  /* targetSession이 다음 세션으로 넘어가면 sessionId 동기화 + 완료 플래그 리셋
+     (URL에 sessionId가 명시된 경우 — result 페이지 경유 등 — 에는 덮어쓰지 않음) */
+  useEffect(() => {
+    if (!targetSession) return;
+    if (searchParams.get("sessionId")) return;
+    if (sessionId === targetSession.sessionId) return;
+    setSessionId(targetSession.sessionId);
+    setJustPassedQuiz(false);
+    setJustDoneFlashcard(false);
+  }, [targetSession, sessionId, searchParams]);
 
   /* 2) URL 쿼리로 바로 모드 진입 (initLoading 완료 후) */
   useEffect(() => {
@@ -211,11 +222,13 @@ function ReviewPageInner() {
   }
 
   /* ── 모드 목록 화면 ──
-     - BE 필드 우선, 미수신 시 localStorage 폴백까지 확인 (히스토리 카드와 동일) */
+     - targetSession은 useMemo로 첫 미완료 세션을 자동 선정 → 이미 완료된 세션은 여기로 안 옴
+     - 개별 done 상태는 현재 타겟 기준 (다음 세션 이동 시 useEffect에서 리셋됨)
+     - allDone은 타겟이 하나도 없을 때(= 전체 세션 별 3개 다 참) — "모든 복습 완료" 멘트 트리거 */
   const targetLocal = targetSession ? getStarProgress(targetSession.sessionId) : {};
   const quizDone = justPassedQuiz || (targetSession?.chosungQuizPassed ?? targetLocal.quizPassed ?? false);
   const flashDone = justDoneFlashcard || (targetSession?.flashcardDone ?? targetLocal.flashcardDone ?? false);
-  const allDone = !targetSession || (quizDone && flashDone);
+  const allDone = !targetSession;
 
   const gradeMatch = targetSession?.grade?.match(/<(\w+)>/);
   const gradeCode = gradeMatch ? gradeMatch[1] : targetSession?.grade ?? "";
