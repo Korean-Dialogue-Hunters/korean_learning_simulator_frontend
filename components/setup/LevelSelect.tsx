@@ -19,11 +19,10 @@ export default function LevelSelect({ value, onChange }: LevelSelectProps) {
     descKey: string;
     turnsKey: string;
     icon: React.ReactNode;
-    disabled: boolean;
   }[] = [
-    { value: "초급", tagKey: "level.beginnerTag", descKey: "level.beginnerDesc", turnsKey: "level.beginnerTurns", icon: <BookOpen size={26} strokeWidth={1.8} />, disabled: false },
-    { value: "중급", tagKey: "level.intermediateTag", descKey: "level.intermediateDesc", turnsKey: "level.intermediateTurns", icon: <MessageSquare size={26} strokeWidth={1.8} />, disabled: true },
-    { value: "고급", tagKey: "level.advancedTag", descKey: "level.advancedDesc", turnsKey: "level.advancedTurns", icon: <GraduationCap size={26} strokeWidth={1.8} />, disabled: true },
+    { value: "초급", tagKey: "level.beginnerTag", descKey: "level.beginnerDesc", turnsKey: "level.beginnerTurns", icon: <BookOpen size={26} strokeWidth={1.8} /> },
+    { value: "중급", tagKey: "level.intermediateTag", descKey: "level.intermediateDesc", turnsKey: "level.intermediateTurns", icon: <MessageSquare size={26} strokeWidth={1.8} /> },
+    { value: "고급", tagKey: "level.advancedTag", descKey: "level.advancedDesc", turnsKey: "level.advancedTurns", icon: <GraduationCap size={26} strokeWidth={1.8} /> },
   ];
 
   const LEVEL_LABELS: Record<KoreanLevel, string> = {
@@ -40,10 +39,9 @@ export default function LevelSelect({ value, onChange }: LevelSelectProps) {
           <button
             key={opt.value}
             type="button"
-            disabled={opt.disabled}
-            onClick={() => !opt.disabled && onChange(opt.value)}
-            className="w-full rounded-2xl px-5 py-5 text-left transition-all flex items-center gap-4 relative"
-            style={{ ...warmCardStyle(isSelected), opacity: opt.disabled ? 0.5 : 1, cursor: opt.disabled ? "not-allowed" : "pointer" }}>
+            onClick={() => onChange(opt.value)}
+            className="w-full rounded-2xl px-5 py-5 text-left transition-all flex items-center gap-4"
+            style={warmCardStyle(isSelected)}>
             <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
               style={warmIconContainerStyle(isSelected)}>
               {opt.icon}
@@ -64,11 +62,6 @@ export default function LevelSelect({ value, onChange }: LevelSelectProps) {
                 {t(opt.turnsKey)}
               </span>
             </div>
-            {opt.disabled && (
-              <span className="absolute bottom-2 right-3 text-[11px] font-medium px-1.5 py-0.5 rounded" style={{ color: WARM_THEME.textSub, backgroundColor: "rgba(0,0,0,0.05)" }}>
-                {t("level.comingSoon")}
-              </span>
-            )}
           </button>
         );
       })}

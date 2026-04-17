@@ -10,26 +10,24 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star, Layers } from "lucide-react";
+import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star, Layers, MessageCircle } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { getSavedProfile } from "@/hooks/useSetup";
 import { getUserSessions } from "@/lib/api";
+import { getStarProgress } from "@/lib/starStorage";
 import type { UserSessionItem, UserSessionsSort, SessionProgress } from "@/types/api";
 
 type SubTab = "dialogue" | "achievement" | "sck";
 
-/* ── 목데이터: 세션별 진척도 생성 (BE API 생기면 교체) ──
-   grade에서 A/S 여부 판별, 나머지는 랜덤 목 */
-function mockProgress(record: UserSessionItem): SessionProgress {
-  const gradeMatch = record.grade.match(/<(\w+)>/);
-  const code = gradeMatch ? gradeMatch[1] : record.grade;
-  const gradeA = code === "S" || code === "A";
-  /* 점수 높을수록 퀴즈/카드 완료 확률 높게 */
-  const seed = record.sessionId.charCodeAt(0) + record.totalScore10;
-  const chosungQuizPassed = seed % 3 !== 0;   // ~66% 확률
-  const flashcardDone = seed % 5 < 3;         // ~60% 확률
-  return { gradeA, chosungQuizPassed, flashcardDone };
+/* ── 세션별 진척도: BE 응답 우선, 없으면 localStorage 폴백 ── */
+function toProgress(record: UserSessionItem): SessionProgress {
+  const local = getStarProgress(record.sessionId);
+  return {
+    completed: true,  // 기록에 존재 = 대화 완료
+    chosungQuizPassed: record.chosungQuizPassed ?? local.quizPassed ?? false,
+    flashcardDone: record.flashcardDone ?? local.flashcardDone ?? false,
+  };
 }
 
 const SORT_OPTIONS: { key: UserSessionsSort; labelKey: string }[] = [
@@ -58,10 +56,21 @@ export default function HistoryPage() {
     }
     setLoading(true);
     setError("");
-    getUserSessions(profile.userNickname, sortKey)
-      .then((res) => setRecords(res.sessions))
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[History] userId:", profile.userId, "nickname:", profile.userNickname);
+    }
+    getUserSessions(profile.userId, sortKey)
+      .then((res) => {
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[History] sessions response:", res);
+        }
+        setRecords(res.sessions);
+      })
       .catch((e) => {
         const msg = e instanceof Error ? e.message : "";
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[History] API error:", msg);
+        }
         /* 신규 유저는 BE에 프로필이 없어 404가 정상 → 빈 상태로 처리 */
         if (/\b404\b/.test(msg) || /user profile not found/i.test(msg)) {
           setRecords([]);
@@ -177,7 +186,7 @@ export default function HistoryPage() {
           ) : (
             <div className="flex flex-col gap-3">
               {records.map((record) => (
-                <DialogueCard key={record.sessionId} record={record} progress={mockProgress(record)} onClick={() => handleCardClick(record)} t={t} />
+                <DialogueCard key={record.sessionId} record={record} progress={toProgress(record)} onClick={() => handleCardClick(record)} t={t} />
               ))}
             </div>
           )}
@@ -207,11 +216,12 @@ export default function HistoryPage() {
 const PROGRESS_ITEMS: {
   key: keyof SessionProgress;
   inner: "text" | "icon";
+  icon?: "message" | "layers";
   text?: string;
 }[] = [
-  { key: "gradeA", inner: "text", text: "A⬆" },
+  { key: "completed", inner: "icon", icon: "message" },
   { key: "chosungQuizPassed", inner: "text", text: "Q" },
-  { key: "flashcardDone", inner: "icon" },
+  { key: "flashcardDone", inner: "icon", icon: "layers" },
 ];
 
 /* ── 대화 기록 카드 ── */
@@ -285,15 +295,20 @@ function DialogueCard({
                     <span
                       className="font-bold text-center"
                       style={{
-                        fontSize: item.text === "Q" ? "12px" : "8px",
+                        fontSize: "12px",
                         lineHeight: 1,
-                        letterSpacing: item.text !== "Q" ? "-0.5px" : undefined,
-                        marginTop: item.text === "Q" ? "-2px" : undefined,
+                        marginTop: "-2px",
                         color: done ? "var(--color-btn-primary-text)" : "var(--color-tab-inactive)",
                       }}
                     >
                       {item.text}
                     </span>
+                  ) : item.icon === "message" ? (
+                    <MessageCircle
+                      size={14}
+                      strokeWidth={2.4}
+                      style={{ color: done ? "var(--color-btn-primary-text)" : "var(--color-tab-inactive)" }}
+                    />
                   ) : (
                     <Layers
                       size={13}

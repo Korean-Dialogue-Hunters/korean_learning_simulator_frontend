@@ -10,6 +10,7 @@ const LOCATION_IMAGE_MAP: Record<string, string> = {
   "한강": "/locations/hangang.svg",
   "명동": "/locations/myeongdong.svg",
   "롯데월드": "/locations/lotteworld.svg",
+  "남산": "/locations/namsan.svg",
 };
 
 export function getLocationImage(id: LocationId | string): string {

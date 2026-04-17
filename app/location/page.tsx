@@ -31,6 +31,7 @@ export default function LocationPage() {
     "한강": t("location.hangang_desc"),
     "명동": t("location.myeongdong_desc"),
     "롯데월드": t("location.lotteworld_desc"),
+    "남산": t("location.namsan_desc"),
   };
 
   const handlePick = async (locId: LocationId) => {

@@ -103,6 +103,9 @@ import type {
   UserProfileResponse,
   UserSessionsResponse,
   UserSessionsSort,
+  QuizResultResponse,
+  FlashcardResultResponse,
+  LevelUpEligibilityResponse,
 } from "@/types/api";
 
 /* 1. 세션 생성 — 장소 선택 후 호출 */
@@ -197,39 +200,89 @@ export async function getSession(
 
 /* 6. 복습 콘텐츠 개수 조회 */
 export async function getReviewCount(
-  userNickname: string
+  userId: string
 ): Promise<ReviewCountResponse> {
-  return apiFetch<ReviewCountResponse>(`/users/${encodeURIComponent(userNickname)}/review/count`);
+  return apiFetch<ReviewCountResponse>(`/users/${encodeURIComponent(userId)}/review/count`);
 }
 
-/* 7. 주간 복습 콘텐츠 생성/조회 */
+/* 7. 주간 복습 콘텐츠 생성/조회
+   - sessionId 전달 시 BE가 해당 세션의 chosung_quiz/flashcards만 DB에서 로드
+   - 생략 시 기존 동작(전체 세션 기반) — BE Option A 적용 전까지 호환 */
 export async function getWeeklyReview(
-  userNickname: string
+  userId: string,
+  sessionId?: string
 ): Promise<WeeklyReviewResponse> {
-  return apiFetch<WeeklyReviewResponse>(`/users/${encodeURIComponent(userNickname)}/review/weekly`);
+  const qs = sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : "";
+  return apiFetch<WeeklyReviewResponse>(`/users/${encodeURIComponent(userId)}/review/weekly${qs}`);
 }
 
 /* 8. 주간 통계 조회 */
 export async function getWeeklyStats(
-  userNickname: string
+  userId: string
 ): Promise<WeeklyStatsResponse> {
-  return apiFetch<WeeklyStatsResponse>(`/users/${encodeURIComponent(userNickname)}/weekly-stats`);
+  return apiFetch<WeeklyStatsResponse>(`/users/${encodeURIComponent(userId)}/weekly-stats`);
 }
 
 /* 9. 유저 프로필 조회 */
 export async function getUserProfile(
-  userNickname: string
+  userId: string
 ): Promise<UserProfileResponse> {
-  return apiFetch<UserProfileResponse>(`/users/${encodeURIComponent(userNickname)}/profile`);
+  return apiFetch<UserProfileResponse>(`/users/${encodeURIComponent(userId)}/profile`);
 }
 
 /* 10. 유저 완료 세션 목록 조회 */
 export async function getUserSessions(
-  userNickname: string,
+  userId: string,
   sort: UserSessionsSort = "recent"
 ): Promise<UserSessionsResponse> {
   const qs = new URLSearchParams({ sort }).toString();
-  return apiFetch<UserSessionsResponse>(
-    `/users/${encodeURIComponent(userNickname)}/sessions?${qs}`
+  const res = await apiFetch<UserSessionsResponse>(
+    `/users/${encodeURIComponent(userId)}/sessions?${qs}`
+  );
+  /* BE가 별 진척도 필드를 snake_case로 내려줄 수 있으므로 camelCase로 정규화 */
+  res.sessions = res.sessions.map((s) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = s as any;
+    if (s.chosungQuizPassed === undefined && raw.chosung_quiz_passed !== undefined) {
+      s.chosungQuizPassed = raw.chosung_quiz_passed;
+    }
+    if (s.flashcardDone === undefined && raw.flashcard_done !== undefined) {
+      s.flashcardDone = raw.flashcard_done;
+    }
+    return s;
+  });
+  return res;
+}
+
+/* 11. 초성퀴즈 결과 저장 */
+export async function submitQuizResult(
+  userId: string,
+  sessionId: string,
+  correctCount: number
+): Promise<QuizResultResponse> {
+  return apiFetch<QuizResultResponse>(
+    `/users/${encodeURIComponent(userId)}/review/quiz-result`,
+    { method: "POST", body: { sessionId, correctCount } }
+  );
+}
+
+/* 12. 플래시카드 완료 결과 저장 */
+export async function submitFlashcardResult(
+  userId: string,
+  sessionId: string,
+  completedCount: number
+): Promise<FlashcardResultResponse> {
+  return apiFetch<FlashcardResultResponse>(
+    `/users/${encodeURIComponent(userId)}/review/flashcard-result`,
+    { method: "POST", body: { sessionId, completedCount } }
+  );
+}
+
+/* 13. 승급 자격 조회 */
+export async function getLevelUpEligibility(
+  userId: string
+): Promise<LevelUpEligibilityResponse> {
+  return apiFetch<LevelUpEligibilityResponse>(
+    `/users/${encodeURIComponent(userId)}/level-up/eligibility`
   );
 }

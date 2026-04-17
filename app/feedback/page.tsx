@@ -311,13 +311,13 @@ export default function FeedbackPage() {
           <ArrowRight size={18} strokeWidth={2} />
         </button>
         <div className="flex gap-3">
-          <button type="button" onClick={() => router.push("/review?mode=quiz")}
+          <button type="button" onClick={() => router.push(`/review?mode=quiz${evalData?.sessionId ? `&sessionId=${evalData.sessionId}` : ""}`)}
             className="flex-1 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
             style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, var(--color-card-bg))", color: "var(--color-accent)", border: "1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)" }}>
             <Zap size={16} strokeWidth={2} />
             <span>{t("result.quizBtn")}</span>
           </button>
-          <button type="button" onClick={() => router.push("/review?mode=flashcard")}
+          <button type="button" onClick={() => router.push(`/review?mode=flashcard${evalData?.sessionId ? `&sessionId=${evalData.sessionId}` : ""}`)}
             className="flex-1 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
             style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, var(--color-card-bg))", color: "var(--color-accent)", border: "1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)" }}>
             <Layers size={16} strokeWidth={2} />

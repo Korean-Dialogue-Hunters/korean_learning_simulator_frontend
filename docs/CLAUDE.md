@@ -37,11 +37,11 @@
 | 🟡 Should | F-05a | 피드백 UI | 오답 빨간 음영 + 대화 요약 + 오답 단어 목록 | ✅ 완료 |
 | 🟡 Should | F-05b | 방사형 그래프 | Recharts — 어휘(30%) / 상황(50%) / 문법(20%) | ✅ 완료 |
 | 🟡 Should | F-06a | 초성 퀴즈 UI | 주간 복습 페이지 | 🚧 미구현 (페이지 placeholder) |
-| 🟡 Should | F-HOME-S | 홈 Should | XP 진행 바 / RetryCard / ReviewBanner | 🚧 레이아웃만 완료 (BE 미연동) |
+| 🟡 Should | F-HOME-S | 홈 Should | XP 진행 바 / RetryCard / ReviewBanner | ✅ BE 연동 완료 |
 | 🟢 Could | F-05c | Scaffolding 팝업 | AI 발화 클릭 시 어절 단위 한→영 해석 | 미착수 |
-| 🟢 Could | F-06b | 플래시 카드 UI | 오답 단어 복습 카드 | 미착수 |
+| 🟢 Could | F-06b | 플래시 카드 UI | 오답 단어 복습 카드 | ✅ 완료 (별 진척도 연동) |
 | 🟢 Could | F-HOME-C | 홈 Could | 카드 페이드인 / 스트릭 토스트 / 스켈레톤 로딩 | 미착수 |
-| 🟢 Could | F-PROFILE | 내정보 탭 | 프로필 페이지 | 🚧 placeholder |
+| 🟢 Could | F-LEVELUP | 승급 탭 | Korean Level 승급 시스템 | 🚧 스캐폴드 (BE-T5-02 대기) |
 
 ---
 
@@ -49,23 +49,25 @@
 
 ```
 웰컴 → 맞춤학습설정(/setup) → 홈(/) → 장소선택(/location)
-→ 역할선택(/persona) → 채팅(/chat) → 결과(/result) → 피드백(/feedback)
+→ 역할선택(/persona) → 채팅(/chat) → 피드백(/feedback) → 결과(/result)
 
-하단 탭: / | /chat | /history | /review | /profile
+하단 탭: / | /history | /review | /level-up
+상단 설정: /settings (톱니바퀴 진입)
 ```
 
 | 라우트 | 파일 | 상태 | 설명 |
 |--------|------|------|------|
-| `/` | `app/page.tsx` | ✅ | 홈 화면 (TierCard, WeeklyStats, CTA, 재도전카드, 복습배너) |
-| `/setup` | `app/setup/page.tsx` | ✅ | 맞춤 학습 설정 (5단계: 국적→닉네임→수준→문화→장소) |
-| `/location` | `app/location/page.tsx` | ✅ | 장소 선택 (MVP: 한강만 활성) |
+| `/` | `app/page.tsx` | ✅ | 홈 화면 (TierCard, WeeklyStats, CTA, 복습배너) |
+| `/setup` | `app/setup/page.tsx` | ✅ | 맞춤 학습 설정 (5단계: 초기설정 → 국적 → 닉네임 → 문화 → 한국어 수준) |
+| `/settings` | `app/settings/page.tsx` | ✅ | 설정 (언어·테마, 홈 우상단 톱니바퀴 진입) |
+| `/location` | `app/location/page.tsx` | ✅ | 장소 선택 (한강·명동·롯데월드·남산 4곳 모두 활성) |
 | `/persona` | `app/persona/page.tsx` | ✅ | 역할(페르소나) A/B 선택 |
 | `/chat` | `app/chat/page.tsx` | ✅ | 메신저형 채팅 (스트리밍 + 한국어 입력 검증) |
-| `/result` | `app/result/page.tsx` | ✅ | 결과 & 점수 (총점/등급/레이더 그래프) |
-| `/feedback` | `app/feedback/page.tsx` | ✅ | 상세 피드백 (오답 하이라이트 + 오답 단어 목록) |
-| `/history` | `app/history/page.tsx` | 🚧 | placeholder ("We are working on it!") |
-| `/review` | `app/review/page.tsx` | 🚧 | placeholder ("We are working on it!") |
-| `/profile` | `app/profile/page.tsx` | 🚧 | placeholder ("We are working on it!") |
+| `/feedback` | `app/feedback/page.tsx` | ✅ | 상세 피드백 (평가 + XP 지급, 메인 결과 화면) |
+| `/result` | `app/result/page.tsx` | ✅ | 결과 요약 (총점·등급·레이더·복습 CTA) |
+| `/history` | `app/history/page.tsx` | ✅ | 대화 기록 + 별 3개 진척도 (업적·SCK 수집 준비 중) |
+| `/review` | `app/review/page.tsx` | ✅ | 주간 복습 (초성퀴즈 + 플래시카드) |
+| `/level-up` | `app/level-up/page.tsx` | 🚧 | 승급 탭 스캐폴드 (BE-T5-02 eligibility API 대기) |
 
 ---
 
@@ -113,17 +115,21 @@
 
 | 화면 | API | FE 타입 | 연동 상태 |
 |------|-----|---------|-----------|
-| 장소선택→채팅 | `POST /v1/sessions` | `CreateSessionRequest` → `CreateSessionResponse` | ⏳ mock |
-| 역할선택 | `POST /v1/sessions/{id}/role` | `SelectRoleRequest` → `SessionStateResponse` | ⏳ mock |
-| 채팅 | `POST /v1/sessions/{id}/turns` | `CreateTurnRequest` → `SessionStateResponse` | ⏳ mock |
-| 결과+피드백 | `POST /v1/sessions/{id}/evaluation` | `EvaluationResponse` | ⏳ mock |
-| 홈 프로필 | `GET /v1/users/{nickname}/profile` | `UserProfile` | ⏳ mock |
-| 홈 통계 | `GET /v1/users/{nickname}/weekly-stats` | `WeeklyStats` | ⏳ mock |
-| 홈 복습 | `GET /v1/users/{nickname}/review/count` | 초성퀴즈/플래시카드 수 | ⏳ mock |
-| 복습 | `GET /v1/users/{nickname}/review/weekly` | 퀴즈/카드 목록 | 미구현 |
+| 장소선택→채팅 | `POST /v1/sessions` | `CreateSessionRequest` → `CreateSessionResponse` | ✅ 실연동 |
+| 역할선택 | `POST /v1/sessions/{id}/role` | `SelectRoleRequest` → `SessionStateResponse` | ✅ 실연동 |
+| 채팅 | `POST /v1/sessions/{id}/turns` | `CreateTurnRequest` → `SessionStateResponse` | ✅ 실연동 |
+| 결과+피드백 | `POST /v1/sessions/{id}/evaluation?lang=ko|en` | `EvaluationResponse` | ✅ 실연동 (5축 점수) |
+| 홈 프로필 | `GET /v1/users/{nickname}/profile` | `UserProfileResponse` | ✅ 실연동 |
+| 홈 통계 | `GET /v1/users/{nickname}/weekly-stats` | `WeeklyStatsResponse` | ✅ 실연동 |
+| 홈 복습 | `GET /v1/users/{nickname}/review/count` | `ReviewCountResponse` | ✅ 실연동 |
+| 복습 | `GET /v1/users/{nickname}/review/weekly` | `WeeklyReviewResponse` | ✅ 실연동 (페이로드 경량화 T1-03 대기) |
+| 기록 | `GET /v1/users/{nickname}/sessions?sort=` | `UserSessionsResponse` | ✅ 실연동 (별 진척도 `chosung_quiz_passed`/`flashcard_done` 포함) |
+| 복습 결과 | `POST /v1/users/{nickname}/review/quiz-result` `·/flashcard-result` | `QuizResultResponse` `·FlashcardResultResponse` | ✅ 실연동 |
 
 > IP 기반 국가 감지는 FE에서 ipapi.co 직접 호출로 처리 (BE 불필요)
-> XP, streakDays, 3축 개별 점수(vocabulary/situation/grammar)는 BE에 없음 — `docs/API_MAPPING.md` 하단 참조
+> XP / streakDays는 FE `localStorage`에서 자체 관리 — `lib/xpSystem.ts`
+> 평가 5축: length · vocab · context(scene/mission + relationship) · spelling
+> Korean Level(1~6) 승급 시스템은 트랙 5 진행 중 (`docs/TRACK5_BE_REQUESTS.md`)
 
 ---
 
@@ -135,45 +141,54 @@ korean_learning_simulator_frontend/     ← 이 레포 전체 = FE 전권
 │   ├── layout.tsx                      (루트 레이아웃: 480px 모바일 고정 + 테마 스크립트)
 │   ├── globals.css                     (Tailwind v4 @theme + 라이트/다크 CSS 변수)
 │   ├── page.tsx                        (홈 /)
-│   ├── setup/page.tsx                  (맞춤 학습 설정)
-│   ├── location/page.tsx               (장소 선택)
-│   ├── persona/page.tsx                (역할 선택)
-│   ├── chat/page.tsx                   (채팅)
-│   ├── result/page.tsx                 (결과)
-│   ├── feedback/page.tsx               (피드백)
-│   ├── history/page.tsx                (대화 기록 🚧)
-│   ├── review/page.tsx                 (복습 🚧)
-│   └── profile/page.tsx                (내정보 🚧)
+│   ├── setup/page.tsx                  (맞춤 학습 설정 5단계)
+│   ├── settings/page.tsx               (언어·테마 설정 — 홈 톱니바퀴 진입)
+│   ├── location/page.tsx               (장소 선택 — 한강·명동·롯데월드·남산)
+│   ├── persona/page.tsx                (역할 페르소나 A/B 선택)
+│   ├── chat/page.tsx                   (채팅: 스트리밍 + 한국어 검증)
+│   ├── feedback/page.tsx               (상세 피드백 — 메인 결과 화면, 평가 호출 + XP 지급)
+│   ├── result/page.tsx                 (결과 요약 — 복습 CTA)
+│   ├── history/page.tsx                (대화 기록 + 별 3개 진척도)
+│   ├── review/page.tsx                 (주간 복습 — 초성퀴즈 + 플래시카드)
+│   └── level-up/page.tsx               (승급 탭 🚧 — BE 대기)
 ├── components/
-│   ├── BottomTabBar.tsx                (하단 5탭 네비게이션)
-│   ├── HomeHeader.tsx                  (홈 헤더: 앱명만, 테마토글은 ThemeToggle로 통합)
-│   ├── ThemeToggle.tsx                 (다크/라이트 전환 버튼 — 모든 화면 우상단 fixed 고정)
-│   ├── TierCard.tsx                    (닉네임 + 등급 + XP 바 — 프로필 아이콘 제거 후 재구성)
-│   ├── WeeklyStats.tsx                 (주간 통계 3칸)
+│   ├── BottomTabBar.tsx                (하단 4탭: 홈/기록/복습/승급)
+│   ├── HomeHeader.tsx                  (홈 헤더 — 우상단 설정 톱니바퀴)
+│   ├── TierCard.tsx                    (닉네임 + 태권도 벨트(korean_level) + XP 바)
+│   ├── WeeklyStats.tsx                 (주간 통계 3칸: 누적 대화 · 평균 · 스트릭)
+│   ├── XpGainPopup.tsx                 (대화 완료 시 XP 지급 팝업)
 │   ├── chat/                           (채팅 관련 컴포넌트)
-│   │   ├── ChatBubble.tsx              (말풍선)
-│   │   ├── ChatInput.tsx               (입력창: 1000바이트 제한 + 한국어 검증)
-│   │   ├── PersonaProfileCard.tsx      (가로 반반 프로필 카드)
-│   │   └── StreamingBubble.tsx         (AI 스트리밍 말풍선)
-│   ├── result/RadarChart.tsx           (Recharts 레이더 그래프)
-│   └── setup/                          (설정 단계별 컴포넌트 — CultureSelect: 중복선택+Others입력)
+│   ├── common/LoadingScreen.tsx        (시나리오/평가/복습 로딩 화면)
+│   ├── result/RadarChart.tsx           (Recharts 5축 레이더)
+│   ├── review/                         (초성퀴즈 · 플래시카드 UI)
+│   └── setup/                          (설정 단계별 컴포넌트)
 ├── hooks/
 │   ├── useChat.ts                      (채팅 상태 + 턴 관리)
-│   ├── useSetup.ts                     (설정 상태 + localStorage + UUID)
-│   └── useTheme.ts                     (다크/라이트 테마 토글)
+│   ├── useSetup.ts                     (설정 프로필 + UUID 기반 userId)
+│   └── useTheme.ts                     (다크/라이트 테마)
 ├── types/
 │   ├── api.ts                          (BE API 요청/응답 타입)
 │   ├── chat.ts                         (ChatMessage, ChatSession)
-│   ├── result.ts                       (ResultData, FeedbackData, FeedbackMessage)
-│   ├── setup.ts                        (SetupProfile, CulturalInterest=string[], location ID=한글)
+│   ├── result.ts                       (ResultData, FeedbackData)
+│   ├── setup.ts                        (SetupProfile, LocationId, KoreanLevel 한글 3단계)
 │   ├── user.ts                         (UserProfile, WeeklyStats, Grade)
-│   └── countries.ts                    (국가 목록 데이터)
+│   └── countries.ts                    (국가 목록)
 ├── lib/
-│   ├── designSystem.ts                 (WARM_THEME, APP_THEME, 공통 스타일 헬퍼)
-│   ├── nicknameGenerator.ts            (닉네임 생성 + 유효성 검사)
-│   └── setupValidation.ts             (설정 프로필 유효성 검사)
+│   ├── api.ts                          (BE API fetch 래퍼)
+│   ├── belt.ts                         (태권도 벨트 6색 — korean_level 매핑)
+│   ├── koreanLevel.ts                  (셋업 문자열 ↔ 정수(1~6) 매핑 유틸)
+│   ├── xpSystem.ts                     (XP/레벨 진행률 — FE localStorage)
+│   ├── designSystem.ts                 (공통 스타일 헬퍼)
+│   ├── historyStorage.ts               (evaluation 캐시 + viewSessionId)
+│   ├── locationImage.ts · personaImage.ts (정적 이미지 매핑)
+│   ├── nicknameGenerator.ts            (닉네임 생성)
+│   └── setupValidation.ts              (설정 유효성 검사)
+├── public/
+│   ├── belts/                          (태권도 벨트 PNG 6장)
+│   ├── personas/ · locations/          (인물/장소 SVG)
+│   └── locales/{ko,en}.json            (i18n 번역)
 ├── __tests__/                          (Jest 테스트)
-├── docs/                               (CLAUDE.md, PLAN.md, TODO.md, API_MAPPING.md)
+├── docs/                               (CLAUDE.md, PLAN.md, TODO.md, TRACK5_BE_REQUESTS.md, BE_API_CHANGES.md)
 └── package.json                        (Next.js 15 + React 19 + Recharts + Lucide)
 ```
 

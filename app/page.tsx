@@ -10,15 +10,9 @@ import TierCard from "@/components/TierCard";
 import WeeklyStats from "@/components/WeeklyStats";
 import { UserProfile, WeeklyStats as WeeklyStatsType, Grade } from "@/types/user";
 import { isSetupDone, getSavedProfile, getUserId } from "@/hooks/useSetup";
-import { getReviewCount, getWeeklyStats, getUserSessions } from "@/lib/api";
+import { getWeeklyStats, getUserSessions } from "@/lib/api";
 import { getXpData, getXpBarInfo } from "@/lib/xpSystem";
-
-/* 셋업 한국어 수준 문자열 → korean_level 숫자 매핑 */
-function mapKoreanLevel(level: string): number {
-  if (level === "중급") return 3;
-  if (level === "고급") return 5;
-  return 1; // 초급 또는 기본값
-}
+import { mapKoreanLevel } from "@/lib/koreanLevel";
 
 /* grade 문자열("초급 <B>")에서 Grade 타입으로 매핑 */
 function parseGrade(raw: string): Grade {
@@ -31,8 +25,6 @@ function parseGrade(raw: string): Grade {
 export default function HomePage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [quizCount, setQuizCount] = useState(0);
-  const [flashCount, setFlashCount] = useState(0);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [weeklyStats, setWeeklyStats] = useState<WeeklyStatsType>({ sessionsPerUserCount: 0, averageScore: 0, streakDays: 0 });
 
@@ -59,14 +51,7 @@ export default function HomePage() {
     });
 
     /* API 병렬 호출 */
-    getReviewCount(profile.userNickname)
-      .then((res) => {
-        setQuizCount(res.chosungQuizCount);
-        setFlashCount(res.flashcardCount);
-      })
-      .catch(() => {});
-
-    getWeeklyStats(profile.userNickname)
+    getWeeklyStats(profile.userId)
       .then((res) => {
         setUser((prev) => prev ? {
           ...prev,
@@ -81,7 +66,7 @@ export default function HomePage() {
       .catch(() => {});
 
     // 누적대화횟수는 완료된 세션만 카운트 (weekly-stats는 고아 세션까지 포함해서 불일치)
-    getUserSessions(profile.userNickname)
+    getUserSessions(profile.userId)
       .then((res) => {
         setWeeklyStats((prev) => ({ ...prev, sessionsPerUserCount: res.totalCount }));
       })
@@ -100,7 +85,7 @@ export default function HomePage() {
           <div>
             <p className="text-sm font-bold text-foreground">{t("home.weeklyReviewTitle")}</p>
             <p className="text-[12px] text-tab-inactive mt-1">
-              {t("home.weeklyReviewContent", { quiz: quizCount, flash: flashCount })}
+              {t("home.weeklyReviewContent")}
             </p>
           </div>
           <ChevronRight size={20} className="text-tab-inactive shrink-0" />

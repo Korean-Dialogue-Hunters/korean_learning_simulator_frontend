@@ -10,16 +10,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Trophy, ArrowRight, Home, BookOpen, AlertCircle, BarChart3, FileText, Sparkles, Zap, Layers } from "lucide-react";
+import { Trophy, ArrowRight, Home, BookOpen, AlertCircle, BarChart3, Sparkles, Zap, Layers, ChevronLeft } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { EvaluationScores } from "@/types/result";
 import { EvaluationResponse } from "@/types/api";
 import { evaluateSession, normalizeSckFields } from "@/lib/api";
 import RadarChart from "@/components/result/RadarChart";
+import ScoreBreakdownCards from "@/components/result/ScoreBreakdownCards";
 import { getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
 import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpSystem";
-import { getUserId } from "@/hooks/useSetup";
+import { getUserId, getSavedProfile } from "@/hooks/useSetup";
+import { getBelt } from "@/lib/belt";
+import { mapKoreanLevel } from "@/lib/koreanLevel";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import { clearSessionState } from "@/lib/sessionStorage";
@@ -53,6 +56,7 @@ export default function ResultPage() {
   const [scores, setScores] = useState<EvaluationScores | null>(null);
   const [xpPopup, setXpPopup] = useState<Omit<XpGainPopupProps, "onClose"> | null>(null);
   const [xpGained, setXpGained] = useState<number>(0);
+  const [fromHistory, setFromHistory] = useState(false);
 
   /* XP 지급 (중복 방지 포함) */
   const awardConversationXp = (sessionId: string, totalScore10: number) => {
@@ -70,6 +74,7 @@ export default function ResultPage() {
        (여기서 즉시 removeItem하면 Strict Mode의 두 번째 effect 실행에서 null이 되어
         현재 활성 sessionId로 fallback되는 버그가 있었음) */
     const viewSessionId = localStorage.getItem("viewSessionId");
+    if (viewSessionId) setFromHistory(true);
     const sessionId = viewSessionId || localStorage.getItem("sessionId");
     if (!sessionId) {
       router.replace("/");
@@ -154,12 +159,28 @@ export default function ResultPage() {
   /* BE grade 문자열에서 등급 코드 추출: "Beginner <B>" → "B" */
   const gradeMatch = evalData.grade.match(/<(\w+)>/);
   const gradeCode = gradeMatch ? gradeMatch[1] : evalData.grade;
-  const gradeLabel = evalData.grade.replace(/<\w+>/, "").trim();
   const gradeColor = GRADE_COLORS[gradeCode as keyof typeof GRADE_COLORS] ?? "var(--color-accent)";
+  /* 유저의 현재 벨트 — 등급 위 라벨로 표시 */
+  const profile = typeof window !== "undefined" ? getSavedProfile() : null;
+  const belt = getBelt(profile ? mapKoreanLevel(profile.koreanLevel) : 1);
+  const beltLabel = i18n.language?.startsWith("ko") ? `${belt.nameKo}띠` : `${belt.name} Belt`;
 
   return (
     <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       {xpPopup && <XpGainPopup {...xpPopup} onClose={() => setXpPopup(null)} />}
+
+      {/* ── 기록 탭에서 온 경우 뒤로가기 ── */}
+      {fromHistory && (
+        <button
+          type="button"
+          onClick={() => { localStorage.removeItem("viewSessionId"); router.push("/history"); }}
+          className="flex items-center gap-1 mb-4 text-sm font-medium transition-opacity hover:opacity-70"
+          style={{ color: "var(--color-tab-inactive)" }}
+        >
+          <ChevronLeft size={18} strokeWidth={2} />
+          <span>{t("result.backToHistory")}</span>
+        </button>
+      )}
 
       {/* ── 상단: 대화 완료 + XP ── */}
       <div className="flex items-center justify-between mb-8">
@@ -194,9 +215,9 @@ export default function ResultPage() {
             <span className="text-sm text-tab-inactive">/ 10</span>
           </div>
         </div>
-        {/* 오른쪽: 등급 도장 */}
+        {/* 오른쪽: 등급 도장 — 위에 유저 벨트 라벨 (벨트 색상 적용) */}
         <div className="flex flex-col items-end">
-          <p className="text-[11px] text-tab-inactive mb-1">{gradeLabel}</p>
+          <p className="text-[11px] font-bold mb-1" style={{ color: belt.color }}>{beltLabel}</p>
           <span className="text-4xl font-black leading-none" style={{ color: gradeColor }}>
             {gradeCode}
           </span>
@@ -213,17 +234,8 @@ export default function ResultPage() {
         <RadarChart scores={scores} />
       </div>
 
-      {/* ── 2. 점수 산출 근거 ── */}
-      <div className={`${COMMON_CLASSES.cardRounded} p-4 mb-4`}
-        style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)" }}>
-        <div className="flex items-center gap-2 mb-3">
-          <FileText size={16} strokeWidth={2} style={{ color: "var(--color-accent)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--color-foreground)" }}>{t("feedback.basisTitle")}</p>
-        </div>
-        <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: "var(--color-foreground)" }}>
-          {(i18n.language?.startsWith("en") && evalData.feedbackEn) || evalData.feedback}
-        </p>
-      </div>
+      {/* ── 2. 점수 산출 근거 (카테고리별 카드) ── */}
+      <ScoreBreakdownCards evalData={evalData} />
 
       {/* ── 하단 버튼 ── */}
       <div className="mt-auto space-y-3">
@@ -234,13 +246,13 @@ export default function ResultPage() {
           <ArrowRight size={18} strokeWidth={2} />
         </button>
         <div className="flex gap-3">
-          <button type="button" onClick={() => router.push("/review?mode=quiz")}
+          <button type="button" onClick={() => router.push(`/review?mode=quiz&sessionId=${evalData.sessionId}`)}
             className="flex-1 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
             style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, var(--color-card-bg))", color: "var(--color-accent)", border: "1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)" }}>
             <Zap size={16} strokeWidth={2} />
             <span>{t("result.quizBtn")}</span>
           </button>
-          <button type="button" onClick={() => router.push("/review?mode=flashcard")}
+          <button type="button" onClick={() => router.push(`/review?mode=flashcard&sessionId=${evalData.sessionId}`)}
             className="flex-1 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
             style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, var(--color-card-bg))", color: "var(--color-accent)", border: "1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)" }}>
             <Layers size={16} strokeWidth={2} />

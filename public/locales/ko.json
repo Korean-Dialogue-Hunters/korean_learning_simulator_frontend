@@ -63,18 +63,13 @@
     "no": "아니요, 나중에 할게요"
   },
   "home": {
-    "retryTitle": "지난 대화를 다시 도전해봐요!",
-    "retrySubTitle": "한강 자전거길에서 길 찾기",
-    "retryScoreLabel": "지난주 최저점:",
-    "retryBtn": "재도전",
-    "weeklyReviewTitle": "주간 복습 준비됐어요!",
-    "weeklyReviewContent": "초성퀴즈 {{quiz}}개, 플래시카드 {{flash}}개",
+    "weeklyReviewTitle": "복습 컨텐츠 준비됐어요!",
+    "weeklyReviewContent": "초성퀴즈와 플래시카드로 복습해 보세요",
     "newBtn": "대화 시작하기"
   },
   "tierCard": {
     "namePostfix": "님",
-    "welcome": "환영해요!",
-    "nextTier": "다음 티어까지 {{xp}} XP"
+    "welcome": "환영해요!"
   },
   "weeklyStats": {
     "conversationCount": "누적 대화 횟수",
@@ -91,7 +86,8 @@
     "creating": "시나리오 생성 중...",
     "hangang_desc": "서울 한강변에서 다양한 사람들과 대화해보세요",
     "myeongdong_desc": "명동 거리의 활기찬 분위기 속 대화",
-    "lotteworld_desc": "롯데월드에서 즐거운 한국어 대화"
+    "lotteworld_desc": "롯데월드에서 즐거운 한국어 대화",
+    "namsan_desc": "남산타워에서 서울 전경을 보며 대화해보세요"
   },
   "persona": {
     "title": "어떤 역할을 맡아볼까요?",
@@ -157,7 +153,9 @@
     "memorizeBtn": "암기 완료",
     "chosungInstruction": "초성을 보고 알맞은 단어를 골라보세요",
     "reviewDone": "복습 완료!",
-    "backToReview": "복습 목록으로"
+    "backToReview": "복습 목록으로",
+    "backToResult": "결과 페이지로",
+    "allDone": "모든 복습을 완료했어요!\n새로운 대화를 해보세요."
   },
   "eval": {
     "length": "발화 길이",
@@ -188,7 +186,8 @@
     "loadFailed": "결과를 불러올 수 없어요",
     "sessionLostTitle": "대화 세션이 만료되었어요",
     "sessionLostDesc": "서버가 이 대화의 기록을 더 이상 가지고 있지 않아요.\n잠시 후 새로운 대화를 시작해 주세요.",
-    "sessionLostRetry": "새 대화 시작하기"
+    "sessionLostRetry": "새 대화 시작하기",
+    "backToHistory": "목록으로"
   },
   "feedback": {
     "title": "상세 피드백",
@@ -196,6 +195,7 @@
     "radarTitle": "세부 평가",
     "analysisTitle": "역량 분석",
     "basisTitle": "점수 산출 근거",
+    "nextCategory": "다음 항목",
     "sckTitle": "SCK 어휘 사용",
     "sckSummary": "{{match}} / {{total}} 어절 일치 ({{rate}}%)",
     "sckLevelLabel": "{{level}}급",
@@ -209,7 +209,29 @@
   "tabs": {
     "home": "홈",
     "history": "기록",
-    "review": "복습"
+    "review": "복습",
+    "levelUp": "승급"
+  },
+  "levelUp": {
+    "title": "승급",
+    "subtitle": "다음 레벨로 올라갈 준비가 됐는지 확인해 보세요",
+    "currentLevel": "현재",
+    "nextLevel": "다음",
+    "maxLevel": "최고 레벨",
+    "maxLevelNote": "이미 최고 레벨에 도달했어요",
+    "requirementsTitle": "승급 조건",
+    "reqSessions": "현재 레벨에서 대화 5회 이상 완료",
+    "reqSessionsProgress": "{{current}} / {{required}}회",
+    "reqScore": "최근 5회 평균 8점 이상",
+    "reqScoreProgress": "{{current}}점 / {{required}}점",
+    "reqExam": "다음 레벨 승급 시험에서 A 등급 이상",
+    "reqExamPending": "대기 중",
+    "reqExamLocked": "이전 조건 먼저",
+    "eligibleBadge": "승급 조건 충족!",
+    "notEligibleBadge": "조건이 조금 더 필요해요",
+    "comingSoon": "승급 시험 준비 중",
+    "systemNote": "승급 시스템 연동은 준비 중이에요. 대화를 쌓아두면 오픈될 때 바로 응시할 수 있어요.",
+    "loadFailed": "승급 정보를 불러오지 못했어요"
   },
   "history": {
     "title": "기록",
@@ -224,7 +246,7 @@
     "sortScoreHigh": "점수 높은 순",
     "sortScoreLow": "점수 낮은 순",
     "sortLocation": "장소 기준",
-    "starGradeA": "대화 A⬆",
+    "starCompleted": "대화완료",
     "starChosung": "퀴즈완료",
     "starFlashcard": "암기완료",
     "progress": "진척도"
