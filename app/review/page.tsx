@@ -19,7 +19,7 @@ import { addXp } from "@/lib/xpSystem";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import type { WeeklyReviewResponse, ChosungQuizItem, FlashcardItem, UserSessionItem } from "@/types/api";
-import { markQuizPassed, markFlashcardDone } from "@/lib/starStorage";
+import { markQuizPassed, markFlashcardDone, getStarProgress } from "@/lib/starStorage";
 
 type Mode = "list" | "quiz" | "flashcard";
 
@@ -75,10 +75,15 @@ function ReviewPageInner() {
 
     getUserSessions(profile.userId, "score_low")
       .then((res) => {
-        /* 퀴즈 또는 카드가 미완료인 세션만 */
-        const incomplete = res.sessions.filter(
-          (s) => !(s.chosungQuizPassed && s.flashcardDone)
-        );
+        /* 퀴즈 또는 카드가 미완료인 세션만
+           - BE 필드가 비어 있을 수 있어 localStorage 폴백까지 OR로 병합
+             (history 카드와 동일 규칙 → 별 3개 다 찬 세션은 리뷰 대상에서 제외) */
+        const incomplete = res.sessions.filter((s) => {
+          const local = getStarProgress(s.sessionId);
+          const quizDone = s.chosungQuizPassed ?? local.quizPassed ?? false;
+          const flashDone = s.flashcardDone ?? local.flashcardDone ?? false;
+          return !(quizDone && flashDone);
+        });
         if (incomplete.length > 0) {
           setTargetSession(incomplete[0]);
           if (!qsSessionId) setSessionId(incomplete[0].sessionId);
@@ -205,9 +210,11 @@ function ReviewPageInner() {
     );
   }
 
-  /* ── 모드 목록 화면 ── */
-  const quizDone = justPassedQuiz || (targetSession?.chosungQuizPassed ?? false);
-  const flashDone = justDoneFlashcard || (targetSession?.flashcardDone ?? false);
+  /* ── 모드 목록 화면 ──
+     - BE 필드 우선, 미수신 시 localStorage 폴백까지 확인 (히스토리 카드와 동일) */
+  const targetLocal = targetSession ? getStarProgress(targetSession.sessionId) : {};
+  const quizDone = justPassedQuiz || (targetSession?.chosungQuizPassed ?? targetLocal.quizPassed ?? false);
+  const flashDone = justDoneFlashcard || (targetSession?.flashcardDone ?? targetLocal.flashcardDone ?? false);
   const allDone = !targetSession || (quizDone && flashDone);
 
   const gradeMatch = targetSession?.grade?.match(/<(\w+)>/);
