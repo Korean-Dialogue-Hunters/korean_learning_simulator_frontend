@@ -10,7 +10,7 @@ import TierCard from "@/components/TierCard";
 import WeeklyStats from "@/components/WeeklyStats";
 import { UserProfile, WeeklyStats as WeeklyStatsType, Grade } from "@/types/user";
 import { isSetupDone, getSavedProfile, getUserId } from "@/hooks/useSetup";
-import { getReviewCount, getWeeklyStats, getUserSessions } from "@/lib/api";
+import { getWeeklyStats, getUserSessions } from "@/lib/api";
 import { getXpData, getXpBarInfo } from "@/lib/xpSystem";
 import { mapKoreanLevel } from "@/lib/koreanLevel";
 
@@ -25,8 +25,6 @@ function parseGrade(raw: string): Grade {
 export default function HomePage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [quizCount, setQuizCount] = useState(0);
-  const [flashCount, setFlashCount] = useState(0);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [weeklyStats, setWeeklyStats] = useState<WeeklyStatsType>({ sessionsPerUserCount: 0, averageScore: 0, streakDays: 0 });
 
@@ -53,13 +51,6 @@ export default function HomePage() {
     });
 
     /* API 병렬 호출 */
-    getReviewCount(profile.userId)
-      .then((res) => {
-        setQuizCount(res.chosungQuizCount);
-        setFlashCount(res.flashcardCount);
-      })
-      .catch(() => {});
-
     getWeeklyStats(profile.userId)
       .then((res) => {
         setUser((prev) => prev ? {
@@ -94,7 +85,7 @@ export default function HomePage() {
           <div>
             <p className="text-sm font-bold text-foreground">{t("home.weeklyReviewTitle")}</p>
             <p className="text-[12px] text-tab-inactive mt-1">
-              {t("home.weeklyReviewContent", { quiz: quizCount, flash: flashCount })}
+              {t("home.weeklyReviewContent")}
             </p>
           </div>
           <ChevronRight size={20} className="text-tab-inactive shrink-0" />

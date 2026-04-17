@@ -63,8 +63,8 @@
     "no": "아니요, 나중에 할게요"
   },
   "home": {
-    "weeklyReviewTitle": "주간 복습 준비됐어요!",
-    "weeklyReviewContent": "초성퀴즈 {{quiz}}개, 플래시카드 {{flash}}개",
+    "weeklyReviewTitle": "복습 컨텐츠 준비됐어요!",
+    "weeklyReviewContent": "초성퀴즈와 플래시카드로 복습해 보세요",
     "newBtn": "대화 시작하기"
   },
   "tierCard": {
@@ -154,6 +154,7 @@
     "chosungInstruction": "초성을 보고 알맞은 단어를 골라보세요",
     "reviewDone": "복습 완료!",
     "backToReview": "복습 목록으로",
+    "backToResult": "결과 페이지로",
     "allDone": "모든 복습을 완료했어요!\n새로운 대화를 해보세요."
   },
   "eval": {
@@ -185,7 +186,8 @@
     "loadFailed": "결과를 불러올 수 없어요",
     "sessionLostTitle": "대화 세션이 만료되었어요",
     "sessionLostDesc": "서버가 이 대화의 기록을 더 이상 가지고 있지 않아요.\n잠시 후 새로운 대화를 시작해 주세요.",
-    "sessionLostRetry": "새 대화 시작하기"
+    "sessionLostRetry": "새 대화 시작하기",
+    "backToHistory": "목록으로"
   },
   "feedback": {
     "title": "상세 피드백",
@@ -193,6 +195,7 @@
     "radarTitle": "세부 평가",
     "analysisTitle": "역량 분석",
     "basisTitle": "점수 산출 근거",
+    "nextCategory": "다음 항목",
     "sckTitle": "SCK 어휘 사용",
     "sckSummary": "{{match}} / {{total}} 어절 일치 ({{rate}}%)",
     "sckLevelLabel": "{{level}}급",
@@ -218,10 +221,17 @@
     "maxLevelNote": "이미 최고 레벨에 도달했어요",
     "requirementsTitle": "승급 조건",
     "reqSessions": "현재 레벨에서 대화 5회 이상 완료",
+    "reqSessionsProgress": "{{current}} / {{required}}회",
     "reqScore": "최근 5회 평균 8점 이상",
+    "reqScoreProgress": "{{current}}점 / {{required}}점",
     "reqExam": "다음 레벨 승급 시험에서 A 등급 이상",
+    "reqExamPending": "대기 중",
+    "reqExamLocked": "이전 조건 먼저",
+    "eligibleBadge": "승급 조건 충족!",
+    "notEligibleBadge": "조건이 조금 더 필요해요",
     "comingSoon": "승급 시험 준비 중",
-    "systemNote": "승급 시스템 연동은 준비 중이에요. 대화를 쌓아두면 오픈될 때 바로 응시할 수 있어요."
+    "systemNote": "승급 시스템 연동은 준비 중이에요. 대화를 쌓아두면 오픈될 때 바로 응시할 수 있어요.",
+    "loadFailed": "승급 정보를 불러오지 못했어요"
   },
   "history": {
     "title": "기록",

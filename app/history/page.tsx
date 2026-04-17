@@ -10,21 +10,23 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star, Layers, Check } from "lucide-react";
+import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star, Layers, MessageCircle } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { getSavedProfile } from "@/hooks/useSetup";
 import { getUserSessions } from "@/lib/api";
+import { getStarProgress } from "@/lib/starStorage";
 import type { UserSessionItem, UserSessionsSort, SessionProgress } from "@/types/api";
 
 type SubTab = "dialogue" | "achievement" | "sck";
 
-/* ── 세션별 진척도: BE 응답의 chosungQuizPassed / flashcardDone 사용 ── */
+/* ── 세션별 진척도: BE 응답 우선, 없으면 localStorage 폴백 ── */
 function toProgress(record: UserSessionItem): SessionProgress {
+  const local = getStarProgress(record.sessionId);
   return {
     completed: true,  // 기록에 존재 = 대화 완료
-    chosungQuizPassed: record.chosungQuizPassed ?? false,
-    flashcardDone: record.flashcardDone ?? false,
+    chosungQuizPassed: record.chosungQuizPassed ?? local.quizPassed ?? false,
+    flashcardDone: record.flashcardDone ?? local.flashcardDone ?? false,
   };
 }
 
@@ -214,10 +216,10 @@ export default function HistoryPage() {
 const PROGRESS_ITEMS: {
   key: keyof SessionProgress;
   inner: "text" | "icon";
-  icon?: "check" | "layers";
+  icon?: "message" | "layers";
   text?: string;
 }[] = [
-  { key: "completed", inner: "icon", icon: "check" },
+  { key: "completed", inner: "icon", icon: "message" },
   { key: "chosungQuizPassed", inner: "text", text: "Q" },
   { key: "flashcardDone", inner: "icon", icon: "layers" },
 ];
@@ -301,10 +303,10 @@ function DialogueCard({
                     >
                       {item.text}
                     </span>
-                  ) : item.icon === "check" ? (
-                    <Check
-                      size={15}
-                      strokeWidth={2.8}
+                  ) : item.icon === "message" ? (
+                    <MessageCircle
+                      size={14}
+                      strokeWidth={2.4}
                       style={{ color: done ? "var(--color-btn-primary-text)" : "var(--color-tab-inactive)" }}
                     />
                   ) : (

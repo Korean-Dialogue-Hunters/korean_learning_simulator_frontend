@@ -105,6 +105,7 @@ import type {
   UserSessionsSort,
   QuizResultResponse,
   FlashcardResultResponse,
+  LevelUpEligibilityResponse,
 } from "@/types/api";
 
 /* 1. 세션 생성 — 장소 선택 후 호출 */
@@ -204,11 +205,15 @@ export async function getReviewCount(
   return apiFetch<ReviewCountResponse>(`/users/${encodeURIComponent(userId)}/review/count`);
 }
 
-/* 7. 주간 복습 콘텐츠 생성/조회 */
+/* 7. 주간 복습 콘텐츠 생성/조회
+   - sessionId 전달 시 BE가 해당 세션의 chosung_quiz/flashcards만 DB에서 로드
+   - 생략 시 기존 동작(전체 세션 기반) — BE Option A 적용 전까지 호환 */
 export async function getWeeklyReview(
-  userId: string
+  userId: string,
+  sessionId?: string
 ): Promise<WeeklyReviewResponse> {
-  return apiFetch<WeeklyReviewResponse>(`/users/${encodeURIComponent(userId)}/review/weekly`);
+  const qs = sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : "";
+  return apiFetch<WeeklyReviewResponse>(`/users/${encodeURIComponent(userId)}/review/weekly${qs}`);
 }
 
 /* 8. 주간 통계 조회 */
@@ -231,9 +236,22 @@ export async function getUserSessions(
   sort: UserSessionsSort = "recent"
 ): Promise<UserSessionsResponse> {
   const qs = new URLSearchParams({ sort }).toString();
-  return apiFetch<UserSessionsResponse>(
+  const res = await apiFetch<UserSessionsResponse>(
     `/users/${encodeURIComponent(userId)}/sessions?${qs}`
   );
+  /* BE가 별 진척도 필드를 snake_case로 내려줄 수 있으므로 camelCase로 정규화 */
+  res.sessions = res.sessions.map((s) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = s as any;
+    if (s.chosungQuizPassed === undefined && raw.chosung_quiz_passed !== undefined) {
+      s.chosungQuizPassed = raw.chosung_quiz_passed;
+    }
+    if (s.flashcardDone === undefined && raw.flashcard_done !== undefined) {
+      s.flashcardDone = raw.flashcard_done;
+    }
+    return s;
+  });
+  return res;
 }
 
 /* 11. 초성퀴즈 결과 저장 */
@@ -257,5 +275,14 @@ export async function submitFlashcardResult(
   return apiFetch<FlashcardResultResponse>(
     `/users/${encodeURIComponent(userId)}/review/flashcard-result`,
     { method: "POST", body: { sessionId, completedCount } }
+  );
+}
+
+/* 13. 승급 자격 조회 */
+export async function getLevelUpEligibility(
+  userId: string
+): Promise<LevelUpEligibilityResponse> {
+  return apiFetch<LevelUpEligibilityResponse>(
+    `/users/${encodeURIComponent(userId)}/level-up/eligibility`
   );
 }

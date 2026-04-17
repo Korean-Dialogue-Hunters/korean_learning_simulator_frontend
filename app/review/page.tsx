@@ -19,6 +19,7 @@ import { addXp } from "@/lib/xpSystem";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import type { WeeklyReviewResponse, ChosungQuizItem, FlashcardItem, UserSessionItem } from "@/types/api";
+import { markQuizPassed, markFlashcardDone } from "@/lib/starStorage";
 
 type Mode = "list" | "quiz" | "flashcard";
 
@@ -100,21 +101,17 @@ function ReviewPageInner() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, initLoading]);
 
-  /* 모드 시작 → 데이터 로드 */
+  /* 모드 시작 → 데이터 로드
+     - URL/target 기반 sessionId를 BE에 전달 → 해당 세션의 콘텐츠만 반환
+     - BE Option A 적용 전에는 서버가 sessionId 무시해도 안전 */
   const startMode = async (m: "quiz" | "flashcard") => {
     if (!profile) return;
     setMode(m);
     setLoading(true);
     setError("");
     try {
-      const data = await getWeeklyReview(profile.userId);
+      const data = await getWeeklyReview(profile.userId, sessionId ?? undefined);
       setReviewData(data);
-      /* BE가 실제로 콘텐츠를 생성한 세션 ID로 항상 동기화
-         — 기존에 설정된 sessionId가 있어도 덮어써야
-           결과 제출 시 올바른 세션에 저장됨 */
-      if (data.justBeforeSession?.length > 0) {
-        setSessionId(data.justBeforeSession[0].sessionId);
-      }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("review.loadFailed"));
       setMode("list");
@@ -142,9 +139,30 @@ function ReviewPageInner() {
     setXpPopup(result);
   };
 
-  /* 퀴즈 완료 → BE 저장 + 4/5 이상이면 별 즉시 반영 */
-  const handleQuizComplete = async (correctCount: number) => {
-    if (correctCount >= 4) setJustPassedQuiz(true);
+  /* 별을 저장할 세션 ID 후보들 모으기
+     - startMode에서 sessionId가 justBeforeSession으로 덮어써질 수 있어
+       history 카드의 record.sessionId와 달라지는 경우가 있음.
+     - URL/targetSession까지 모두 커버해 별이 유실되지 않게 함. */
+  const collectStarSessionIds = () => {
+    const ids = new Set<string>();
+    if (sessionId) ids.add(sessionId);
+    const qs = searchParams.get("sessionId");
+    if (qs) ids.add(qs);
+    if (targetSession?.sessionId) ids.add(targetSession.sessionId);
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("viewSessionId") || localStorage.getItem("sessionId");
+      if (stored) ids.add(stored);
+    }
+    return ids;
+  };
+
+  /* 퀴즈 완료 → BE 저장 + 정답률 75% 이상이면 별 즉시 반영 */
+  const handleQuizComplete = async (correctCount: number, totalCount: number) => {
+    const passed = totalCount > 0 && correctCount / totalCount >= 0.75;
+    if (passed) {
+      setJustPassedQuiz(true);
+      collectStarSessionIds().forEach(markQuizPassed);
+    }
     if (!profile || !sessionId) return;
     try {
       await submitQuizResult(profile.userId, sessionId, correctCount);
@@ -155,9 +173,10 @@ function ReviewPageInner() {
     }
   };
 
-  /* 플래시카드 완료 → BE 저장 + 별 즉시 반영 */
+  /* 플래시카드 완료 → BE 저장 + 별 즉시 반영 + localStorage 저장 */
   const handleFlashcardComplete = async (completedCount: number) => {
     setJustDoneFlashcard(true);
+    collectStarSessionIds().forEach(markFlashcardDone);
     if (!profile || !sessionId) return;
     try {
       await submitFlashcardResult(profile.userId, sessionId, completedCount);
@@ -172,7 +191,7 @@ function ReviewPageInner() {
     return (
       <>
         {xpPopup && <XpGainPopup {...xpPopup} onClose={() => setXpPopup(null)} />}
-        <ChosungQuizView items={reviewData.chosungQuiz} onBack={handleBack} onXpGain={handleXpGain} onComplete={handleQuizComplete} />
+        <ChosungQuizView items={reviewData.chosungQuiz} onBack={handleBack} onXpGain={handleXpGain} onComplete={(c, t) => handleQuizComplete(c, t)} fromResult={fromResult.current} />
       </>
     );
   }
@@ -320,7 +339,7 @@ function ModeCard({
 /* ══════════════════════════════════════════
    초성 퀴즈 뷰
    ══════════════════════════════════════════ */
-function ChosungQuizView({ items, onBack, onXpGain, onComplete }: { items: ChosungQuizItem[]; onBack: () => void; onXpGain?: (amount: number) => void; onComplete?: (correctCount: number) => Promise<void> | void }) {
+function ChosungQuizView({ items, onBack, onXpGain, onComplete, fromResult }: { items: ChosungQuizItem[]; onBack: () => void; onXpGain?: (amount: number) => void; onComplete?: (correctCount: number, totalCount: number) => Promise<void> | void; fromResult?: boolean }) {
   const { t } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -379,7 +398,7 @@ function ChosungQuizView({ items, onBack, onXpGain, onComplete }: { items: Chosu
       const xp = correct * 5;
       if (xp > 0) onXpGain(xp);
     }
-    if (onComplete) onComplete(correct);
+    if (onComplete) onComplete(correct, items.length);
     setXpAwarded(true);
   }
 
@@ -401,7 +420,7 @@ function ChosungQuizView({ items, onBack, onXpGain, onComplete }: { items: Chosu
           <button onClick={onBack}
             className="px-5 py-2.5 rounded-xl text-sm font-bold"
             style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}>
-            {t("review.backToReview")}
+            {t(fromResult ? "review.backToResult" : "review.backToReview")}
           </button>
         </div>
       </div>

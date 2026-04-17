@@ -63,8 +63,8 @@
     "no": "No, I'll do it later"
   },
   "home": {
-    "weeklyReviewTitle": "Weekly review is ready!",
-    "weeklyReviewContent": "{{quiz}} consonant quiz, {{flash}} flashcards",
+    "weeklyReviewTitle": "Review content is ready!",
+    "weeklyReviewContent": "Practice with consonant quizzes and flashcards",
     "newBtn": "Start Conversation"
   },
   "tierCard": {
@@ -154,6 +154,7 @@
     "chosungInstruction": "Pick the word that matches these initial consonants",
     "reviewDone": "Review Complete!",
     "backToReview": "Back to Review",
+    "backToResult": "Back to Result",
     "allDone": "All reviews complete!\nTry a new conversation."
   },
   "eval": {
@@ -185,7 +186,8 @@
     "loadFailed": "Could not load results",
     "sessionLostTitle": "This conversation has expired",
     "sessionLostDesc": "The server no longer has a record of this conversation.\nPlease start a new one to try again.",
-    "sessionLostRetry": "Start a new conversation"
+    "sessionLostRetry": "Start a new conversation",
+    "backToHistory": "Back to History"
   },
   "feedback": {
     "title": "Detailed Feedback",
@@ -193,6 +195,7 @@
     "radarTitle": "Detailed Evaluation",
     "analysisTitle": "Skills Analysis",
     "basisTitle": "Score Breakdown",
+    "nextCategory": "Next category",
     "sckTitle": "SCK Vocabulary Used",
     "sckSummary": "{{match}} / {{total}} tokens matched ({{rate}}%)",
     "sckLevelLabel": "Level {{level}}",
@@ -218,10 +221,17 @@
     "maxLevelNote": "You've already reached the top level",
     "requirementsTitle": "Requirements",
     "reqSessions": "Complete 5+ conversations at your current level",
+    "reqSessionsProgress": "{{current}} / {{required}}",
     "reqScore": "Average score 8+ over the last 5 conversations",
+    "reqScoreProgress": "{{current}} / {{required}}",
     "reqExam": "Score Grade A or higher on the level-up exam",
+    "reqExamPending": "Waiting",
+    "reqExamLocked": "Finish previous first",
+    "eligibleBadge": "You're ready to level up!",
+    "notEligibleBadge": "A bit more to go",
     "comingSoon": "Exam Coming Soon",
-    "systemNote": "The level-up system is still being wired up. Keep practicing — you'll be ready when it opens."
+    "systemNote": "The level-up system is still being wired up. Keep practicing — you'll be ready when it opens.",
+    "loadFailed": "Couldn't load level-up info"
   },
   "history": {
     "title": "History",
