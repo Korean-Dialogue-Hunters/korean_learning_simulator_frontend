@@ -21,7 +21,7 @@ export interface CounterpartInfo {
   genderEn?: string;
   role: string;
   roleEn?: string;
-  avatarUrl?: string;
+  personaUrl?: string;
 }
 
 interface PersonaProfileCardProps {
@@ -55,15 +55,20 @@ export default function PersonaProfileCard({
         {/* 왼쪽: 내 역할 */}
         <div className="flex-1 flex items-center gap-2 min-w-0">
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
+            className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center shrink-0 text-sm font-bold"
             style={{
               backgroundColor: "var(--color-accent)",
               color: "var(--color-btn-primary-text)",
             }}
           >
-            {persona.avatarUrl ? (
+            {persona.personaUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={persona.avatarUrl} alt={persona.name} className="w-full h-full object-cover rounded-full" />
+              <img
+                src={persona.personaUrl}
+                alt={persona.name}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: "center 15%", transform: "scale(1.45)", transformOrigin: "center 20%" }}
+              />
             ) : (
               persona.name.charAt(0)
             )}
@@ -88,15 +93,20 @@ export default function PersonaProfileCard({
         {/* 오른쪽: 상대방 */}
         <div className="flex-1 flex items-center gap-2 min-w-0">
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
+            className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center shrink-0 text-sm font-bold"
             style={{
               backgroundColor: "var(--color-surface)",
               color: "var(--color-tab-inactive)",
             }}
           >
-            {counterpart.avatarUrl ? (
+            {counterpart.personaUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={counterpart.avatarUrl} alt={counterpart.name} className="w-full h-full object-cover rounded-full" />
+              <img
+                src={counterpart.personaUrl}
+                alt={counterpart.name}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: "center 15%", transform: "scale(1.45)", transformOrigin: "center 20%" }}
+              />
             ) : (
               counterpart.name.charAt(0)
             )}

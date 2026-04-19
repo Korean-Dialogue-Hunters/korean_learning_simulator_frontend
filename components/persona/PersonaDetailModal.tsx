@@ -69,10 +69,10 @@ export default function PersonaDetailModal({
         className="relative w-full max-w-[480px] flex flex-col"
         style={{ backgroundColor: "var(--color-background)" }}
       >
-        {/* 큰 인물 이미지 (상단 ~38vh) */}
-        <div className="relative w-full" style={{ height: "38vh", minHeight: 224 }}>
+        {/* 큰 인물 이미지 (상단 ~48vh) — object-top으로 머리가 잘리지 않도록 앵커 */}
+        <div className="relative w-full" style={{ height: "48vh", minHeight: 280 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={img} alt={persona.name} className="absolute inset-0 w-full h-full object-cover" />
+          <img src={img} alt={persona.name} className="absolute inset-0 w-full h-full object-cover object-top" />
           {/* 아래쪽 페이드 */}
           <div
             className="absolute inset-x-0 bottom-0 h-32 pointer-events-none"
@@ -129,8 +129,8 @@ export default function PersonaDetailModal({
           </div>
         </div>
 
-        {/* 정보 영역 (스크롤 가능) */}
-        <div className="flex-1 overflow-y-auto px-5 pb-28 pt-2">
+        {/* 정보 영역 (스크롤 가능) — 마지막 카드와 CTA 사이 실제 여백을 절반으로(약 36→18px) */}
+        <div className="flex-1 overflow-y-auto px-5 pb-24 pt-2">
           {/* 정보 */}
           <section className="mb-4">
             <div className="flex items-center gap-1.5 mb-2">

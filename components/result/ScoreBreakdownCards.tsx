@@ -89,10 +89,21 @@ export default function ScoreBreakdownCards({ evalData }: Props) {
 
   const current = categories[index];
   const body = stripSectionHeader(sections[index]);
+  const advance = () => setIndex((i) => (i + 1) % categories.length);
 
   return (
     <div
-      className={`${COMMON_CLASSES.cardRounded} p-4 mb-4 flex flex-col`}
+      role="button"
+      tabIndex={0}
+      aria-label={t("feedback.nextCategory")}
+      onClick={advance}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          advance();
+        }
+      }}
+      className={`${COMMON_CLASSES.cardRounded} p-4 mb-4 flex flex-col cursor-pointer transition-transform active:scale-[0.99] select-none`}
       style={{
         backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
         border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
@@ -127,7 +138,7 @@ export default function ScoreBreakdownCards({ evalData }: Props) {
         <button
           type="button"
           aria-label={t("feedback.nextCategory")}
-          onClick={() => setIndex((i) => (i + 1) % categories.length)}
+          onClick={(e) => { e.stopPropagation(); advance(); }}
           className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 hover:opacity-80 shrink-0"
           style={{
             backgroundColor: "var(--color-card-bg)",
@@ -156,7 +167,7 @@ export default function ScoreBreakdownCards({ evalData }: Props) {
             role="tab"
             aria-selected={i === index}
             aria-label={`${i + 1} / ${categories.length}`}
-            onClick={() => setIndex(i)}
+            onClick={(e) => { e.stopPropagation(); setIndex(i); }}
             className="transition-all"
             style={{
               width: i === index ? 18 : 6,

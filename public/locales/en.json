@@ -67,7 +67,6 @@
     "newBtn": "Start Conversation"
   },
   "tierCard": {
-    "namePostfix": "",
     "welcome": "Welcome!"
   },
   "weeklyStats": {
@@ -86,7 +85,10 @@
     "hangang_desc": "Chat with people along the Han River in Seoul",
     "myeongdong_desc": "Conversations in the lively streets of Myeongdong",
     "lotteworld_desc": "Fun Korean conversations at Lotte World",
-    "namsan_desc": "Chat while enjoying the panoramic Seoul view at Namsan Tower"
+    "namsan_desc": "Chat while enjoying the panoramic Seoul view at Namsan Tower",
+    "examRouletteTitle": "Picking exam location...",
+    "examRouletteSubtitle": "Where will your exam take place?!",
+    "examRouletteDone": "Exam starts at {{location}}!"
   },
   "persona": {
     "title": "Which role would you like?",
@@ -222,13 +224,24 @@
     "reqSessionsProgress": "{{current}} / {{required}}",
     "reqScore": "Average score 8+ over the last 5 conversations",
     "reqScoreProgress": "{{current}} / {{required}}",
-    "reqExam": "Score Grade A or higher on the belt promotion exam",
+    "reqExam": "Earn Grade A or higher on the next belt exam",
     "reqExamPending": "Waiting",
     "reqExamLocked": "Finish previous first",
+    "reqExamReady": "Ready — take it now",
     "eligibleBadge": "You're ready to Belt promotion!",
     "notEligibleBadge": "A bit more to go",
     "comingSoon": "Exam Coming Soon",
-    "systemNote": "The belt promotion system is still being wired up. Keep practicing — you'll be ready when it opens.",
+    "takeExam": "Take Promotion Exam",
+    "examFinished": "The exam is over! Ready to see your result?",
+    "examResultBtn": "View Exam Result",
+    "examPassTitle": "Promoted!",
+    "examFailTitle": "Try Again Next Time",
+    "examScoreLabel": "Exam Score",
+    "backToLevelUp": "Back to Promotion",
+    "examLoadFailed": "Could not load exam result",
+    "demoteTitle": "Your Belt Was Lowered",
+    "demoteDesc": "Your recent average was below the threshold, so your belt was adjusted from {{prev}} to {{next}}.",
+    "systemNote": "The promotion exam runs one belt above your current level. Earn Grade A (score 8+) to promote.",
     "loadFailed": "Couldn't load belt promotion info"
   },
   "history": {
@@ -265,7 +278,95 @@
     "theme": "Theme",
     "themeLight": "Light Mode",
     "themeDark": "Dark Mode",
-    "preview": "Preview"
+    "preview": "Preview",
+    "guideTitle": "App Guide",
+    "guideBtn": "View App Guide",
+    "guideDesc": "Walk through the main concepts in one go",
+    "tutorialBtn": "Replay Tutorial",
+    "tutorialDesc": "See the home screen highlights again"
+  },
+  "tutorial": {
+    "step1Title": "Your Info",
+    "step2Title": "Start Learning",
+    "step3Title": "Navigation",
+    "tierCard": "Your current belt and level at a glance",
+    "weeklyStats": "Total chats, average score, and streak",
+    "reviewBanner": "Review with chosung quizzes and flashcards",
+    "cta": "Start a new conversation from here",
+    "tabHome": "Home — check your info and start a conversation",
+    "tabHistory": "History — past conversations and your SCK collection",
+    "tabReview": "Review — chosung quizzes and flashcards",
+    "tabLevelUp": "Promotion — check requirements and take the exam",
+    "skip": "Skip",
+    "next": "Next →",
+    "done": "Let's start! 🎉"
+  },
+  "guide": {
+    "title": "App Guide",
+    "prev": "Prev",
+    "next": "Next",
+    "done": "Got it",
+    "close": "Close",
+    "slides": {
+      "flow": {
+        "title": "Learning Flow",
+        "lead": "One cycle runs from picking a location all the way to review.",
+        "bullets": [
+          "Pick a location → pick a persona (role)",
+          "Talk with the AI — complete the mission within your turn limit",
+          "See the result, score, and detailed feedback",
+          "Review weak sessions with chosung quizzes and flashcards"
+        ]
+      },
+      "beltVsLevel": {
+        "title": "Belt vs Lv.",
+        "lead": "Belt is your skill rank; Lv. is your activity. They move independently.",
+        "bullets": [
+          "Belt (white→black): a skill rank that only changes via the promotion exam",
+          "Lv.: an activity meter that grows from XP earned in every conversation",
+          "So stacking XP alone won't change your belt — you still need to pass the exam",
+          "The home card's border color reflects your current belt"
+        ]
+      },
+      "sck": {
+        "title": "SCK Vocabulary",
+        "lead": "SCK is a Korean learner vocabulary list (levels 1–6; higher = more advanced).",
+        "bullets": [
+          "Feedback shows how many of your words matched SCK entries",
+          "Matches are grouped by level so you can see which tier you lean on",
+          "The SCK Collection tab tracks everything you've picked up over time"
+        ]
+      },
+      "scoring": {
+        "title": "Scoring & Grades",
+        "lead": "Every conversation scores out of 10 across 5 axes and lands a grade (S, A, B, C).",
+        "bullets": [
+          "Axes: length · vocabulary · scene/mission · relationship · spelling",
+          "Grade A or higher on the exam is the bar for promotion",
+          "Open detailed feedback to see per-axis scores and the reasoning"
+        ]
+      },
+      "promotion": {
+        "title": "Promotion & Demotion",
+        "lead": "Meet the requirements and you can take the exam; slip in recent scores and you may drop a belt.",
+        "bullets": [
+          "Requirements: 5+ conversations at the current belt, recent 5-avg of 8+",
+          "When ready, the home belt icon shows a red ! badge — take it from the Promotion tab",
+          "Earn Grade A (8+) on the exam to move up a belt",
+          "If recent averages fall below the threshold, your belt can step down"
+        ]
+      },
+      "review": {
+        "title": "Review & Hiding",
+        "lead": "Weak sessions feed review automatically. You can hide any record you don't want revisited.",
+        "bullets": [
+          "The review banner on home → chosung quiz and flashcards",
+          "Review auto-picks the sessions with the lowest recent scores",
+          "Hide a session from the History tab to exclude it from weakest-session review",
+          "Hidden sessions can be brought back with \"Show hidden\""
+        ]
+      }
+    }
   },
   "startConfirm": {
     "title": "Start a conversation now?",

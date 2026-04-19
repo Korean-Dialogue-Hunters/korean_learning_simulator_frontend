@@ -8,10 +8,10 @@ import { Persona } from "@/types/api";
 
 /** 페르소나 카드 배경/디테일에 쓸 이미지 경로 */
 export function getPersonaImage(persona: Persona): string {
-  /* BE가 avatarUrl을 채워주면 그걸 우선 사용 */
-  if (persona.avatarUrl) return persona.avatarUrl;
+  /* BE가 personaUrl을 채워주면 그걸 우선 사용 (빈 문자열은 폴백 처리) */
+  if (persona.personaUrl) return persona.personaUrl;
 
-  /* 폴백: id 기준 임시 SVG */
+  /* 폴백: id 기준 기본 SVG */
   const idLower = (persona.id || "A").toLowerCase();
   return `/personas/${idLower}/1.svg`;
 }

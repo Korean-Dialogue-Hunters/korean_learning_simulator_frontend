@@ -7,12 +7,12 @@
 import { LocationId } from "@/types/setup";
 
 const LOCATION_IMAGE_MAP: Record<string, string> = {
-  "한강": "/locations/hangang.svg",
-  "명동": "/locations/myeongdong.svg",
-  "롯데월드": "/locations/lotteworld.svg",
-  "남산": "/locations/namsan.svg",
+  "한강": "/locations/hangang.png",
+  "명동": "/locations/myeongdong.png",
+  "롯데월드": "/locations/lotteworld.png",
+  "남산": "/locations/namsan.png",
 };
 
 export function getLocationImage(id: LocationId | string): string {
-  return LOCATION_IMAGE_MAP[id] ?? "/locations/hangang.svg";
+  return LOCATION_IMAGE_MAP[id] ?? "/locations/hangang.png";
 }

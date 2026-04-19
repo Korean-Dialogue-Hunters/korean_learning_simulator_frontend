@@ -51,6 +51,7 @@ export default function PersonaPage() {
             roleEn: (p.roleEn ?? (raw.role_en as string | undefined)) || undefined,
             missionEn: (p.missionEn ?? (raw.mission_en as string | undefined)) || undefined,
             genderEn: (p.genderEn ?? (raw.gender_en as string | undefined)) || undefined,
+            personaUrl: (p.personaUrl ?? (raw.persona_url as string | undefined)) || undefined,
           };
         }
       );
@@ -90,6 +91,7 @@ export default function PersonaPage() {
         genderEn: counterpart.genderEn,
         role: counterpart.role,
         roleEn: counterpart.roleEn,
+        personaUrl: counterpart.personaUrl,
       }));
       localStorage.setItem("scene", res.scene || scene);
       const selectedPersonaData = res.personas?.[openId] as unknown as Record<string, unknown> | undefined;
@@ -197,7 +199,7 @@ function PersonaBigCard({
       style={{ border: "1px solid var(--color-card-border)" }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={img} alt={persona.name} className="absolute inset-0 w-full h-full object-cover" />
+      <img src={img} alt={persona.name} className="absolute inset-0 w-full h-full object-cover object-top" />
 
       {/* 하단 글래스 그라데이션 */}
       <div

@@ -6,16 +6,20 @@
    - 홈 우상단 톱니바퀴 또는 셋업 0단계에서 진입
    ────────────────────────────────────────── */
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Globe, Sun, Moon, Settings as SettingsIcon } from "lucide-react";
+import { ArrowLeft, Globe, Sun, Moon, Settings as SettingsIcon, BookOpen, Sparkles, ChevronRight } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { useTheme } from "@/hooks/useTheme";
+import { resetTutorial } from "@/hooks/useTutorial";
+import ConceptGuideModal from "@/components/guide/ConceptGuideModal";
 
 export default function SettingsPage() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const currentLang = i18n.language?.startsWith("ko") ? "ko" : "en";
 
@@ -98,6 +102,48 @@ export default function SettingsPage() {
           })}
         </div>
       </section>
+
+      {/* 앱 가이드 — 개념 설명 */}
+      <section className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <BookOpen size={16} strokeWidth={2} className="text-tab-inactive" />
+          <p className="text-sm font-bold text-foreground">{t("settings.guideTitle")}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setGuideOpen(true)}
+          className={`${COMMON_CLASSES.cardRounded} w-full p-4 flex items-center justify-between active:scale-[0.98] transition-transform`}
+          style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}
+        >
+          <div className="flex flex-col items-start gap-1">
+            <span className="text-sm font-bold text-foreground">{t("settings.guideBtn")}</span>
+            <span className="text-[12px] text-tab-inactive">{t("settings.guideDesc")}</span>
+          </div>
+          <ChevronRight size={20} className="text-tab-inactive shrink-0" />
+        </button>
+      </section>
+
+      {/* 튜토리얼 다시 보기 — 홈 스포트라이트 재생 */}
+      <section className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles size={16} strokeWidth={2} className="text-tab-inactive" />
+          <p className="text-sm font-bold text-foreground">{t("settings.tutorialBtn")}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => { resetTutorial(); router.push("/"); }}
+          className={`${COMMON_CLASSES.cardRounded} w-full p-4 flex items-center justify-between active:scale-[0.98] transition-transform`}
+          style={{ backgroundColor: "var(--color-card-bg)", border: "1px solid var(--color-card-border)" }}
+        >
+          <div className="flex flex-col items-start gap-1">
+            <span className="text-sm font-bold text-foreground">{t("settings.tutorialBtn")}</span>
+            <span className="text-[12px] text-tab-inactive">{t("settings.tutorialDesc")}</span>
+          </div>
+          <ChevronRight size={20} className="text-tab-inactive shrink-0" />
+        </button>
+      </section>
+
+      <ConceptGuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
     </div>
   );
 }

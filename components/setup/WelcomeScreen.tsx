@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Globe, MessageCircle, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { WARM_THEME, COMMON_CLASSES } from "@/lib/designSystem";
+import { useLogoSrc } from "@/hooks/useLogoSrc";
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -11,20 +12,18 @@ interface WelcomeScreenProps {
 
 export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   const { t } = useTranslation();
+  const logoSrc = useLogoSrc();
   return (
     <div className="relative flex flex-col items-center justify-center min-h-[100dvh] px-8 text-center">
       <div className="mb-4 flex flex-col items-center">
         <Image
-          src="/brand/kdh_logo_welcome.png"
+          src={logoSrc}
           alt="Korean Dialogue Hunters"
           width={280}
           height={186}
           priority
           className="mb-2 h-auto w-[240px]"
         />
-        <p className="text-base font-extrabold tracking-widest" style={{ color: WARM_THEME.text }}>
-          코.대.헌.
-        </p>
       </div>
 
       <p
