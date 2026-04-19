@@ -207,28 +207,28 @@
     "home": "Home",
     "history": "History",
     "review": "Review",
-    "levelUp": "Level Up"
+    "levelUp": "Belt Promotion"
   },
   "levelUp": {
-    "title": "Level Up",
-    "subtitle": "Check if you're ready to reach the next level",
+    "title": "Belt Promotion",
+    "subtitle": "Check if you're ready to reach the next belt",
     "currentLevel": "Current",
     "nextLevel": "Next",
-    "maxLevel": "Max Level",
-    "maxLevelNote": "You've already reached the top level",
+    "maxLevel": "The highest skill!",
+    "maxLevelNote": "You've already reached the top belt",
     "requirementsTitle": "Requirements",
-    "reqSessions": "Complete 5+ conversations at your current level",
+    "reqSessions": "Complete 5+ conversations at your current belt",
     "reqSessionsProgress": "{{current}} / {{required}}",
     "reqScore": "Average score 8+ over the last 5 conversations",
     "reqScoreProgress": "{{current}} / {{required}}",
-    "reqExam": "Score Grade A or higher on the level-up exam",
+    "reqExam": "Score Grade A or higher on the belt promotion exam",
     "reqExamPending": "Waiting",
     "reqExamLocked": "Finish previous first",
-    "eligibleBadge": "You're ready to level up!",
+    "eligibleBadge": "You're ready to Belt promotion!",
     "notEligibleBadge": "A bit more to go",
     "comingSoon": "Exam Coming Soon",
-    "systemNote": "The level-up system is still being wired up. Keep practicing — you'll be ready when it opens.",
-    "loadFailed": "Couldn't load level-up info"
+    "systemNote": "The belt promotion system is still being wired up. Keep practicing — you'll be ready when it opens.",
+    "loadFailed": "Couldn't load belt promotion info"
   },
   "history": {
     "title": "History",
