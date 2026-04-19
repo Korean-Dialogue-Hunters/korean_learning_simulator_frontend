@@ -20,6 +20,7 @@ import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import type { WeeklyReviewResponse, ChosungQuizItem, FlashcardItem, UserSessionItem } from "@/types/api";
 import { markQuizPassed, markFlashcardDone, getStarProgress } from "@/lib/starStorage";
+import { findReviewTarget } from "@/lib/reviewTarget";
 
 type Mode = "list" | "quiz" | "flashcard";
 
@@ -82,17 +83,11 @@ function ReviewPageInner() {
 
   /* 매 렌더마다 정렬 리스트에서 첫 번째 미완료 세션을 선택 → 완료 시 자동으로 다음 최저점으로 이동
      justPassedQuiz/justDoneFlashcard가 바뀌면 재계산되어 방금 완료된 세션이 스킵됨. */
-  const targetSession = useMemo<UserSessionItem | null>(() => {
-    for (const s of sortedSessions) {
-      const local = getStarProgress(s.sessionId);
-      const q = s.chosungQuizPassed ?? local.quizPassed ?? false;
-      const f = s.flashcardDone ?? local.flashcardDone ?? false;
-      if (!(q && f)) return s;
-    }
-    return null;
+  const targetSession = useMemo<UserSessionItem | null>(
+    () => findReviewTarget(sortedSessions, getStarProgress),
   // justPassed*가 deps에 있어야 markQuiz/FlashcardDone 직후 재계산됨
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortedSessions, justPassedQuiz, justDoneFlashcard]);
+  , [sortedSessions, justPassedQuiz, justDoneFlashcard]);
 
   /* targetSession이 다음 세션으로 넘어가면 sessionId 동기화 + 완료 플래그 리셋
      (URL에 sessionId가 명시된 경우 — result 페이지 경유 등 — 에는 덮어쓰지 않음) */
@@ -118,15 +113,16 @@ function ReviewPageInner() {
   }, [searchParams, initLoading]);
 
   /* 모드 시작 → 데이터 로드
-     - URL/target 기반 sessionId를 BE에 전달 → 해당 세션의 콘텐츠만 반환
-     - BE Option A 적용 전에는 서버가 sessionId 무시해도 안전 */
+     - sessionId state가 React 배치 업데이트로 아직 반영 안 됐을 수 있으므로
+       targetSession.sessionId를 폴백으로 사용 */
   const startMode = async (m: "quiz" | "flashcard") => {
     if (!profile) return;
     setMode(m);
     setLoading(true);
     setError("");
     try {
-      const data = await getWeeklyReview(profile.userId, sessionId ?? undefined);
+      const resolvedSessionId = sessionId ?? targetSession?.sessionId;
+      const data = await getWeeklyReview(profile.userId, resolvedSessionId ?? undefined);
       setReviewData(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : t("review.loadFailed"));
