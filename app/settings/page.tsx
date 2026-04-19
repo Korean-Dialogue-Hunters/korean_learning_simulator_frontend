@@ -24,7 +24,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       <button
         type="button"
         onClick={() => router.back()}

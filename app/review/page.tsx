@@ -244,7 +244,7 @@ function ReviewPageInner() {
   const gradeColor = GRADE_COLORS[gradeCode as keyof typeof GRADE_COLORS] ?? "var(--color-accent)";
 
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       <div className="flex items-center gap-2 mb-2">
         <BookOpen size={22} strokeWidth={2} className="text-accent" />
         <h1 className="text-xl font-bold text-foreground">{t("review.title")}</h1>
@@ -433,7 +433,7 @@ function ChosungQuizView({ items, onBack, onXpGain, onComplete, fromResult }: { 
 
   if (done) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
+      <div className="flex flex-col items-center justify-center min-h-[100dvh] gap-4 px-5">
         <div className="w-16 h-16 rounded-full flex items-center justify-center"
           style={{ backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)", color: "var(--color-accent)" }}>
           <Check size={32} strokeWidth={2} />
@@ -457,7 +457,7 @@ function ChosungQuizView({ items, onBack, onXpGain, onComplete, fromResult }: { 
   }
 
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       <button type="button" onClick={onBack}
         className="flex items-center gap-1 text-sm text-tab-inactive mb-6 self-start hover:opacity-70">
         <ArrowLeft size={16} strokeWidth={2} />
@@ -613,7 +613,7 @@ function FlashcardView({ items, onBack, onXpGain, onComplete }: { items: Flashca
   };
 
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       <button type="button" onClick={onBack}
         className="flex items-center gap-1 text-sm text-tab-inactive mb-6 self-start hover:opacity-70">
         <ArrowLeft size={16} strokeWidth={2} />

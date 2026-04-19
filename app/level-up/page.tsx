@@ -71,7 +71,7 @@ export default function LevelUpPage() {
   const nextBeltLabel = isKo ? `${nextBelt.nameKo}띠` : `${nextBelt.name} Belt`;
 
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       <h1 className="text-xl font-bold text-foreground mb-1">{t("levelUp.title")}</h1>
       <p className="text-[12px] text-tab-inactive mb-5">{t("levelUp.subtitle")}</p>
 

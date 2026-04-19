@@ -72,7 +72,7 @@ export default function LocationPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen px-5 pt-14 pb-6 overflow-hidden" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col h-[100dvh] px-5 pt-14 pb-6 overflow-hidden" style={{ backgroundColor: "var(--color-background)" }}>
       <LoadingScreen active={isLoading} variant="scenario" />
       <button
         type="button"

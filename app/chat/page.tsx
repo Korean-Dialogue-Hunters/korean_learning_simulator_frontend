@@ -194,14 +194,14 @@ export default function ChatPage() {
   /* 페르소나 로딩 대기 (리다이렉트 중이거나 localStorage 파싱 중) */
   if (!persona || !counterpart) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[100dvh]">
         <p className="text-tab-inactive text-sm">{t("common.loading")}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen pb-16" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col h-[100dvh] pb-16" style={{ backgroundColor: "var(--color-background)" }}>
       {/* ── 나가기 확인 팝업 ── */}
       {showLeaveModal && (
         <LeaveConfirmModal

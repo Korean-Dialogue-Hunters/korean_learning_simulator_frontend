@@ -115,7 +115,7 @@ export default function FeedbackPage() {
     };
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-5 px-6 text-center">
+      <div className="flex flex-col items-center justify-center min-h-[100dvh] gap-5 px-6 text-center">
         <div className="w-16 h-16 rounded-full flex items-center justify-center"
           style={{ backgroundColor: "color-mix(in srgb, #DC3C3C 12%, transparent)", color: "#DC3C3C" }}>
           <AlertCircle size={32} strokeWidth={1.8} />
@@ -156,7 +156,7 @@ export default function FeedbackPage() {
   const visibleMessages = showFullLog ? messages : messages.slice(0, 4);
 
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       {xpPopup && <XpGainPopup {...xpPopup} onClose={() => setXpPopup(null)} />}
 
       {/* ── 상단: 대화 완료 + XP ── */}

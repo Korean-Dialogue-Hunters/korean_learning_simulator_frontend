@@ -12,7 +12,7 @@ interface WelcomeScreenProps {
 export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   const { t } = useTranslation();
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen px-8 text-center">
+    <div className="relative flex flex-col items-center justify-center min-h-[100dvh] px-8 text-center">
       <div className="mb-4 flex flex-col items-center">
         <Image
           src="/brand/kdh_logo_welcome.png"
