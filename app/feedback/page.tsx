@@ -7,7 +7,7 @@
    - "결과로 돌아가기" 버튼 → /result
    ────────────────────────────────────────── */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Home, Layers, Zap, BookOpen, AlertCircle, Trophy, ArrowRight, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
@@ -18,6 +18,7 @@ import { evaluateSession, normalizeSckFields } from "@/lib/api";
 import { getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
 import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpSystem";
 import { getUserId } from "@/hooks/useSetup";
+import { loadSckExamples, getSckExample } from "@/lib/sckExamples";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import { clearSessionState } from "@/lib/sessionStorage";
@@ -34,6 +35,10 @@ export default function FeedbackPage() {
   const [xpGained, setXpGained] = useState<number>(0);
   const [showFullLog, setShowFullLog] = useState(false);
   const [mission, setMission] = useState("");
+  const [sckReady, setSckReady] = useState(false);
+
+  /* SCK 예문 데이터 로드 */
+  useEffect(() => { loadSckExamples().then(() => setSckReady(true)); }, []);
 
   /* 미션 — 히스토리 뷰에선 localStorage myPersona가 다른 세션 것이므로 숨김 */
   useEffect(() => {
@@ -260,11 +265,16 @@ export default function FeedbackPage() {
               .sort(([a], [b]) => Number(a) - Number(b))
               .map(([level, count]) => {
                 const rawWords = evalData.sckLevelWordCounts?.[level];
-                const words: string[] = Array.isArray(rawWords)
-                  ? rawWords
-                  : rawWords && typeof rawWords === "object"
-                    ? Object.keys(rawWords)
-                    : [];
+                /* 새 형식 {word: {count, index}} / 구 형식 {word: count} / 배열 호환 */
+                const wordEntries: { word: string; index?: string }[] = [];
+                if (Array.isArray(rawWords)) {
+                  rawWords.forEach((w) => wordEntries.push({ word: w }));
+                } else if (rawWords && typeof rawWords === "object") {
+                  Object.entries(rawWords).forEach(([w, val]) => {
+                    const idx = typeof val === "object" && val !== null ? (val as { index?: string }).index : undefined;
+                    wordEntries.push({ word: w, index: idx });
+                  });
+                }
                 return (
                   <div key={level}>
                     <div className="flex items-center gap-2 mb-1.5">
@@ -276,14 +286,10 @@ export default function FeedbackPage() {
                         {t("feedback.sckCount", { count })}
                       </span>
                     </div>
-                    {words.length > 0 && (
+                    {wordEntries.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
-                        {words.map((word, i) => (
-                          <span key={`${level}-${i}`}
-                            className="inline-block px-2 py-0.5 rounded-md text-[11px]"
-                            style={{ backgroundColor: "var(--color-surface)", color: "var(--color-foreground)", border: "1px solid var(--color-card-border)" }}>
-                            {word}
-                          </span>
+                        {wordEntries.map((entry, i) => (
+                          <SckWordChip key={`${level}-${i}`} word={entry.word} index={entry.index} />
                         ))}
                       </div>
                     )}
@@ -332,5 +338,37 @@ export default function FeedbackPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+/* ── SCK 단어 칩: 호버/탭 시 예문 툴팁 ── */
+function SckWordChip({ word, index }: { word: string; index?: string }) {
+  const [show, setShow] = useState(false);
+  const example = index ? getSckExample(index) : null;
+
+  return (
+    <span
+      className="relative inline-block px-2 py-0.5 rounded-md text-[11px] cursor-default"
+      style={{ backgroundColor: "var(--color-surface)", color: "var(--color-foreground)", border: "1px solid var(--color-card-border)" }}
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      onClick={() => setShow((v) => !v)}
+    >
+      {word}
+      {show && example && (
+        <span
+          className="absolute left-1/2 bottom-full mb-1.5 -translate-x-1/2 whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] font-medium shadow-lg z-30 pointer-events-none"
+          style={{
+            backgroundColor: "var(--color-foreground)",
+            color: "var(--color-background)",
+            maxWidth: 220,
+            whiteSpace: "normal",
+            wordBreak: "keep-all",
+          }}
+        >
+          {example}
+        </span>
+      )}
+    </span>
   );
 }

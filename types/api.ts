@@ -96,7 +96,7 @@ export interface EvaluationResponse {
   sckTotalTokens: number;                         // BE: SCK_total_tokens
   sckMatchRate: number;                           // BE: SCK_match_rate
   sckLevelCounts: Record<string, number>;         // BE: SCK_level_counts
-  sckLevelWordCounts: Record<string, string[]>;   // BE: SCK_level_word_counts
+  sckLevelWordCounts: Record<string, Record<string, number | { count: number; index: string }>>;   // BE: SCK_level_word_counts
 }
 
 /* ── GET /v1/users/{nickname}/review/count ── */
