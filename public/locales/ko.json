@@ -86,7 +86,10 @@
     "hangang_desc": "서울 한강변에서 다양한 사람들과 대화해보세요",
     "myeongdong_desc": "명동 거리의 활기찬 분위기 속 대화",
     "lotteworld_desc": "롯데월드에서 즐거운 한국어 대화",
-    "namsan_desc": "남산타워에서 서울 전경을 보며 대화해보세요"
+    "namsan_desc": "남산타워에서 서울 전경을 보며 대화해보세요",
+    "examRouletteTitle": "시험 장소 추첨 중...",
+    "examRouletteSubtitle": "AI가 무작위로 장소를 고르고 있어요",
+    "examRouletteDone": "{{location}}에서 시험 시작!"
   },
   "persona": {
     "title": "어떤 역할을 맡아볼까요?",

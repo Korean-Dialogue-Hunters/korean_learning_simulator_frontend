@@ -86,7 +86,10 @@
     "hangang_desc": "Chat with people along the Han River in Seoul",
     "myeongdong_desc": "Conversations in the lively streets of Myeongdong",
     "lotteworld_desc": "Fun Korean conversations at Lotte World",
-    "namsan_desc": "Chat while enjoying the panoramic Seoul view at Namsan Tower"
+    "namsan_desc": "Chat while enjoying the panoramic Seoul view at Namsan Tower",
+    "examRouletteTitle": "Picking exam location...",
+    "examRouletteSubtitle": "AI is choosing a random location for you",
+    "examRouletteDone": "Exam starts at {{location}}!"
   },
   "persona": {
     "title": "Which role would you like?",

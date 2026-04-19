@@ -10,10 +10,10 @@
    🔗 연동: POST /v1/sessions → 세션 생성 + 페르소나 수신
    ────────────────────────────────────────── */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, MapPin, Sparkles } from "lucide-react";
 import { LOCATION_OPTIONS, LocationId } from "@/types/setup";
 import { getSavedProfile } from "@/hooks/useSetup";
 import { createSession, createExamSession } from "@/lib/api";
@@ -32,6 +32,12 @@ export default function LocationPage() {
   useEffect(() => {
     setIsExamMode(typeof window !== "undefined" && localStorage.getItem("examMode") === "true");
   }, []);
+
+  /* 룰렛 상태 — examMode일 때만 활성. rouletteIdx는 현재 하이라이트된 카드 idx,
+     rouletteWinner는 최종 당첨(정착) 카드. 둘 다 LOCATION_OPTIONS 기준 인덱스. */
+  const [rouletteIdx, setRouletteIdx] = useState<number | null>(null);
+  const [rouletteWinner, setRouletteWinner] = useState<number | null>(null);
+  const rouletteStartedRef = useRef(false);
 
   const LOCATION_DESC: Record<string, string> = {
     "한강": t("location.hangang_desc"),
@@ -83,6 +89,63 @@ export default function LocationPage() {
     }
   };
 
+  /* examMode 진입 시 룰렛 가동 — 활성 장소 중 무작위 1곳을 뽑아 가속→감속 하이라이트 순회 후
+     정착. 정착 후 짧은 홀드(650ms) 뒤 handlePick 자동 호출. prefers-reduced-motion면 바로 픽. */
+  useEffect(() => {
+    if (!isExamMode) return;
+    if (rouletteStartedRef.current) return;
+    rouletteStartedRef.current = true;
+
+    const active = LOCATION_OPTIONS
+      .map((loc, i) => ({ loc, i }))
+      .filter((x) => x.loc.available);
+    if (active.length === 0) return;
+
+    const winner = active[Math.floor(Math.random() * active.length)];
+
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+
+    if (reduced) {
+      setRouletteIdx(winner.i);
+      setRouletteWinner(winner.i);
+      timeouts.push(setTimeout(() => handlePick(winner.loc.id as LocationId), 500));
+      return () => timeouts.forEach(clearTimeout);
+    }
+
+    /* 가속→감속 스케줄: 총 ~2.1초. 시작 빠름(90ms) → 점점 느려짐(420ms)
+       정착은 winner 인덱스에서 멈추도록 사이클 카운트를 조정. */
+    const steps: number[] = [];
+    const intervals = [90, 90, 90, 100, 110, 130, 160, 200, 250, 320, 420];
+    /* active 인덱스들을 순환시키되 마지막이 winner가 되게 경로 구성 */
+    const winnerActiveIdx = active.findIndex((x) => x.i === winner.i);
+    for (let k = 0; k < intervals.length; k++) {
+      steps.push(active[(k + winnerActiveIdx - (intervals.length - 1) + active.length * 10) % active.length].i);
+    }
+
+    let acc = 0;
+    steps.forEach((targetIdx, k) => {
+      acc += intervals[k];
+      timeouts.push(
+        setTimeout(() => {
+          setRouletteIdx(targetIdx);
+          if (k === steps.length - 1) {
+            setRouletteWinner(targetIdx);
+            timeouts.push(
+              setTimeout(() => handlePick(LOCATION_OPTIONS[targetIdx].id as LocationId), 650),
+            );
+          }
+        }, acc),
+      );
+    });
+
+    return () => timeouts.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExamMode]);
+
   return (
     <div className="flex flex-col h-[100dvh] px-5 pt-14 pb-6 overflow-hidden" style={{ backgroundColor: "var(--color-background)" }}>
       <LoadingScreen active={isLoading} variant="scenario" />
@@ -97,33 +160,53 @@ export default function LocationPage() {
 
       <div className="mb-3">
         <div className="flex items-center gap-2 mb-1">
-          <MapPin size={18} strokeWidth={2} className="text-accent" />
+          {isExamMode ? (
+            <Sparkles size={18} strokeWidth={2} className="text-accent animate-pulse" />
+          ) : (
+            <MapPin size={18} strokeWidth={2} className="text-accent" />
+          )}
           <h1 className="text-lg font-extrabold text-foreground">
-            {t("location.title")}
+            {isExamMode
+              ? rouletteWinner !== null
+                ? t("location.examRouletteDone", { location: LOCATION_OPTIONS[rouletteWinner].label.split(" - ")[0] })
+                : t("location.examRouletteTitle")
+              : t("location.title")}
           </h1>
         </div>
         <p className="text-xs text-tab-inactive">
-          {t("location.subtitle")}
+          {isExamMode ? t("location.examRouletteSubtitle") : t("location.subtitle")}
         </p>
       </div>
 
       {/* 장소 카드 목록 — 탭 즉시 선택 + 세션 생성 */}
       <div className="flex-1 flex flex-col gap-3 min-h-0">
-        {LOCATION_OPTIONS.map((loc) => {
+        {LOCATION_OPTIONS.map((loc, idx) => {
           const isDisabled = !loc.available;
           const img = getLocationImage(loc.id);
+          const isHighlighted = isExamMode && rouletteIdx === idx;
+          const isWinner = isExamMode && rouletteWinner === idx;
+          const dimmedByRoulette = isExamMode && rouletteIdx !== null && rouletteIdx !== idx && rouletteWinner === null;
 
           return (
             <button
               key={loc.id}
               type="button"
-              disabled={isDisabled || isLoading}
-              onClick={() => !isDisabled && handlePick(loc.id)}
+              disabled={isDisabled || isLoading || isExamMode}
+              onClick={() => !isDisabled && !isExamMode && handlePick(loc.id)}
               className="relative w-full flex-1 min-h-0 rounded-2xl overflow-hidden text-left transition-all active:scale-[0.98]"
               style={{
-                border: "1px solid var(--color-card-border)",
-                opacity: isDisabled ? 0.5 : 1,
-                cursor: isDisabled ? "not-allowed" : "pointer",
+                border: isWinner
+                  ? "2px solid var(--color-accent)"
+                  : "1px solid var(--color-card-border)",
+                opacity: isDisabled ? 0.5 : dimmedByRoulette ? 0.45 : 1,
+                cursor: isDisabled || isExamMode ? "default" : "pointer",
+                transform: isHighlighted || isWinner ? "scale(1.02)" : "scale(1)",
+                boxShadow: isWinner
+                  ? "0 0 0 4px color-mix(in srgb, var(--color-accent) 35%, transparent), 0 8px 30px color-mix(in srgb, var(--color-accent) 30%, transparent)"
+                  : isHighlighted
+                    ? "0 0 0 3px color-mix(in srgb, var(--color-accent) 45%, transparent)"
+                    : "none",
+                transitionDuration: isWinner ? "350ms" : "180ms",
               }}
             >
               {/* 배경 이미지 */}
