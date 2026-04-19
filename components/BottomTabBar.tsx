@@ -9,10 +9,11 @@
    ────────────────────────────────────────── */
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Home, ClipboardList, BookOpen, Award } from "lucide-react";
+import { Home, ClipboardList, BookOpen } from "lucide-react";
 import { SETUP_DONE_KEY } from "@/hooks/useSetup";
 
 /* 탭 정의 */
@@ -25,12 +26,12 @@ interface Tab {
 const ICON_SIZE = 20;
 const ICON_STROKE = 1.8;
 
-/* 4개 탭 목록 (홈/기록/복습/승급 — 내정보는 /settings 통합) */
+/* 상위 3개 탭 (승급 탭은 벨트 이미지를 동적으로 렌더링하므로 별도 처리) */
 const TABS: Tab[] = [
   { href: "/",         labelKey: "tabs.home",    icon: <Home size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { href: "/history",  labelKey: "tabs.history", icon: <ClipboardList size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { href: "/review",   labelKey: "tabs.review",  icon: <BookOpen size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
-  { href: "/level-up", labelKey: "tabs.levelUp", icon: <Award size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
+  { href: "/level-up", labelKey: "tabs.levelUp", icon: null },
 ];
 
 // 탭바를 숨기는 경로 목록
@@ -69,7 +70,40 @@ export default function BottomTabBar() {
                   isActive ? "text-tab-active" : "text-tab-inactive"
                 }`}
               >
-                {tab.icon}
+                {tab.href === "/level-up" ? (
+                  <div className="relative" style={{ width: ICON_SIZE + 6, height: ICON_SIZE + 6, marginTop: 2 }}>
+                    <Image
+                      src="/belts/belt_yellow.png"
+                      alt="belt"
+                      width={ICON_SIZE + 6}
+                      height={ICON_SIZE + 6}
+                      style={{
+                        filter: isActive
+                          ? "brightness(0) saturate(100%)"
+                          : "grayscale(1) opacity(0.55)",
+                      }}
+                    />
+                    {/* 활성 시 tab-active 색상으로 오버레이 */}
+                    {isActive && (
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          backgroundColor: "var(--color-tab-active)",
+                          maskImage: "url(/belts/belt_yellow.png)",
+                          maskSize: "contain",
+                          maskRepeat: "no-repeat",
+                          maskPosition: "center",
+                          WebkitMaskImage: "url(/belts/belt_yellow.png)",
+                          WebkitMaskSize: "contain",
+                          WebkitMaskRepeat: "no-repeat",
+                          WebkitMaskPosition: "center",
+                        }}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  tab.icon
+                )}
                 <span className="text-[10px] font-medium">{t(tab.labelKey)}</span>
               </Link>
             </li>
