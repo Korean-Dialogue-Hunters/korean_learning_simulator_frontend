@@ -86,7 +86,26 @@ export default function LocationPage() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "세션 생성에 실패했습니다");
       setIsLoading(false);
+      /* 룰렛 중 실패하면 시각 상태를 되돌려야 유저가 "다시 시도" 버튼으로 빠져나올 수 있음 */
+      if (isExamMode) {
+        setRouletteIdx(null);
+        setRouletteWinner(null);
+        rouletteStartedRef.current = false;
+      }
     }
+  };
+
+  const handleExitExamMode = () => {
+    if (typeof window !== "undefined") localStorage.removeItem("examMode");
+    router.push("/level-up");
+  };
+
+  const handleRetryRoulette = () => {
+    setError("");
+    rouletteStartedRef.current = false;
+    /* isExamMode 의존 effect가 다시 돌게끔 토글 */
+    setIsExamMode(false);
+    setTimeout(() => setIsExamMode(true), 50);
   };
 
   /* examMode 진입 시 룰렛 가동 — 활성 장소 중 무작위 1곳을 뽑아 가속→감속 하이라이트 순회 후
@@ -268,8 +287,31 @@ export default function LocationPage() {
         })}
       </div>
 
-      {/* 에러 메시지 */}
-      {error && (
+      {/* 에러 메시지 — examMode에선 수동 탭 불가 상태이므로 복구 버튼 2개 제공 */}
+      {error && isExamMode && (
+        <div className="mt-3 flex flex-col items-center gap-2">
+          <p className="text-sm text-center" style={{ color: "#DC3C3C" }}>{error}</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleRetryRoulette}
+              className="px-4 py-2 rounded-full text-[13px] font-bold active:scale-95 transition-transform"
+              style={{ backgroundColor: "var(--color-accent)", color: "#fff" }}
+            >
+              다시 시도
+            </button>
+            <button
+              type="button"
+              onClick={handleExitExamMode}
+              className="px-4 py-2 rounded-full text-[13px] font-bold active:scale-95 transition-transform"
+              style={{ backgroundColor: "var(--color-surface)", color: "var(--color-foreground)", border: "1px solid var(--color-card-border)" }}
+            >
+              승급 탭으로
+            </button>
+          </div>
+        </div>
+      )}
+      {error && !isExamMode && (
         <p className="text-sm text-center mt-3" style={{ color: "#DC3C3C" }}>{error}</p>
       )}
     </div>
