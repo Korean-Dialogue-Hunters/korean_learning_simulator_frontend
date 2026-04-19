@@ -22,6 +22,7 @@ function normalizePersonas<T>(res: T): T {
     mission_en: "missionEn",
     gender_en: "genderEn",
     scene_en: "sceneEn",
+    persona_url: "personaUrl",
   };
   for (const key of Object.keys(anyRes.personas)) {
     const p = anyRes.personas[key];
@@ -106,6 +107,9 @@ import type {
   QuizResultResponse,
   FlashcardResultResponse,
   LevelUpEligibilityResponse,
+  ExamResultResponse,
+  LevelDownEligibilityResponse,
+  LevelDownApplyResponse,
 } from "@/types/api";
 
 /* 1. 세션 생성 — 장소 선택 후 호출 */
@@ -284,5 +288,49 @@ export async function getLevelUpEligibility(
 ): Promise<LevelUpEligibilityResponse> {
   return apiFetch<LevelUpEligibilityResponse>(
     `/users/${encodeURIComponent(userId)}/level-up/eligibility`
+  );
+}
+
+/* 14. 승급 시험 세션 생성
+   BE가 현재 korean_level + 1 난이도로 시나리오를 준비함.
+   응답 스키마는 일반 /sessions 생성과 동일 (CreateSessionResponse 재사용). */
+export async function createExamSession(
+  userId: string,
+  location: string
+): Promise<CreateSessionResponse> {
+  const res = await apiFetch<CreateSessionResponse>("/sessions/exam", {
+    method: "POST",
+    body: { userId, location },
+  });
+  return normalizePersonas(res);
+}
+
+/* 15. 승급 시험 평가 — 통과 시 BE가 korean_level 자동 증가 */
+export async function evaluateExamSession(
+  sessionId: string
+): Promise<ExamResultResponse> {
+  return apiFetch<ExamResultResponse>(`/sessions/${sessionId}/exam`, {
+    method: "POST",
+  });
+}
+
+/* 16. 강등 자격 조회 — 현재 레벨 완료 5회+ 최근 평균 < 4.0 */
+export async function getLevelDownEligibility(
+  userId: string
+): Promise<LevelDownEligibilityResponse> {
+  return apiFetch<LevelDownEligibilityResponse>(
+    `/users/${encodeURIComponent(userId)}/level-down/eligibility`
+  );
+}
+
+/* 17. 강등 수동 적용
+   - 평가 직후 BE가 자동으로도 적용하지만, 수동 트리거가 필요할 때 사용.
+   - 응답의 applied=false면 자격 미달로 변경 없음. */
+export async function applyLevelDown(
+  userId: string
+): Promise<LevelDownApplyResponse> {
+  return apiFetch<LevelDownApplyResponse>(
+    `/users/${encodeURIComponent(userId)}/level-down/apply`,
+    { method: "POST" }
   );
 }

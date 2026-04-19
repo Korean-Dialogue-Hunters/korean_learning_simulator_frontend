@@ -10,13 +10,13 @@
    🔗 연동: POST /v1/sessions → 세션 생성 + 페르소나 수신
    ────────────────────────────────────────── */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { LOCATION_OPTIONS, LocationId } from "@/types/setup";
 import { getSavedProfile } from "@/hooks/useSetup";
-import { createSession } from "@/lib/api";
+import { createSession, createExamSession } from "@/lib/api";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import { getLocationImage } from "@/lib/locationImage";
 import { clearSessionState } from "@/lib/sessionStorage";
@@ -26,6 +26,12 @@ export default function LocationPage() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  /* 승급 시험 모드 — /level-up에서 examMode 플래그를 세팅하고 넘어옴.
+     clearSessionState()가 플래그를 지우므로 보존 후 복원. */
+  const [isExamMode, setIsExamMode] = useState(false);
+  useEffect(() => {
+    setIsExamMode(typeof window !== "undefined" && localStorage.getItem("examMode") === "true");
+  }, []);
 
   const LOCATION_DESC: Record<string, string> = {
     "한강": t("location.hangang_desc"),
@@ -47,22 +53,28 @@ export default function LocationPage() {
         return;
       }
 
-      /* 이전 in-flow 세션 키 초기화 (새 세션 시작 전 스테이트 청소) */
+      /* 이전 in-flow 세션 키 초기화 (새 세션 시작 전 스테이트 청소).
+         examMode 플래그는 clearSessionState에서 지워지므로 호출 후 복원. */
       clearSessionState();
 
-      /* POST /v1/sessions — 세션 생성 */
-      const res = await createSession({
-        userId: profile.userId,
-        userNickname: profile.userNickname,
-        country: profile.country,
-        koreanLevel: profile.koreanLevel,
-        culturalInterest: profile.culturalInterest,
-        location: locId,
-      });
+      /* examMode면 시험 전용 엔드포인트 호출 (BE가 현재 레벨 +1 난이도로 시나리오 준비).
+         응답 스키마는 동일하므로 이후 플로우는 공유. */
+      const res = isExamMode
+        ? await createExamSession(profile.userId, locId)
+        : await createSession({
+            userId: profile.userId,
+            userNickname: profile.userNickname,
+            country: profile.country,
+            koreanLevel: profile.koreanLevel,
+            culturalInterest: profile.culturalInterest,
+            location: locId,
+          });
 
       /* 세션 데이터를 localStorage에 저장 (역할 선택 페이지에서 사용) */
       localStorage.setItem("sessionId", res.sessionId);
       localStorage.setItem("scenarioData", JSON.stringify(res));
+      /* 시험 모드 플래그는 /chat → /level-up/exam-result 경로에서 다시 필요하므로 복원 */
+      if (isExamMode) localStorage.setItem("examMode", "true");
 
       router.push("/persona");
     } catch (e) {

@@ -6,20 +6,20 @@
    - 승급 조건 3가지를 BE eligibility API 기준으로 시각화
      ① 현재 레벨 세션 수 ≥ requiredSessions
      ② 평균 점수 ≥ requiredScore
-     ③ 승급 시험 (BE 미구현 — pending)
-   - BE 실패 시 프로필 기반으로 최소 렌더 + 에러 배너
+     ③ 승급 시험 — eligible=true면 응시 가능
+   - 응시 버튼 → examMode 플래그 세팅 후 /location으로 이동
    ────────────────────────────────────────── */
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Award, ChevronRight, Lock, Check, X, Clock, AlertCircle } from "lucide-react";
+import { Award, ChevronRight, Lock, Check, X, Clock, AlertCircle, Sparkles } from "lucide-react";
 import { isSetupDone, getSavedProfile } from "@/hooks/useSetup";
 import { getBelt } from "@/lib/belt";
-import { mapKoreanLevel } from "@/lib/koreanLevel";
 import { getLevelUpEligibility } from "@/lib/api";
 import type { LevelUpEligibilityResponse } from "@/types/api";
+import { getEffectiveKoreanLevel, refreshProfileFromBE } from "@/lib/profileSync";
 
 export default function LevelUpPage() {
   const router = useRouter();
@@ -39,13 +39,27 @@ export default function LevelUpPage() {
       setLoading(false);
       return;
     }
-    setFallbackLevel(mapKoreanLevel(profile.koreanLevel));
+    /* 셋업 문자열 대신 override(최근 BE 값) 우선 */
+    setFallbackLevel(getEffectiveKoreanLevel());
+
+    /* eligibility와 최신 프로필을 병렬로 조회 — 시험/강등 이후 올바른 벨트 반영 */
+    refreshProfileFromBE(profile.userId).then((lvl) => {
+      if (typeof lvl === "number") setFallbackLevel(lvl);
+    });
 
     getLevelUpEligibility(profile.userId)
       .then((res) => setEligibility(res))
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [router]);
+
+  /* 응시 버튼 — examMode 플래그 세팅 후 /location으로 이동.
+     /location이 이 플래그를 보고 createExamSession으로 분기. */
+  const handleStartExam = () => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("examMode", "true");
+    router.push("/location");
+  };
 
   /* BE 값 우선, 미수신 시 프로필/기본값 폴백 */
   const currentLevel = eligibility?.currentLevel ?? fallbackLevel;
@@ -198,30 +212,44 @@ export default function LevelUpPage() {
             disabled={!meetSessions}
           />
 
-          {/* 조건 3: 승급 시험 (BE 미구현 → 항상 pending) */}
+          {/* 조건 3: 승급 시험 — eligible=true면 응시 가능 */}
           <RequirementRow
-            status={!eligibleForExam ? "locked" : "pending"}
+            status={!eligibleForExam ? "locked" : "unmet"}
             label={t("levelUp.reqExam")}
-            progressLabel={!eligibleForExam ? t("levelUp.reqExamLocked") : t("levelUp.reqExamPending")}
+            progressLabel={
+              !meetSessions || !meetScore
+                ? t("levelUp.reqExamLocked")
+                : t("levelUp.reqExamReady")
+            }
             disabled={!eligibleForExam}
           />
         </div>
       </div>
 
-      {/* 응시 버튼 (BE 준비 중 → 비활성) */}
+      {/* 응시 버튼 — eligible일 때만 활성 */}
       <button
         type="button"
-        disabled
-        className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px]"
+        disabled={!eligibleForExam}
+        onClick={eligibleForExam ? handleStartExam : undefined}
+        className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] transition-all active:scale-[0.98]"
         style={{
-          backgroundColor: eligibleForExam ? `${currentBelt.color}22` : "var(--color-surface)",
-          color: eligibleForExam ? currentBelt.color : "var(--color-tab-inactive)",
+          backgroundColor: eligibleForExam ? currentBelt.color : "var(--color-surface)",
+          color: eligibleForExam ? "#fff" : "var(--color-tab-inactive)",
           border: `1px solid ${eligibleForExam ? currentBelt.color : "var(--color-card-border)"}`,
-          cursor: "not-allowed",
+          cursor: eligibleForExam ? "pointer" : "not-allowed",
         }}
       >
-        <Lock size={16} strokeWidth={2.2} />
-        {isMaxLevel ? t("levelUp.maxLevelNote") : t("levelUp.comingSoon")}
+        {eligibleForExam ? (
+          <>
+            <Sparkles size={16} strokeWidth={2.4} />
+            {t("levelUp.takeExam")}
+          </>
+        ) : (
+          <>
+            <Lock size={16} strokeWidth={2.2} />
+            {isMaxLevel ? t("levelUp.maxLevelNote") : t("levelUp.notEligibleBadge")}
+          </>
+        )}
       </button>
 
       {/* 안내 문구 */}

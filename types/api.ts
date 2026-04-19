@@ -25,7 +25,7 @@ export interface Persona {
   roleEn?: string;
   mission: string;
   missionEn?: string;
-  avatarUrl?: string;
+  personaUrl?: string;
 }
 
 // POST /v1/sessions 응답 — 역할 선택 전 상태
@@ -97,6 +97,15 @@ export interface EvaluationResponse {
   sckMatchRate: number;                           // BE: SCK_match_rate
   sckLevelCounts: Record<string, number>;         // BE: SCK_level_counts
   sckLevelWordCounts: Record<string, Record<string, number | { count: number; index: string }>>;   // BE: SCK_level_word_counts
+  /* 평가 직후 자동 강등 결과 — 자격 미달이면 null */
+  levelDown?: LevelDownOutcome | null;            // BE: level_down
+}
+
+/* 평가 응답 안에 포함되는 자동 강등 결과 */
+export interface LevelDownOutcome {
+  applied: boolean;
+  previousLevel: number;   // BE: previous_level
+  newLevel: number;        // BE: new_level
 }
 
 /* ── GET /v1/users/{nickname}/review/count ── */
@@ -152,12 +161,47 @@ export interface UserProfileResponse {
 /* ── GET /v1/users/{user_id}/level-up/eligibility ── */
 export interface LevelUpEligibilityResponse {
   currentLevel: number;          // BE: current_level
-  nextLevel: number;             // BE: next_level
+  nextLevel: number | null;      // BE: next_level — 최고 레벨이면 null
   eligible: boolean;             // 승급 자격 여부
   completedSessions: number;     // BE: completed_sessions — 완료 세션 수
   requiredSessions: number;      // BE: required_sessions — 필요한 세션 수
   averageScore: number;          // BE: average_score
   requiredScore: number;         // BE: required_score — 필요한 평균 점수
+}
+
+/* ── POST /v1/sessions/exam ── */
+export interface CreateExamRequest {
+  userId: string;                // BE: user_id (UUID)
+  location: string;
+}
+
+/* ── POST /v1/sessions/{id}/exam ── */
+export interface ExamResultResponse {
+  status: "CONVERSATION_PASSED" | "FAIL" | string;
+  message: string;
+  score: number;                 // 시험 점수 (10점 만점)
+  passed: boolean;               // 8점 이상이면 true
+  previousLevel: number | null;  // BE: previous_level
+  newLevel: number | null;       // BE: new_level
+}
+
+/* ── GET /v1/users/{user_id}/level-down/eligibility ── */
+export interface LevelDownEligibilityResponse {
+  currentLevel: number;          // BE: current_level
+  previousLevel: number | null;  // BE: previous_level — 최저(1급)면 null
+  eligible: boolean;
+  completedSessions: number;     // BE: completed_sessions
+  requiredSessions: number;      // BE: required_sessions
+  averageScore: number;          // BE: average_score — 최근 5회 평균
+  thresholdScore: number;        // BE: threshold_score — 강등 임계 (기본 4.0)
+}
+
+/* ── POST /v1/users/{user_id}/level-down/apply ── */
+export interface LevelDownApplyResponse {
+  userId: string;                // BE: user_id
+  previousLevel: number;         // BE: previous_level
+  newLevel: number;              // BE: new_level
+  applied: boolean;              // 실제 강등 적용 여부
 }
 
 /* ── GET /v1/users/{nickname}/sessions ── */
