@@ -247,7 +247,8 @@
     "starCompleted": "대화완료",
     "starChosung": "퀴즈완료",
     "starFlashcard": "암기완료",
-    "progress": "진척도"
+    "progress": "진척도",
+    "hide": "숨기기"
   },
   "xp": {
     "levelUp": "레벨 업!",

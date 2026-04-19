@@ -247,7 +247,8 @@
     "starCompleted": "Completed",
     "starChosung": "Quiz done",
     "starFlashcard": "Cards done",
-    "progress": "Progress"
+    "progress": "Progress",
+    "hide": "Hide"
   },
   "xp": {
     "levelUp": "Level Up!",

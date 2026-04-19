@@ -63,6 +63,15 @@ function ReviewPageInner() {
 
   const profile = typeof window !== "undefined" ? getSavedProfile() : null;
 
+  /* 기록 탭에서 숨긴 세션 ID — 복습 대상에서도 제외 */
+  const hiddenIds = useMemo<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const raw = localStorage.getItem("hiddenSessionIds");
+      return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+    } catch { return new Set(); }
+  }, []);
+
   /* 1) 진입 시: 세션 목록 로드 (점수 낮은 순) */
   useEffect(() => {
     if (!profile) { setInitLoading(false); return; }
@@ -86,8 +95,11 @@ function ReviewPageInner() {
   // justPassed*가 deps에 있어야 markQuiz/FlashcardDone 직후 재계산됨
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const targetSession = useMemo<UserSessionItem | null>(
-    () => findReviewTarget(sortedSessions, getStarProgress),
-    [sortedSessions, justPassedQuiz, justDoneFlashcard],
+    () => findReviewTarget(
+      sortedSessions.filter((s) => !hiddenIds.has(s.sessionId)),
+      getStarProgress,
+    ),
+    [sortedSessions, hiddenIds, justPassedQuiz, justDoneFlashcard],
   );
 
   /* targetSession이 다음 세션으로 넘어가면 sessionId 동기화 + 완료 플래그 리셋

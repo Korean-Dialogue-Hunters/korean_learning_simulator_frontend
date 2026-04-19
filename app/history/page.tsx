@@ -10,7 +10,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star, Layers, MessageCircle } from "lucide-react";
+import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star, Layers, MessageCircle, X } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { getSavedProfile } from "@/hooks/useSetup";
@@ -51,6 +51,13 @@ export default function HistoryPage() {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const raw = localStorage.getItem("hiddenSessionIds");
+      return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+    } catch { return new Set(); }
+  });
 
   useEffect(() => {
     const profile = typeof window !== "undefined" ? getSavedProfile() : null;
@@ -90,6 +97,15 @@ export default function HistoryPage() {
     localStorage.setItem("historySortKey", key);
     setShowSortMenu(false);
   };
+
+  const handleHide = (sessionId: string) => {
+    const next = new Set(hiddenIds);
+    next.add(sessionId);
+    setHiddenIds(next);
+    localStorage.setItem("hiddenSessionIds", JSON.stringify([...next]));
+  };
+
+  const visibleRecords = records.filter((r) => !hiddenIds.has(r.sessionId));
 
   /* 카드 클릭 → /result로 이동
      - viewSessionId(읽기 전용 키)에만 저장해서 진행 중인 세션 상태를 건드리지 않음
@@ -184,14 +200,14 @@ export default function HistoryPage() {
             <div className="flex-1 flex items-center justify-center">
               <p className="text-sm text-center" style={{ color: "#DC3C3C" }}>{error}</p>
             </div>
-          ) : records.length === 0 ? (
+          ) : visibleRecords.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
               <p className="text-sm text-tab-inactive text-center">{t("history.empty")}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {records.map((record) => (
-                <DialogueCard key={record.sessionId} record={record} progress={toProgress(record)} onClick={() => handleCardClick(record)} t={t} />
+              {visibleRecords.map((record) => (
+                <DialogueCard key={record.sessionId} record={record} progress={toProgress(record)} onClick={() => handleCardClick(record)} onHide={() => handleHide(record.sessionId)} t={t} />
               ))}
             </div>
           )}
@@ -234,11 +250,13 @@ function DialogueCard({
   record,
   progress,
   onClick,
+  onHide,
   t,
 }: {
   record: UserSessionItem;
   progress: SessionProgress;
   onClick: () => void;
+  onHide: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   /* grade 문자열에서 등급 코드만 추출: "Beginner <B>" → "B" */
@@ -253,15 +271,25 @@ function DialogueCard({
   });
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`${COMMON_CLASSES.cardRounded} p-4 text-left w-full transition-all active:scale-[0.98]`}
+    <div
+      className={`${COMMON_CLASSES.cardRounded} p-4 text-left w-full transition-all active:scale-[0.98] relative cursor-pointer`}
       style={{
         backgroundColor: "var(--color-card-bg)",
         border: "1px solid var(--color-card-border)",
       }}
+      onClick={onClick}
     >
+      {/* 좌상단 숨기기 버튼 */}
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onHide(); }}
+        className="absolute top-2 left-2 w-5 h-5 rounded-full flex items-center justify-center transition-opacity opacity-30 hover:opacity-80"
+        style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-card-border)" }}
+        aria-label={t("history.hide")}
+      >
+        <X size={10} strokeWidth={2.5} style={{ color: "var(--color-tab-inactive)" }} />
+      </button>
+
       {/* 상단: 장소 + 날짜 */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
@@ -340,6 +368,6 @@ function DialogueCard({
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
