@@ -51,6 +51,7 @@ export default function PersonaPage() {
             roleEn: (p.roleEn ?? (raw.role_en as string | undefined)) || undefined,
             missionEn: (p.missionEn ?? (raw.mission_en as string | undefined)) || undefined,
             genderEn: (p.genderEn ?? (raw.gender_en as string | undefined)) || undefined,
+            personaUrl: (p.personaUrl ?? (raw.persona_url as string | undefined)) || undefined,
           };
         }
       );
@@ -90,6 +91,7 @@ export default function PersonaPage() {
         genderEn: counterpart.genderEn,
         role: counterpart.role,
         roleEn: counterpart.roleEn,
+        personaUrl: counterpart.personaUrl,
       }));
       localStorage.setItem("scene", res.scene || scene);
       const selectedPersonaData = res.personas?.[openId] as unknown as Record<string, unknown> | undefined;
@@ -112,7 +114,7 @@ export default function PersonaPage() {
 
   if (personas.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[100dvh]">
         <p className="text-tab-inactive text-sm">{t("persona.loadingScenario")}</p>
       </div>
     );
@@ -122,7 +124,7 @@ export default function PersonaPage() {
   const counterpartPersona = openPersona ? personas.find((p) => p.id !== openId) || null : null;
 
   return (
-    <div className="flex flex-col min-h-screen pt-14" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col min-h-[100dvh] pt-14" style={{ backgroundColor: "var(--color-background)" }}>
       {/* 헤더 (뒤로가기 + 타이틀) */}
       <div className="px-5 mb-3">
         <button

@@ -12,7 +12,7 @@ import { UserProfile, WeeklyStats as WeeklyStatsType, Grade } from "@/types/user
 import { isSetupDone, getSavedProfile, getUserId } from "@/hooks/useSetup";
 import { getWeeklyStats, getUserSessions } from "@/lib/api";
 import { getXpData, getXpBarInfo } from "@/lib/xpSystem";
-import { mapKoreanLevel } from "@/lib/koreanLevel";
+import { getEffectiveKoreanLevel, refreshProfileFromBE } from "@/lib/profileSync";
 
 /* grade 문자열("초급 <B>")에서 Grade 타입으로 매핑 */
 function parseGrade(raw: string): Grade {
@@ -26,7 +26,7 @@ export default function HomePage() {
   const router = useRouter();
   const { t } = useTranslation();
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [weeklyStats, setWeeklyStats] = useState<WeeklyStatsType>({ sessionsPerUserCount: 0, averageScore: 0, streakDays: 0 });
+  const [weeklyStats, setWeeklyStats] = useState<WeeklyStatsType | null>(null);
 
   useEffect(() => {
     if (!isSetupDone()) {
@@ -43,34 +43,39 @@ export default function HomePage() {
     setUser({
       userNickname: profile.userNickname,
       grade: "C",
-      koreanLevel: mapKoreanLevel(profile.koreanLevel),
+      /* 시험 통과/자동 강등 이후 갱신된 override 우선, 없으면 셋업값 매핑 */
+      koreanLevel: getEffectiveKoreanLevel(),
       level: bar.level,
       xp: bar.currentLevelXp,
       xpMax: bar.requiredLevelXp,
       xpToNext: bar.requiredLevelXp - bar.currentLevelXp,
     });
 
-    /* API 병렬 호출 */
-    getWeeklyStats(profile.userId)
-      .then((res) => {
+    /* BE에서 최신 korean_level 동기화 → 성공 시 TierCard 즉시 재렌더 */
+    refreshProfileFromBE(profile.userId).then((lvl) => {
+      if (typeof lvl === "number") {
+        setUser((prev) => (prev ? { ...prev, koreanLevel: lvl } : prev));
+      }
+    });
+
+    /* 주간 통계 + 누적 대화 횟수 병렬 호출 — 둘 다 완료 후 한 번에 세팅해 0→실값 flicker 제거
+       (누적대화횟수는 완료된 세션만 카운트, weekly-stats는 고아 세션까지 포함해서 불일치) */
+    Promise.allSettled([
+      getWeeklyStats(profile.userId),
+      getUserSessions(profile.userId),
+    ]).then(([statsRes, sessionsRes]) => {
+      if (statsRes.status === "fulfilled") {
         setUser((prev) => prev ? {
           ...prev,
-          grade: parseGrade(res.latestGrade || ""),
+          grade: parseGrade(statsRes.value.latestGrade || ""),
         } : prev);
-        setWeeklyStats((prev) => ({
-          ...prev,
-          averageScore: res.averageScore,
-          streakDays: res.streakDays ?? 0,
-        }));
-      })
-      .catch(() => {});
-
-    // 누적대화횟수는 완료된 세션만 카운트 (weekly-stats는 고아 세션까지 포함해서 불일치)
-    getUserSessions(profile.userId)
-      .then((res) => {
-        setWeeklyStats((prev) => ({ ...prev, sessionsPerUserCount: res.totalCount }));
-      })
-      .catch(() => {});
+      }
+      setWeeklyStats({
+        averageScore: statsRes.status === "fulfilled" ? statsRes.value.averageScore : 0,
+        streakDays: statsRes.status === "fulfilled" ? (statsRes.value.streakDays ?? 0) : 0,
+        sessionsPerUserCount: sessionsRes.status === "fulfilled" ? sessionsRes.value.totalCount : 0,
+      });
+    });
   }, [router]);
 
   return (

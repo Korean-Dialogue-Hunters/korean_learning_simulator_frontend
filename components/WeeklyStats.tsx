@@ -6,7 +6,8 @@ import { useTranslation } from "react-i18next";
 import { WeeklyStats as WeeklyStatsType } from "@/types/user";
 
 interface WeeklyStatsProps {
-  stats: WeeklyStatsType;
+  /* null = 아직 로딩 중 (스켈레톤 유지) */
+  stats: WeeklyStatsType | null;
 }
 
 export default function WeeklyStats({ stats }: WeeklyStatsProps) {
@@ -14,7 +15,7 @@ export default function WeeklyStats({ stats }: WeeklyStatsProps) {
   // i18n 언어가 SSR/client에서 달라 hydration mismatch가 나므로 mount 후에만 실제 값 렌더
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  if (!mounted) {
+  if (!mounted || !stats) {
     return (
       <div className="mx-5 grid grid-cols-3 gap-2.5">
         <div className="h-[86px] rounded-2xl bg-card-bg border border-card-border" />

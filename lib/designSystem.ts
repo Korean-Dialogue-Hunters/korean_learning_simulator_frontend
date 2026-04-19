@@ -70,7 +70,7 @@ export function warmCtaStyle(isEnabled: boolean): React.CSSProperties {
 /* 따뜻한 무드 페이지 래퍼 스타일 */
 export const warmPageStyle: React.CSSProperties = {
   backgroundColor: WARM_THEME.bg,
-  minHeight: "100vh",
+  minHeight: "100dvh",
 };
 
 /* ── 4. 공통 클래스명 상수 ── */

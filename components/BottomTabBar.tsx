@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Home, ClipboardList, BookOpen, Award } from "lucide-react";
 import { SETUP_DONE_KEY } from "@/hooks/useSetup";
+import { useExamEligibility } from "@/hooks/useExamEligibility";
 
 /* 탭 정의 */
 interface Tab {
@@ -25,7 +26,6 @@ interface Tab {
 const ICON_SIZE = 20;
 const ICON_STROKE = 1.8;
 
-/* 4개 탭 목록 (홈/기록/복습/승급 — 내정보는 /settings 통합) */
 const TABS: Tab[] = [
   { href: "/",         labelKey: "tabs.home",    icon: <Home size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
   { href: "/history",  labelKey: "tabs.history", icon: <ClipboardList size={ICON_SIZE} strokeWidth={ICON_STROKE} /> },
@@ -34,12 +34,13 @@ const TABS: Tab[] = [
 ];
 
 // 탭바를 숨기는 경로 목록
-const HIDDEN_PATHS = ["/setup", "/location", "/persona", "/settings"];
+const HIDDEN_PATHS = ["/setup", "/location", "/persona", "/settings", "/chat"];
 
 export default function BottomTabBar() {
   const pathname = usePathname();
   const { t } = useTranslation();
   const [isSetupComplete, setIsSetupComplete] = useState(false);
+  const examEligible = useExamEligibility();
 
   /* 마운트 시 맞춤 학습 설정 완료 여부 확인 */
   useEffect(() => {
@@ -61,15 +62,28 @@ export default function BottomTabBar() {
           const isActive =
             tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
 
+          const showExamBadge = tab.href === "/level-up" && examEligible && !isActive;
+
           return (
             <li key={tab.href}>
               <Link
                 href={tab.href}
-                className={`flex flex-col items-center gap-1 px-3 py-0.5 transition-colors ${
+                className={`relative flex flex-col items-center gap-1 px-3 py-0.5 transition-colors ${
                   isActive ? "text-tab-active" : "text-tab-inactive"
                 }`}
               >
-                {tab.icon}
+                <div className="relative">
+                  {tab.icon}
+                  {showExamBadge && (
+                    <span
+                      aria-hidden
+                      className="absolute -top-1.5 -right-2 flex items-center justify-center min-w-[14px] h-[14px] px-1 rounded-full text-[9px] font-bold text-white animate-pulse"
+                      style={{ backgroundColor: "#DC3C3C", boxShadow: "0 0 0 2px var(--color-card-bg)" }}
+                    >
+                      !
+                    </span>
+                  )}
+                </div>
                 <span className="text-[10px] font-medium">{t(tab.labelKey)}</span>
               </Link>
             </li>

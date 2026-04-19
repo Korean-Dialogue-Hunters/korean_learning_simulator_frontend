@@ -10,21 +10,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { Settings } from "lucide-react";
 import { WARM_THEME } from "@/lib/designSystem";
+import { useLogoSrc } from "@/hooks/useLogoSrc";
 
 export default function HomeHeader() {
+  const logoSrc = useLogoSrc();
+
   return (
     <header className="flex items-center justify-between px-5 pt-6 pb-3">
       {/* 좌측: 앱 타이틀 (로고 + 서브라벨) */}
       <div className="flex flex-col items-start">
         <Image
-          src="/brand/kdh_logo.png"
+          src={logoSrc}
           alt="Korean Dialogue Hunters"
-          width={160}
-          height={106}
+          width={180}
+          height={110}
           priority
           className="h-auto w-[140px]"
         />
-        <p className="text-[11px] font-semibold text-tab-inactive tracking-wide mt-1">코대헌</p>
       </div>
       {/* 우측: 설정 진입 */}
       <Link

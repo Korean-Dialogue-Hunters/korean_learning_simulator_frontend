@@ -10,7 +10,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star, Layers, MessageCircle } from "lucide-react";
+import { ClipboardList, Trophy, Sparkles, MapPin, ChevronDown, Star, Layers, MessageCircle, X } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { getSavedProfile } from "@/hooks/useSetup";
@@ -43,10 +43,21 @@ export default function HistoryPage() {
   const router = useRouter();
   const [tab, setTab] = useState<SubTab>("dialogue");
   const [records, setRecords] = useState<UserSessionItem[]>([]);
-  const [sortKey, setSortKey] = useState<UserSessionsSort>("recent");
+  const [sortKey, setSortKey] = useState<UserSessionsSort>(() => {
+    if (typeof window === "undefined") return "recent";
+    const saved = localStorage.getItem("historySortKey");
+    return (saved as UserSessionsSort) || "recent";
+  });
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const raw = localStorage.getItem("hiddenSessionIds");
+      return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+    } catch { return new Set(); }
+  });
 
   useEffect(() => {
     const profile = typeof window !== "undefined" ? getSavedProfile() : null;
@@ -83,7 +94,22 @@ export default function HistoryPage() {
 
   const handleSort = (key: UserSessionsSort) => {
     setSortKey(key);
+    localStorage.setItem("historySortKey", key);
     setShowSortMenu(false);
+  };
+
+  const handleHide = (sessionId: string) => {
+    const next = new Set(hiddenIds);
+    next.add(sessionId);
+    setHiddenIds(next);
+    localStorage.setItem("hiddenSessionIds", JSON.stringify([...next]));
+  };
+
+  const visibleRecords = records.filter((r) => !hiddenIds.has(r.sessionId));
+
+  const handleShowAll = () => {
+    setHiddenIds(new Set());
+    localStorage.removeItem("hiddenSessionIds");
   };
 
   /* 카드 클릭 → /result로 이동
@@ -101,7 +127,7 @@ export default function HistoryPage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       {/* 헤더 */}
       <h1 className="text-xl font-bold text-foreground mb-4">{t("history.title")}</h1>
 
@@ -134,8 +160,8 @@ export default function HistoryPage() {
       {/* 대화 기록 탭 */}
       {tab === "dialogue" && (
         <>
-          {/* 정렬 드롭다운 */}
-          <div className="relative mb-4">
+          {/* 정렬 드롭다운 + 숨긴 세션 보이기 */}
+          <div className="relative mb-4 flex items-center justify-between">
             <button
               type="button"
               onClick={() => setShowSortMenu(!showSortMenu)}
@@ -144,6 +170,16 @@ export default function HistoryPage() {
               <span>{t(SORT_OPTIONS.find((o) => o.key === sortKey)?.labelKey ?? "")}</span>
               <ChevronDown size={14} />
             </button>
+            {hiddenIds.size > 0 && (
+              <button
+                type="button"
+                onClick={handleShowAll}
+                className="text-[11px] font-medium hover:opacity-70 transition-opacity"
+                style={{ color: "var(--color-accent)" }}
+              >
+                {t("history.showHidden", { count: hiddenIds.size })}
+              </button>
+            )}
             {showSortMenu && (
               <div
                 className="absolute top-8 left-0 z-20 rounded-xl py-1 shadow-lg min-w-[140px]"
@@ -179,14 +215,14 @@ export default function HistoryPage() {
             <div className="flex-1 flex items-center justify-center">
               <p className="text-sm text-center" style={{ color: "#DC3C3C" }}>{error}</p>
             </div>
-          ) : records.length === 0 ? (
+          ) : visibleRecords.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
               <p className="text-sm text-tab-inactive text-center">{t("history.empty")}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {records.map((record) => (
-                <DialogueCard key={record.sessionId} record={record} progress={toProgress(record)} onClick={() => handleCardClick(record)} t={t} />
+              {visibleRecords.map((record) => (
+                <DialogueCard key={record.sessionId} record={record} progress={toProgress(record)} onClick={() => handleCardClick(record)} onHide={() => handleHide(record.sessionId)} t={t} />
               ))}
             </div>
           )}
@@ -229,11 +265,13 @@ function DialogueCard({
   record,
   progress,
   onClick,
+  onHide,
   t,
 }: {
   record: UserSessionItem;
   progress: SessionProgress;
   onClick: () => void;
+  onHide: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   /* grade 문자열에서 등급 코드만 추출: "Beginner <B>" → "B" */
@@ -248,15 +286,25 @@ function DialogueCard({
   });
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`${COMMON_CLASSES.cardRounded} p-4 text-left w-full transition-all active:scale-[0.98]`}
+    <div
+      className={`${COMMON_CLASSES.cardRounded} p-4 text-left w-full transition-all active:scale-[0.98] relative cursor-pointer`}
       style={{
         backgroundColor: "var(--color-card-bg)",
         border: "1px solid var(--color-card-border)",
       }}
+      onClick={onClick}
     >
+      {/* 좌하단 숨기기 버튼 */}
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onHide(); }}
+        className="absolute bottom-1.5 left-1.5 w-5 h-5 rounded-full flex items-center justify-center transition-opacity opacity-30 hover:opacity-80"
+        style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-card-border)" }}
+        aria-label={t("history.hide")}
+      >
+        <X size={10} strokeWidth={2.5} style={{ color: "var(--color-tab-inactive)" }} />
+      </button>
+
       {/* 상단: 장소 + 날짜 */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
@@ -335,6 +383,6 @@ function DialogueCard({
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }

@@ -60,7 +60,7 @@ export default function RootLayout({
       <body>
         <I18nProvider>
           {/* 모바일 고정 래퍼: 최대 480px, 화면 중앙 배치 */}
-          <div className="mx-auto w-full max-w-[480px] min-h-screen relative">
+          <div className="mx-auto w-full max-w-[480px] min-h-[100dvh] relative">
             {children}
             {/* 하단 탭 바: 맞춤 학습 설정 완료 후에만 노출 (BottomTabBar 내부에서 조건 처리) */}
             <BottomTabBar />

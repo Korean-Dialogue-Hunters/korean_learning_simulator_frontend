@@ -1,7 +1,7 @@
 # TODO.md — 코대헌 작업 목록 (재작성 v2)
 
 > **작성 기준**: 2026-04-14, FE/BE 실제 코드 상태 교차 검증 후 재작성
-> **최근 갱신**: 2026-04-17 (3차) — T8 main 머지 (결과 카드 캐러셀 + 승급 eligibility 연동 + 리뷰 스코프) + BE 강등/시험 미구현 현황 재확인
+> **최근 갱신**: 2026-04-20 — BE T5-05/T5-09/T5-11 완료 확인 + FE 승급/강등 연동 (T5-10/T5-12/T9-03/T10-01)
 > **작업 단위**: 트랙별 묶음 작업 (이전 1-TODO-1-PR 방식 폐기)
 > **워크로그**: 푸시 단위로 작성 (`worklog/{push 단위 한 문장}.md`)
 > **디벨롭 필요** 태그: 작업 착수 시점에 초안을 다듬어 진행
@@ -71,47 +71,25 @@
 
 > ⚠️ 기존 "tier" 개념 폐기 → BE `korean_level` (1~6) 단일 필드로 통합.
 > FE에서 "tier" 용어/UI 전부 제거, "Korean Level" 또는 "한국어 레벨"로 교체.
-> **BE 현황 재검증**: 2026-04-17 (3차) — BE 레포 직접 Grep/Read로 확인
+> **BE 현황 재검증**: 2026-04-20 — BE 레포 직접 확인, 승급 시험·강등·korean_level 증가 경로 모두 구현 완료
 > **연동 현황 요약**:
 > - ✅ `korean_level` 정수 저장 (1~6)
 > - ✅ `GET /users/{id}/level-up/eligibility` — FE 실연동 완료 (T8)
-> - ❌ **시험 엔드포인트 미구현** (`exam_orchestrator` 스캐폴드만, `sck_quiz.py` 0바이트, 라우터 미노출)
-> - ❌ **`korean_level` 실제 증가 로직 없음** — `_update_user_profile_columns`에 `korean_level` 분기는 있으나 호출 dict(`latest_grade/average_score/total_conversations/streak_days`)에 해당 키를 전달하는 경로가 전무 → dead branch
-> - ❌ **강등 로직 전무** — 키워드 `demot/level_down/downgrade/하락` 전 레이어(endpoints/usecases/domain/infra/repo) 검색·커밋 히스토리 검색 결과 0건
+> - ✅ **승급 시험 엔드포인트 구현 + FE 연동** (`POST /v1/sessions/exam` + `/exam` 평가 → 통과 시 `korean_level +1`)
+> - ✅ **강등 로직 구현 + FE 연동** (`EvaluationResponse.levelDown` 필드 수신 → 피드백 상단 배너)
 
-### 승급 시스템 (남은 BE 작업)
+### 승급/강등 시스템
 - [x] **T5-04** BE: 승급 자격 판정 API ✅ (2026-04-17 연동)
-  - `GET /v1/users/{nickname}/level-up/eligibility` 구현 완료
-  - FE: `lib/api.ts#getLevelUpEligibility` + `/level-up` 실연동
-- [ ] **T5-05** BE: 승급 시험 엔드포인트 → TRACK5 `BE-T5-03`
-  - `POST /v1/users/{nickname}/level-up/exam` + `/result`
-  - `exam_orchestrator` 스캐폴드 있으나 `continue_turn` 미구현 + 라우터 미노출
-  - `app/domain/exam/sck_quiz.py` 0바이트 (껍데기만)
-  - 다음 레벨 대화 세션 생성 → Grade A+ (기준 논의 필요) → `korean_level +1`
-- [ ] **T5-11 (신규)** BE: `korean_level` 증가/저장 경로 실제 연결
-  - 현재 `_update_user_profile_columns`의 `korean_level` 분기는 호출자 dict에 키 자체가 없어 never-fires
-  - 시험 통과 이벤트 → `update_user_profile(user_id, {"korean_level": N+1})` 호출 훅 추가 필요
-
-### 레벨 재조정 (강등) — **BE 0%, FE 0%**
-- [ ] **T5-09** BE: 강등 판정 로직 → TRACK5 `BE-T5-04`
-  - 2026-04-17 재검증: BE 전 레이어에서 강등/하락 관련 코드 0건 (증거: endpoints/v1, usecases/learning_orchestrator, domain/exam, infra/persistence/repo 전부 Grep 음성)
-  - 현재 레벨 최근 3회 평균 ≤ 5점 → `korean_level -1`
-  - 평가 시점 자동 판정 + `EvaluationResponse`에 `level_changed`, `new_level` 필드 추가 (권장)
-  - 레벨 변경 시 평균 측정 리셋
-- [ ] **T5-10** FE: 강등 알림 UI — BE-T5-04 `level_changed`/`new_level` 필드 확정 후
-  - `/feedback` 평가 응답 감지 → 모달/토스트 표시
-  - `EvaluationResponse` 타입에 옵셔널 필드 추가
-
-### FE 진행 중 / 대기
+- [x] **T5-05** BE: 승급 시험 엔드포인트 ✅ (2026-04-20 연동)
+- [x] **T5-11** BE: `korean_level` 증가/저장 경로 실제 연결 ✅ (2026-04-20 연동)
+- [x] **T5-09** BE: 강등 판정 로직 ✅ (2026-04-20 연동)
+- [x] **T5-10** FE: 강등 알림 UI ✅ (2026-04-20 — `/feedback` 상단 빨간 배너, 벨트 전후 비교)
 - [x] **T5-06** FE: 승급 탭 `/level-up` ✅ (2026-04-17, T8 머지)
-  - eligibility API 연동 완료 (로컬 계산 제거)
-  - BE 실패 시 프로필 벨트 폴백 + 에러 배너
-  - 0 divisor 가드 (`Math.max(required, 1/0.1)`)
-- [ ] **T5-12 (신규)** FE: 시험 응시 플로우 (BE-T5-03 확정 후)
-  - `/level-up` 응시 버튼 활성화 조건: `eligibility.eligible === true`
-  - 시험 세션 생성 → `/chat` 재사용 or 전용 `/level-up/exam` 라우트
-  - 결과 수신 후 프로필 리프레시 (TierCard 벨트 재렌더)
-  - 실패/합격 모달
+- [x] **T5-12** FE: 시험 응시 플로우 ✅ (2026-04-20)
+- [x] **T5-13** FE: 응시 가능 시 시각 유도 ✅ (2026-04-20)
+  - BottomTabBar `/level-up` 탭 빨간 `!` 배지 + TierCard 벨트 아이콘 pulse + `!` 배지
+  - `hooks/useExamEligibility.ts` — BE eligibility를 공유 훅/localStorage 캐시로 소비
+  - 시험 종료 시(`exam-result`) 캐시 자동 비움
 
 ### 보류
 - [ ] **T5-07** SCK 단어퀴즈 (현재 등급에 맞는 SCK 어휘 테스트)
@@ -143,10 +121,10 @@
 
 ## 🟤 트랙 10 — FE 후속 (2026-04-17 추가)
 
-- [ ] **T10-01** 승급/강등 로직 연동
-  - BE T5-05(시험) / T5-11(korean_level 증가) / T5-09(강등) 완료 후 FE 훅 연결
-  - `/level-up` 응시 버튼 활성화, 결과 수신 후 프로필 refetch
-  - 평가 응답 `level_changed`/`new_level` 감지 → 알림 UI
+- [x] **T10-01** 승급/강등 로직 연동 ✅ (2026-04-20)
+  - `/level-up` 응시 버튼 활성화 → examMode 플래그로 `/location`→`/chat`→`/level-up/exam-result` 재사용
+  - 시험 통과/강등 시 `refreshProfileFromBE`로 TierCard 벨트 즉시 반영
+  - 평가 응답 `levelDown.applied` 감지 → `/feedback` 상단 빨간 강등 배너
 - [ ] **T10-02** 페르소나 이미지 연동
   - 현재 `public/personas/{a,b}/1.svg` 임시 SVG
   - BE-04 (페르소나 `avatarUrl` / `imageUrl` 필드) 확정 후 `lib/personaImage.ts`에서 실제 이미지 우선 매핑

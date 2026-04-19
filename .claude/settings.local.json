@@ -69,7 +69,8 @@
       "Bash(kill 222 220)",
       "Bash(rm:*)",
       "Bash(awk '{print $2}')",
-      "Bash(xargs kill *)"
+      "Bash(xargs kill *)",
+      "Bash(find:*)"
     ],
     "defaultMode": "auto"
   },

@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { UserProfile } from "@/types/user";
 import { getBelt } from "@/lib/belt";
+import { useExamEligibility } from "@/hooks/useExamEligibility";
 
 interface TierCardProps {
   user: UserProfile;
@@ -20,6 +21,7 @@ export default function TierCard({ user }: TierCardProps) {
   const router = useRouter();
   const belt = getBelt(user.koreanLevel);
   const progressPercent = Math.min(Math.round((user.xp / user.xpMax) * 100), 100);
+  const examEligible = useExamEligibility();
 
   return (
     <div className="mx-5 rounded-2xl bg-card-bg p-5"
@@ -30,7 +32,8 @@ export default function TierCard({ user }: TierCardProps) {
           <span className="text-lg font-bold text-foreground">{user.userNickname}</span>
           <span className="text-[11px] text-tab-inactive">{t("tierCard.namePostfix")}</span>
         </div>
-        {/* 벨트 아이콘 + 이름 — 누르면 승급 탭으로 이동 */}
+        {/* 벨트 아이콘 + 이름 — 누르면 승급 탭으로 이동
+            승급 응시 가능 상태면 벨트 박스에 pulse glow + 빨간 ! 배지 */}
         <button
           type="button"
           onClick={() => router.push("/level-up")}
@@ -40,9 +43,26 @@ export default function TierCard({ user }: TierCardProps) {
           <span className="text-[11px] font-medium" style={{ color: belt.color }}>
             {i18n.language?.startsWith("ko") ? `${belt.nameKo}띠` : `${belt.name} Belt`}
           </span>
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ border: `1.5px solid ${belt.color}`, backgroundColor: "var(--color-surface)" }}>
-            <Image src={belt.image} alt={belt.name} width={28} height={28} />
+          <div className="relative">
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center ${examEligible ? "animate-pulse" : ""}`}
+              style={{
+                border: `1.5px solid ${belt.color}`,
+                backgroundColor: "var(--color-surface)",
+                boxShadow: examEligible ? `0 0 0 3px color-mix(in srgb, ${belt.color} 35%, transparent)` : undefined,
+              }}
+            >
+              <Image src={belt.image} alt={belt.name} width={28} height={28} />
+            </div>
+            {examEligible && (
+              <span
+                aria-hidden
+                className="absolute -top-1.5 -right-1.5 flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold text-white"
+                style={{ backgroundColor: "#DC3C3C", boxShadow: "0 0 0 2px var(--color-card-bg)" }}
+              >
+                !
+              </span>
+            )}
           </div>
         </button>
       </div>

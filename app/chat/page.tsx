@@ -95,6 +95,11 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showScene, setShowScene] = useState(true);
+  /* 승급 시험 모드 — 종료 시 /result 대신 /level-up/exam-result로 보내야 함 */
+  const [isExamMode, setIsExamMode] = useState(false);
+  useEffect(() => {
+    setIsExamMode(localStorage.getItem("examMode") === "true");
+  }, []);
 
   /* 세션/페르소나가 없으면 적절한 화면으로 리다이렉트 */
   useEffect(() => {
@@ -194,14 +199,14 @@ export default function ChatPage() {
   /* 페르소나 로딩 대기 (리다이렉트 중이거나 localStorage 파싱 중) */
   if (!persona || !counterpart) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[100dvh]">
         <p className="text-tab-inactive text-sm">{t("common.loading")}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen pb-16" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col h-[100dvh] pb-16" style={{ backgroundColor: "var(--color-background)" }}>
       {/* ── 나가기 확인 팝업 ── */}
       {showLeaveModal && (
         <LeaveConfirmModal
@@ -311,22 +316,22 @@ export default function ChatPage() {
           />
         )}
 
-        {/* 대화 종료 안내 + 결과 확인 버튼 */}
+        {/* 대화 종료 안내 + 결과 확인 버튼 (시험 모드 분기) */}
         {isFinished && (
           <div className="text-center py-6 space-y-4">
             <p className="text-base font-bold text-foreground">
-              {t("chat.finished")}
+              {isExamMode ? t("levelUp.examFinished") : t("chat.finished")}
             </p>
             <button
               type="button"
-              onClick={() => router.push("/result")}
+              onClick={() => router.push(isExamMode ? "/level-up/exam-result" : "/result")}
               className="px-6 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95"
               style={{
                 backgroundColor: "var(--color-accent)",
                 color: "var(--color-btn-primary-text)",
               }}
             >
-              {t("chat.checkResult")}
+              {isExamMode ? t("levelUp.examResultBtn") : t("chat.checkResult")}
             </button>
           </div>
         )}

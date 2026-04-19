@@ -7,10 +7,10 @@
    - "결과로 돌아가기" 버튼 → /result
    ────────────────────────────────────────── */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Home, Layers, Zap, BookOpen, AlertCircle, Trophy, ArrowRight, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Home, Layers, Zap, BookOpen, AlertCircle, Trophy, ArrowRight, ChevronDown, ChevronUp, Sparkles, TrendingDown } from "lucide-react";
 import { COMMON_CLASSES } from "@/lib/designSystem";
 import { GRADE_COLORS } from "@/types/user";
 import { EvaluationResponse } from "@/types/api";
@@ -18,9 +18,12 @@ import { evaluateSession, normalizeSckFields } from "@/lib/api";
 import { getEvaluationCache, saveEvaluationCache } from "@/lib/historyStorage";
 import { addXp, calcConversationXp, isXpAwarded, markXpAwarded } from "@/lib/xpSystem";
 import { getUserId } from "@/hooks/useSetup";
+import { loadSckExamples, getSckExample } from "@/lib/sckExamples";
+import { refreshProfileFromBE } from "@/lib/profileSync";
 import XpGainPopup, { type XpGainPopupProps } from "@/components/XpGainPopup";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import { clearSessionState } from "@/lib/sessionStorage";
+import { getBelt } from "@/lib/belt";
 
 
 export default function FeedbackPage() {
@@ -34,6 +37,10 @@ export default function FeedbackPage() {
   const [xpGained, setXpGained] = useState<number>(0);
   const [showFullLog, setShowFullLog] = useState(false);
   const [mission, setMission] = useState("");
+  const [sckReady, setSckReady] = useState(false);
+
+  /* SCK 예문 데이터 로드 */
+  useEffect(() => { loadSckExamples().then(() => setSckReady(true)); }, []);
 
   /* 미션 — 히스토리 뷰에선 localStorage myPersona가 다른 세션 것이므로 숨김 */
   useEffect(() => {
@@ -86,6 +93,12 @@ export default function FeedbackPage() {
         localStorage.setItem("evaluationData", JSON.stringify(res));
         saveEvaluationCache(sessionId, res);
         awardConversationXp(sessionId, res.totalScore10);
+        /* BE가 평가 직후 자동 강등을 적용했으면 프로필 refetch — TierCard 갱신용.
+           (응답에 new_level이 이미 있으나, 캐시 일관성 위해 BE 단일 소스 신뢰) */
+        if (res.levelDown?.applied) {
+          const userId = getUserId();
+          if (userId) refreshProfileFromBE(userId);
+        }
       })
       .catch((e) => {
         const msg = e instanceof Error ? e.message : String(e);
@@ -115,7 +128,7 @@ export default function FeedbackPage() {
     };
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-5 px-6 text-center">
+      <div className="flex flex-col items-center justify-center min-h-[100dvh] gap-5 px-6 text-center">
         <div className="w-16 h-16 rounded-full flex items-center justify-center"
           style={{ backgroundColor: "color-mix(in srgb, #DC3C3C 12%, transparent)", color: "#DC3C3C" }}>
           <AlertCircle size={32} strokeWidth={1.8} />
@@ -155,9 +168,44 @@ export default function FeedbackPage() {
   const messages = evalData.conversationLog;
   const visibleMessages = showFullLog ? messages : messages.slice(0, 4);
 
+  /* 자동 강등 배너용 데이터 */
+  const demote = evalData.levelDown?.applied ? evalData.levelDown : null;
+  const demotePrevBelt = demote ? getBelt(demote.previousLevel) : null;
+  const demoteNewBelt = demote ? getBelt(demote.newLevel) : null;
+  const isKo = i18n.language?.startsWith("ko");
+
   return (
-    <div className="flex flex-col min-h-screen px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
+    <div className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-24" style={{ backgroundColor: "var(--color-background)" }}>
       {xpPopup && <XpGainPopup {...xpPopup} onClose={() => setXpPopup(null)} />}
+
+      {/* ── 자동 강등 알림 배너 (applied=true일 때만) ── */}
+      {demote && demotePrevBelt && demoteNewBelt && (
+        <div
+          className="flex items-start gap-3 rounded-2xl p-4 mb-4"
+          style={{
+            backgroundColor: "color-mix(in srgb, #DC3C3C 10%, transparent)",
+            border: "1px solid color-mix(in srgb, #DC3C3C 30%, transparent)",
+          }}
+        >
+          <div
+            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: "color-mix(in srgb, #DC3C3C 20%, transparent)" }}
+          >
+            <TrendingDown size={16} strokeWidth={2.2} style={{ color: "#DC3C3C" }} />
+          </div>
+          <div className="flex-1">
+            <p className="text-[13px] font-bold mb-0.5" style={{ color: "#DC3C3C" }}>
+              {t("levelUp.demoteTitle")}
+            </p>
+            <p className="text-[12px] leading-relaxed" style={{ color: "var(--color-foreground)" }}>
+              {t("levelUp.demoteDesc", {
+                prev: isKo ? `${demotePrevBelt.nameKo}띠` : `${demotePrevBelt.name} Belt`,
+                next: isKo ? `${demoteNewBelt.nameKo}띠` : `${demoteNewBelt.name} Belt`,
+              })}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── 상단: 대화 완료 + XP ── */}
       <div className="flex items-center justify-between mb-6">
@@ -260,11 +308,16 @@ export default function FeedbackPage() {
               .sort(([a], [b]) => Number(a) - Number(b))
               .map(([level, count]) => {
                 const rawWords = evalData.sckLevelWordCounts?.[level];
-                const words: string[] = Array.isArray(rawWords)
-                  ? rawWords
-                  : rawWords && typeof rawWords === "object"
-                    ? Object.keys(rawWords)
-                    : [];
+                /* 새 형식 {word: {count, index}} / 구 형식 {word: count} / 배열 호환 */
+                const wordEntries: { word: string; index?: string }[] = [];
+                if (Array.isArray(rawWords)) {
+                  rawWords.forEach((w) => wordEntries.push({ word: w }));
+                } else if (rawWords && typeof rawWords === "object") {
+                  Object.entries(rawWords).forEach(([w, val]) => {
+                    const idx = typeof val === "object" && val !== null ? (val as { index?: string }).index : undefined;
+                    wordEntries.push({ word: w, index: idx });
+                  });
+                }
                 return (
                   <div key={level}>
                     <div className="flex items-center gap-2 mb-1.5">
@@ -276,14 +329,10 @@ export default function FeedbackPage() {
                         {t("feedback.sckCount", { count })}
                       </span>
                     </div>
-                    {words.length > 0 && (
+                    {wordEntries.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
-                        {words.map((word, i) => (
-                          <span key={`${level}-${i}`}
-                            className="inline-block px-2 py-0.5 rounded-md text-[11px]"
-                            style={{ backgroundColor: "var(--color-surface)", color: "var(--color-foreground)", border: "1px solid var(--color-card-border)" }}>
-                            {word}
-                          </span>
+                        {wordEntries.map((entry, i) => (
+                          <SckWordChip key={`${level}-${i}`} word={entry.word} index={entry.index} />
                         ))}
                       </div>
                     )}
@@ -332,5 +381,37 @@ export default function FeedbackPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+/* ── SCK 단어 칩: 호버/탭 시 예문 툴팁 ── */
+function SckWordChip({ word, index }: { word: string; index?: string }) {
+  const [show, setShow] = useState(false);
+  const example = index ? getSckExample(index) : null;
+
+  return (
+    <span
+      className="relative inline-block px-2 py-0.5 rounded-md text-[11px] cursor-default"
+      style={{ backgroundColor: "var(--color-surface)", color: "var(--color-foreground)", border: "1px solid var(--color-card-border)" }}
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      onClick={() => setShow((v) => !v)}
+    >
+      {word}
+      {show && example && (
+        <span
+          className="absolute left-1/2 bottom-full mb-1.5 -translate-x-1/2 whitespace-nowrap px-2.5 py-1.5 rounded-lg text-[11px] font-medium shadow-lg z-30 pointer-events-none"
+          style={{
+            backgroundColor: "var(--color-foreground)",
+            color: "var(--color-background)",
+            maxWidth: 220,
+            whiteSpace: "normal",
+            wordBreak: "keep-all",
+          }}
+        >
+          {example}
+        </span>
+      )}
+    </span>
   );
 }

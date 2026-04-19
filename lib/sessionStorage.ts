@@ -12,6 +12,7 @@ const SESSION_KEYS = [
   "sceneEn",
   "evaluationData",
   "viewSessionId",
+  "examMode",
 ] as const;
 
 export function clearSessionState(): void {

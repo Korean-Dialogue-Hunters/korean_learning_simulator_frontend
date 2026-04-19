@@ -11,20 +11,19 @@ interface WelcomeScreenProps {
 
 export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   const { t } = useTranslation();
-
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen px-8 text-center">
+    <div className="relative flex flex-col items-center justify-center min-h-[100dvh] px-8 text-center">
       <div className="mb-4 flex flex-col items-center">
         <Image
-          src="/brand/kdh_logo.png"
+          src="/brand/kdh_logo_welcome.png"
           alt="Korean Dialogue Hunters"
           width={280}
           height={186}
           priority
           className="mb-2 h-auto w-[240px]"
         />
-        <p className="text-sm font-semibold tracking-tight" style={{ color: WARM_THEME.text }}>
-          코대헌
+        <p className="text-base font-extrabold tracking-widest" style={{ color: WARM_THEME.text }}>
+          코.대.헌.
         </p>
       </div>
 

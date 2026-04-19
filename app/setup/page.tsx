@@ -71,7 +71,7 @@ export default function SetupPage() {
 
   return (
     <div
-      className="flex flex-col min-h-screen px-5 pt-16 pb-8"
+      className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-8"
       style={{ backgroundColor: WARM_THEME.bg }}
     >
       {/* 상단: 뒤로가기 + 닷 인디케이터 */}
