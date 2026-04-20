@@ -242,7 +242,22 @@
     "demoteTitle": "띠가 내려갔어요",
     "demoteDesc": "최근 평균 점수가 기준보다 낮아 {{prev}}에서 {{next}}(으)로 조정됐어요.",
     "systemNote": "승급 시험은 현재 띠보다 한 단계 높은 난이도로 진행돼요. 8점 이상을 받으면 띠가 올라갑니다.",
-    "loadFailed": "승급 정보를 불러오지 못했어요"
+    "loadFailed": "승급 정보를 불러오지 못했어요",
+    "beltGuide": {
+      "openAria": "띠 등급 안내 열기",
+      "close": "닫기",
+      "title": "띠 등급 안내",
+      "lead": "승급 시험으로 올라가는 실력 등급이에요.",
+      "currentBadge": "내 띠",
+      "levelLabel": "{{level}}급",
+      "note": "띠 ≠ Level. Level은 대화를 마칠 때마다 쌓이는 활동량(XP)이고, 띠는 승급 시험으로만 올라가는 실력 등급이에요.",
+      "level1": { "desc": "입문 · 기본 인사와 자기소개" },
+      "level2": { "desc": "초급 · 일상 표현과 짧은 문장" },
+      "level3": { "desc": "중급 · 상황 대화와 감정 표현" },
+      "level4": { "desc": "중상급 · 의견과 설명이 가능한 수준" },
+      "level5": { "desc": "고급 · 논리적 토론과 전문 표현" },
+      "level6": { "desc": "최고 · 원어민에 준하는 유창성" }
+    }
   },
   "history": {
     "title": "기록",

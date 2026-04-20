@@ -242,7 +242,22 @@
     "demoteTitle": "Your Belt Was Lowered",
     "demoteDesc": "Your recent average was below the threshold, so your belt was adjusted from {{prev}} to {{next}}.",
     "systemNote": "The promotion exam runs one belt above your current level. Score 8 or above to promote.",
-    "loadFailed": "Couldn't load belt promotion info"
+    "loadFailed": "Couldn't load belt promotion info",
+    "beltGuide": {
+      "openAria": "Open belt guide",
+      "close": "Close",
+      "title": "Belt Guide",
+      "lead": "A skill tier raised via the promotion exam.",
+      "currentBadge": "You",
+      "levelLabel": "Level {{level}}",
+      "note": "Belt ≠ Level. Level is activity (XP) earned per conversation. Belt is a skill tier raised only by passing the promotion exam.",
+      "level1": { "desc": "Starter · greetings and self-introduction" },
+      "level2": { "desc": "Beginner · everyday expressions and short sentences" },
+      "level3": { "desc": "Intermediate · situational dialogue and emotions" },
+      "level4": { "desc": "Upper-intermediate · opinions and explanations" },
+      "level5": { "desc": "Advanced · logical debate and nuanced expression" },
+      "level6": { "desc": "Mastery · near-native fluency" }
+    }
   },
   "history": {
     "title": "History",
