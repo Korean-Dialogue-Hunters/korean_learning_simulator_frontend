@@ -14,12 +14,13 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Award, ChevronRight, Lock, Check, X, Clock, AlertCircle, Sparkles } from "lucide-react";
+import { Award, ChevronRight, Lock, Check, X, Clock, AlertCircle, Sparkles, HelpCircle } from "lucide-react";
 import { isSetupDone, getSavedProfile } from "@/hooks/useSetup";
 import { getBelt } from "@/lib/belt";
 import { getLevelUpEligibility } from "@/lib/api";
 import type { LevelUpEligibilityResponse } from "@/types/api";
 import { getEffectiveKoreanLevel, refreshProfileFromBE } from "@/lib/profileSync";
+import BeltGuideModal from "@/components/level-up/BeltGuideModal";
 
 export default function LevelUpPage() {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function LevelUpPage() {
   const [fallbackLevel, setFallbackLevel] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   useEffect(() => {
     if (!isSetupDone()) {
@@ -107,12 +109,27 @@ export default function LevelUpPage() {
 
       {/* 현재 → 다음 벨트 비교 카드 */}
       <div
-        className="rounded-2xl p-5 mb-4"
+        className="relative rounded-2xl p-5 mb-4"
         style={{
           backgroundColor: "var(--color-card-bg)",
           border: "1px solid var(--color-card-border)",
         }}
       >
+        {/* 띠 등급 안내 버튼 (우상단) */}
+        <button
+          type="button"
+          onClick={() => setGuideOpen(true)}
+          aria-label={t("levelUp.beltGuide.openAria")}
+          className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-all"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-card-border)",
+            color: "var(--color-tab-inactive)",
+          }}
+        >
+          <HelpCircle size={16} strokeWidth={2} />
+        </button>
+
         <div className="flex items-center justify-between">
           {/* 현재 벨트 */}
           <div className="flex flex-col items-center flex-1">
@@ -257,6 +274,12 @@ export default function LevelUpPage() {
         <Award size={12} className="inline-block mr-1 mb-[2px]" />
         {t("levelUp.systemNote")}
       </p>
+
+      <BeltGuideModal
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        currentLevel={currentLevel}
+      />
     </div>
   );
 }

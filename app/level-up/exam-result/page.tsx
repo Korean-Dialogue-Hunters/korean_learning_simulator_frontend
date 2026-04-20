@@ -91,7 +91,7 @@ export default function ExamResultPage() {
 
   return (
     <div
-      className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-8"
+      className="flex flex-col min-h-[100dvh] px-5 pt-16 pb-24 overflow-y-auto"
       style={{ backgroundColor: "var(--color-background)" }}
     >
       {/* 중앙 콘텐츠 */}

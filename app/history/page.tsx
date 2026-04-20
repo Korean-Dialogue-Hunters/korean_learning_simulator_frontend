@@ -16,6 +16,7 @@ import { GRADE_COLORS } from "@/types/user";
 import { getSavedProfile } from "@/hooks/useSetup";
 import { getUserSessions } from "@/lib/api";
 import { getStarProgress } from "@/lib/starStorage";
+import { getBelt } from "@/lib/belt";
 import type { UserSessionItem, UserSessionsSort, SessionProgress } from "@/types/api";
 
 type SubTab = "dialogue" | "achievement" | "sck";
@@ -279,6 +280,9 @@ function DialogueCard({
   const gradeCode = gradeMatch ? gradeMatch[1] : record.grade;
   const gradeColor = GRADE_COLORS[gradeCode as keyof typeof GRADE_COLORS] ?? "var(--color-accent)";
 
+  /* 세션의 korean_level → 벨트 색상 */
+  const belt = getBelt(record.koreanLevel ?? 1);
+
   const dateStr = new Date(record.createdAt).toLocaleDateString("ko-KR", {
     year: "numeric",
     month: "short",
@@ -290,7 +294,10 @@ function DialogueCard({
       className={`${COMMON_CLASSES.cardRounded} p-4 text-left w-full transition-all active:scale-[0.98] relative cursor-pointer`}
       style={{
         backgroundColor: "var(--color-card-bg)",
-        border: "1px solid var(--color-card-border)",
+        borderLeft: `3px solid ${belt.color}`,
+        borderTop: "1px solid var(--color-card-border)",
+        borderRight: "1px solid var(--color-card-border)",
+        borderBottom: "1px solid var(--color-card-border)",
       }}
       onClick={onClick}
     >

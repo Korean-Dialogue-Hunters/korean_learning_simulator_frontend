@@ -217,6 +217,7 @@ export interface UserSessionItem {
   scenarioTitle: string;         // BE: scenario_title
   location: string;
   scene: string;
+  koreanLevel: number;           // BE: korean_level — 대화 진행 시 레벨(1~6, 벨트 색상 매핑)
   totalScore10: number;          // BE: total_score_10
   grade: string;
   turnCount: number;             // BE: turn_count

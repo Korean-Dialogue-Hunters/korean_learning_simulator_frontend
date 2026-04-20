@@ -54,28 +54,34 @@ export default function PersonaProfileCard({
       <div className="flex gap-3">
         {/* 왼쪽: 내 역할 */}
         <div className="flex-1 flex items-center gap-2 min-w-0">
-          <div
-            className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center shrink-0 text-sm font-bold"
-            style={{
-              backgroundColor: "var(--color-accent)",
-              color: "var(--color-btn-primary-text)",
-            }}
-          >
-            {persona.personaUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={persona.personaUrl}
-                alt={persona.name}
-                className="w-full h-full object-cover"
-                style={{ objectPosition: "center 15%", transform: "scale(1.45)", transformOrigin: "center 20%" }}
-              />
-            ) : (
-              persona.name.charAt(0)
-            )}
+          <div className="relative shrink-0">
+            <div
+              className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center text-sm font-bold"
+              style={{
+                backgroundColor: "var(--color-accent)",
+                color: "var(--color-btn-primary-text)",
+                border: "2px solid var(--color-accent)",
+              }}
+            >
+              {persona.personaUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={persona.personaUrl}
+                  alt={persona.name}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: "center 15%", transform: "scale(1.45)", transformOrigin: "center 20%" }}
+                />
+              ) : (
+                persona.name.charAt(0)
+              )}
+            </div>
+            <span
+              className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-bold px-1.5 py-[1px] rounded-full whitespace-nowrap"
+              style={{ backgroundColor: "var(--color-accent)", color: "var(--color-btn-primary-text)" }}
+            >{t("chat.me")}</span>
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <span className="text-[9px] text-tab-inactive bg-surface px-1 py-0.5 rounded shrink-0">{t("chat.me")}</span>
               <p className="text-[13px] font-bold truncate text-foreground">{persona.name}</p>
             </div>
             <p className="text-[11px] text-tab-inactive">
@@ -92,28 +98,34 @@ export default function PersonaProfileCard({
 
         {/* 오른쪽: 상대방 */}
         <div className="flex-1 flex items-center gap-2 min-w-0">
-          <div
-            className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center shrink-0 text-sm font-bold"
-            style={{
-              backgroundColor: "var(--color-surface)",
-              color: "var(--color-tab-inactive)",
-            }}
-          >
-            {counterpart.personaUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={counterpart.personaUrl}
-                alt={counterpart.name}
-                className="w-full h-full object-cover"
-                style={{ objectPosition: "center 15%", transform: "scale(1.45)", transformOrigin: "center 20%" }}
-              />
-            ) : (
-              counterpart.name.charAt(0)
-            )}
+          <div className="relative shrink-0">
+            <div
+              className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center text-sm font-bold"
+              style={{
+                backgroundColor: "var(--color-surface)",
+                color: "var(--color-tab-inactive)",
+                border: "2px solid var(--color-card-border)",
+              }}
+            >
+              {counterpart.personaUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={counterpart.personaUrl}
+                  alt={counterpart.name}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: "center 15%", transform: "scale(1.45)", transformOrigin: "center 20%" }}
+                />
+              ) : (
+                counterpart.name.charAt(0)
+              )}
+            </div>
+            <span
+              className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-bold px-1.5 py-[1px] rounded-full whitespace-nowrap"
+              style={{ backgroundColor: "var(--color-tab-inactive)", color: "var(--color-card-bg)" }}
+            >{t("chat.partner")}</span>
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <span className="text-[9px] text-tab-inactive bg-surface px-1 py-0.5 rounded shrink-0">{t("chat.partner")}</span>
               <p className="text-[13px] font-bold text-foreground truncate">{counterpart.name}</p>
             </div>
             <p className="text-[11px] text-tab-inactive">

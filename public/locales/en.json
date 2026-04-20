@@ -224,7 +224,7 @@
     "reqSessionsProgress": "{{current}} / {{required}}",
     "reqScore": "Average score 8+ over the last 5 conversations",
     "reqScoreProgress": "{{current}} / {{required}}",
-    "reqExam": "Earn Grade A or higher on the next belt exam",
+    "reqExam": "Earn score 8+ on the next belt exam",
     "reqExamPending": "Waiting",
     "reqExamLocked": "Finish previous first",
     "reqExamReady": "Ready — take it now",
@@ -241,8 +241,23 @@
     "examLoadFailed": "Could not load exam result",
     "demoteTitle": "Your Belt Was Lowered",
     "demoteDesc": "Your recent average was below the threshold, so your belt was adjusted from {{prev}} to {{next}}.",
-    "systemNote": "The promotion exam runs one belt above your current level. Earn Grade A (score 8+) to promote.",
-    "loadFailed": "Couldn't load belt promotion info"
+    "systemNote": "The promotion exam runs one belt above your current level. Score 8 or above to promote.",
+    "loadFailed": "Couldn't load belt promotion info",
+    "beltGuide": {
+      "openAria": "Open belt guide",
+      "close": "Close",
+      "title": "Belt Guide",
+      "lead": "A skill tier raised via the promotion exam.",
+      "currentBadge": "You",
+      "levelLabel": "Level {{level}}",
+      "note": "Belt ≠ Level. Level is activity (XP) earned per conversation. Belt is a skill tier raised only by passing the promotion exam.",
+      "level1": { "desc": "Starter · greetings and self-introduction" },
+      "level2": { "desc": "Beginner · everyday expressions and short sentences" },
+      "level3": { "desc": "Intermediate · situational dialogue and emotions" },
+      "level4": { "desc": "Upper-intermediate · opinions and explanations" },
+      "level5": { "desc": "Advanced · logical debate and nuanced expression" },
+      "level6": { "desc": "Mastery · near-native fluency" }
+    }
   },
   "history": {
     "title": "History",
@@ -319,18 +334,19 @@
         ]
       },
       "beltVsLevel": {
-        "title": "Belt vs Lv.",
-        "lead": "Belt is your skill rank; Lv. is your activity. They move independently.",
+        "title": "Belt vs. Level",
+        "lead": "Belt is your skill rank; Level is your activity. They move independently.",
         "bullets": [
-          "Belt (white→black): a skill rank that only changes via the promotion exam",
-          "Lv.: an activity meter that grows from XP earned in every conversation",
+          "Belt (yellow→blue→purple→brown→red→black): a skill rank that only changes via the promotion exam",
+          "Belt color = Korean level = conversation difficulty. A higher belt means harder conversations",
+          "Level: an activity meter that grows from XP earned in every conversation",
           "So stacking XP alone won't change your belt — you still need to pass the exam",
-          "The home card's border color reflects your current belt"
+          "The left border color on history cards shows the difficulty of that conversation"
         ]
       },
       "sck": {
         "title": "SCK Vocabulary",
-        "lead": "SCK is a Korean learner vocabulary list (levels 1–6; higher = more advanced).",
+        "lead": "SCK is Standard Curriculum of Korean vocabulary (levels 1–6; higher = more advanced).",
         "bullets": [
           "Feedback shows how many of your words matched SCK entries",
           "Matches are grouped by level so you can see which tier you lean on",
@@ -342,7 +358,7 @@
         "lead": "Every conversation scores out of 10 across 5 axes and lands a grade (S, A, B, C).",
         "bullets": [
           "Axes: length · vocabulary · scene/mission · relationship · spelling",
-          "Grade A or higher on the exam is the bar for promotion",
+          "You can obtain XP from every conversation, but higher grades earn more XP",
           "Open detailed feedback to see per-axis scores and the reasoning"
         ]
       },
@@ -351,8 +367,8 @@
         "lead": "Meet the requirements and you can take the exam; slip in recent scores and you may drop a belt.",
         "bullets": [
           "Requirements: 5+ conversations at the current belt, recent 5-avg of 8+",
-          "When ready, the home belt icon shows a red ! badge — take it from the Promotion tab",
-          "Earn Grade A (8+) on the exam to move up a belt",
+          "When ready, the promotion tab icon shows a red ! badge",
+          "Earn score 8+ on the exam to move up a belt",
           "If recent averages fall below the threshold, your belt can step down"
         ]
       },
